@@ -1,0 +1,37 @@
+[
+  {
+    "session_id": "9eb66175-cfad-466d-a499-f4ae4af7e229",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/9eb66175-cfad-466d-a499-f4ae4af7e229.jsonl",
+    "cwd": "/Users/shane/src/sync",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "commit"
+  },
+  {
+    "session_id": "9eb66175-cfad-466d-a499-f4ae4af7e229",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/9eb66175-cfad-466d-a499-f4ae4af7e229.jsonl",
+    "cwd": "/Users/shane/src/sync",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "What is eza?  eza . --tree"
+  },
+  {
+    "session_id": "9eb66175-cfad-466d-a499-f4ae4af7e229",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/9eb66175-cfad-466d-a499-f4ae4af7e229.jsonl",
+    "cwd": "/Users/shane/src/sync",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "y"
+  },
+  {
+    "session_id": "31919f15-efcd-4a45-af82-22241bf524df",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/31919f15-efcd-4a45-af82-22241bf524df.jsonl",
+    "cwd": "/Users/shane/src/sync",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "Ok evaluate prompt3.md, create a plan, and let's execute"
+  },
+  {
+    "session_id": "31919f15-efcd-4a45-af82-22241bf524df",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/31919f15-efcd-4a45-af82-22241bf524df.jsonl",
+    "cwd": "/Users/shane/src/sync",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "at the end of each phase, run commit and push, and right now run commit and push"
+  }
+]
