@@ -4,11 +4,18 @@ import { Command } from 'commander';
 import inquirer from 'inquirer';
 import { ConfigManager } from './config.js';
 import { SyncEngine } from './syncEngine.js';
-import { ConflictResolution } from './types.js';
 import logger from './logger.js';
 import { mkdirSync } from 'fs';
 import { homedir } from 'os';
 import { join } from 'path';
+
+const ConflictResolution = {
+    LOCAL_WINS: 'local',
+    REMOTE_WINS: 'remote',
+    MERGE: 'merge',
+    INTERACTIVE: 'interactive',
+    NEWEST_WINS: 'newest'
+};
 
 // Ensure log directory exists
 const logDir = join(homedir(), '.todo-sync');

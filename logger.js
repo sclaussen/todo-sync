@@ -22,7 +22,6 @@ const logger = winston.createLogger({
   ]
 });
 
-// Add console output in non-production environments
 if (process.env.NODE_ENV !== 'production') {
   logger.add(new winston.transports.Console({
     format: winston.format.combine(

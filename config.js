@@ -1,9 +1,16 @@
 import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { homedir } from 'os';
 import { join } from 'path';
-import { Config, ConflictResolution } from './types.js';
 
-const DEFAULT_CONFIG: Config = {
+const ConflictResolution = {
+    LOCAL_WINS: 'local',
+    REMOTE_WINS: 'remote',
+    MERGE: 'merge',
+    INTERACTIVE: 'interactive',
+    NEWEST_WINS: 'newest'
+};
+
+const DEFAULT_CONFIG = {
   todoist: {
     apiToken: '',
     projectName: 'Synced Tasks'
@@ -33,15 +40,12 @@ const DEFAULT_CONFIG: Config = {
 };
 
 export class ConfigManager {
-  private configPath: string;
-  private config: Config;
-
-  constructor(configPath: string = '~/.todo-sync.json') {
+  constructor(configPath = '~/.todo-sync.json') {
     this.configPath = configPath.replace('~', homedir());
     this.config = this.load();
   }
 
-  load(): Config {
+  load() {
     if (!existsSync(this.configPath)) {
       return { ...DEFAULT_CONFIG };
     }
@@ -50,7 +54,6 @@ export class ConfigManager {
       const content = readFileSync(this.configPath, 'utf-8');
       const loadedConfig = JSON.parse(content);
       
-      // Merge with defaults to ensure all fields exist
       return this.mergeWithDefaults(loadedConfig);
     } catch (error) {
       console.error('Error loading config:', error);
@@ -58,46 +61,46 @@ export class ConfigManager {
     }
   }
 
-  save(): void {
+  save() {
     const configJson = JSON.stringify(this.config, null, 2);
     writeFileSync(this.configPath, configJson, 'utf-8');
   }
 
-  get(): Config {
+  get() {
     return this.config;
   }
 
-  set(updates: Partial<Config>): void {
+  set(updates) {
     this.config = this.mergeDeep(this.config, updates);
     this.save();
   }
 
-  setApiToken(token: string): void {
+  setApiToken(token) {
     this.config.todoist.apiToken = token;
     this.save();
   }
 
-  setProjectName(name: string): void {
+  setProjectName(name) {
     this.config.todoist.projectName = name;
-    this.config.todoist.projectId = undefined; // Reset project ID
+    this.config.todoist.projectId = undefined;
     this.save();
   }
 
-  setConflictResolution(resolution: ConflictResolution): void {
+  setConflictResolution(resolution) {
     this.config.sync.conflictResolution = resolution;
     this.save();
   }
 
-  updateLastSync(): void {
+  updateLastSync() {
     this.config.sync.lastSync = new Date();
     this.save();
   }
 
-  private mergeWithDefaults(loadedConfig: any): Config {
-    return this.mergeDeep({ ...DEFAULT_CONFIG }, loadedConfig) as Config;
+  mergeWithDefaults(loadedConfig) {
+    return this.mergeDeep({ ...DEFAULT_CONFIG }, loadedConfig);
   }
 
-  private mergeDeep(target: any, source: any): any {
+  mergeDeep(target, source) {
     const output = { ...target };
     
     if (this.isObject(target) && this.isObject(source)) {
@@ -117,7 +120,7 @@ export class ConfigManager {
     return output;
   }
 
-  private isObject(item: any): boolean {
+  isObject(item) {
     return item && typeof item === 'object' && !Array.isArray(item);
   }
 }
