@@ -9,7 +9,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "/Users/shane/src/sync/.claude/hooks/voice.sh stop"
+            "command": "/Users/shane/src/sync/.claude/hooks/voice.py"
           }
         ]
       }
@@ -19,7 +19,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "/Users/shane/src/sync/.claude/hooks/voice.sh subagent-stop"
+            "command": "/Users/shane/src/sync/.claude/hooks/voice.py"
           }
         ]
       }
@@ -29,7 +29,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "/Users/shane/src/sync/.claude/hooks/voice.sh pre-compact"
+            "command": "/Users/shane/src/sync/.claude/hooks/voice.py"
           }
         ]
       }
@@ -39,7 +39,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "/Users/shane/src/sync/.claude/hooks/voice.sh notification"
+            "command": "/Users/shane/src/sync/.claude/hooks/voice.py"
           }
         ]
       }
