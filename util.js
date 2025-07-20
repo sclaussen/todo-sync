@@ -9,7 +9,7 @@ export function calculateChecksum(content) {
     return createHash('md5').update(content).digest('hex');
 }
 
-export function createTodoItem(content, localPriority, lineNumber) {
+export function createTaskItem(content, localPriority, lineNumber) {
     return {
         content: content.trim(),
         localPriority,
@@ -49,6 +49,37 @@ if (process.env.NODE_ENV !== 'production') {
       winston.format.simple()
     )
   }));
+}
+
+// Duplicate removal functions
+export function removeDuplicateTasks(tasks) {
+    const seen = new Set();
+    const uniqueTasks = [];
+    
+    for (const task of tasks) {
+        const normalizedContent = task.content.toLowerCase().trim();
+        if (!seen.has(normalizedContent)) {
+            seen.add(normalizedContent);
+            uniqueTasks.push(task);
+        }
+    }
+    
+    return uniqueTasks;
+}
+
+export function removeDuplicateTodoistTasks(tasks) {
+    const seen = new Set();
+    const uniqueTasks = [];
+    
+    for (const task of tasks) {
+        const normalizedContent = task.content.toLowerCase().trim();
+        if (!seen.has(normalizedContent)) {
+            seen.add(normalizedContent);
+            uniqueTasks.push(task);
+        }
+    }
+    
+    return uniqueTasks;
 }
 
 export { logger };
