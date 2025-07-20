@@ -9,7 +9,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "/Users/shane/src/sync/.claude/hooks/event_notification_voice.py"
+            "command": ".claude/hooks/event_notification_voice.py"
           }
         ]
       }
@@ -19,7 +19,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "/Users/shane/src/sync/.claude/hooks/event_notification_voice.py"
+            "command": ".claude/hooks/event_notification_voice.py"
           }
         ]
       }
@@ -29,7 +29,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "/Users/shane/src/sync/.claude/hooks/event_notification_voice.py"
+            "command": ".claude/hooks/event_notification_voice.py"
           }
         ]
       }
@@ -39,7 +39,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "/Users/shane/src/sync/.claude/hooks/event_notification_voice.py"
+            "command": ".claude/hooks/event_notification_voice.py"
           }
         ]
       }

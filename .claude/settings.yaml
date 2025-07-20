@@ -1,7 +1,0 @@
-cleanupPeriodDays: 20
-env:
-  SOME_VAR: some_value
-  SOME_OTHER_VAR: some_value
-includeCoAuthoredBy: false
-additionalDirectories:
-  - '../todo'
