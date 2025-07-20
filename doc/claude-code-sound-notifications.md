@@ -46,29 +46,65 @@ Create `.claude/settings.local.json` with the hook configuration and permissions
     "allow": [
       "Bash(*)",
       "WebFetch(*)",
-      "WebSearch(*)"
+      "WebSearch(*)",
+      "Edit(*)",
+      "Write(*)",
+      "MultiEdit(*)"
     ],
     "deny": []
   },
   "hooks": {
-    "Stop": [
+    "PostToolUse": [
       {
-        "type": "command",
-        "command": ".claude/hooks/step-complete.sh"
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/step-complete.sh"
+          }
+        ]
       }
     ],
-    "UserInputRequired": [
+    "Stop": [
       {
-        "type": "command", 
-        "command": ".claude/hooks/user-input-required.sh"
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/step-complete.sh"
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/user-input-required.sh"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/user-input-required.sh"
+          }
+        ]
       }
     ]
   },
-  "defaultMode": "acceptEdits"
+  "defaultMode": "acceptAll"
 }
 ```
 
-**Note**: Claude Code uses `settings.local.json` as the primary configuration file. While `settings.yaml` exists for other settings, permissions and hooks work best in the JSON format.
+**Key Configuration Details**:
+- **`defaultMode: "acceptAll"`** - Prevents all permission prompts
+- **`Edit(*), Write(*), MultiEdit(*)`** - Allows all file operations without prompts
+- **Multiple hook events** - Tries different event types (PostToolUse, Stop, Notification, PreToolUse) to ensure triggers
+- **`settings.local.json`** - Primary configuration file that overrides settings.yaml
 
 ## Testing
 
