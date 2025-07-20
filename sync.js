@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { Command } from 'commander';
-import logger from './logger.js';
+import { logger } from './util.js';
 import { mkdirSync } from 'fs';
 import { homedir } from 'os';
 import { join } from 'path';
