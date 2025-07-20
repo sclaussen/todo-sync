@@ -18,14 +18,16 @@ Create the `.claude/hooks/` directory and add the following executable scripts:
 ```bash
 #!/bin/bash
 # Play completion sound when a step is finished
-afplay /System/Library/Sounds/Glass.aiff
+afplay /System/Library/Sounds/Funk.aiff
+say "Step complete" &
 ```
 
 **`.claude/hooks/user-input-required.sh`**:
 ```bash
 #!/bin/bash
 # Play attention sound when user input is required
-afplay /System/Library/Sounds/Ping.aiff
+afplay /System/Library/Sounds/Basso.aiff
+say "Input needed" &
 ```
 
 Make the scripts executable:
@@ -36,32 +38,37 @@ chmod +x .claude/hooks/user-input-required.sh
 
 ### 2. Configure Claude Code Settings
 
-Create or update `.claude/settings.yaml` with the hook configuration:
+Create `.claude/settings.local.json` with the hook configuration and permissions:
 
-```yaml
-hooks:
-  Stop:
-    - hooks:
-      - type: command
-        command: '.claude/hooks/step-complete.sh'
-  UserInputRequired:
-    - hooks:
-      - type: command
-        command: '.claude/hooks/user-input-required.sh'
+```json
+{
+  "permissions": {
+    "allow": [
+      "Bash(*)",
+      "WebFetch(*)",
+      "WebSearch(*)"
+    ],
+    "deny": []
+  },
+  "hooks": {
+    "Stop": [
+      {
+        "type": "command",
+        "command": ".claude/hooks/step-complete.sh"
+      }
+    ],
+    "UserInputRequired": [
+      {
+        "type": "command", 
+        "command": ".claude/hooks/user-input-required.sh"
+      }
+    ]
+  },
+  "defaultMode": "acceptEdits"
+}
 ```
 
-### 3. Update Permissions (if needed)
-
-If you encounter permission prompts, update your `.claude/settings.yaml` to include:
-
-```yaml
-permissions:
-  allow:
-    - Bash(*)
-    - WebFetch(*)
-    - WebSearch(*)
-  deny: []
-```
+**Note**: Claude Code uses `settings.local.json` as the primary configuration file. While `settings.yaml` exists for other settings, permissions and hooks work best in the JSON format.
 
 ## Testing
 
@@ -77,11 +84,12 @@ Test the sound notifications by running the hook scripts directly:
 
 ## Sound Files
 
-The system uses macOS built-in sound files:
-- **Glass.aiff**: Pleasant completion sound for finished tasks
-- **Ping.aiff**: Attention-getting sound for user input prompts
+The system uses macOS built-in sound files and voice notifications:
+- **Funk.aiff**: Distinctive completion sound for finished tasks + "Step complete" voice
+- **Basso.aiff**: Deep attention sound for user input prompts + "Input needed" voice
+- Voice notifications run in background (`&`) to avoid blocking hook execution
 
-You can customize these by changing the paths in the hook scripts to any `.aiff` or `.wav` file on your system.
+You can customize these by changing the paths in the hook scripts to any `.aiff` or `.wav` file on your system, or modify the voice messages.
 
 ## Troubleshooting
 
@@ -93,14 +101,24 @@ You can customize these by changing the paths in the hook scripts to any `.aiff`
 ## Alternative Sound Files
 
 Other macOS system sounds you can use:
-- `/System/Library/Sounds/Basso.aiff` - Error/warning sound
+- `/System/Library/Sounds/Basso.aiff` - Deep attention sound (currently used for input)
 - `/System/Library/Sounds/Blow.aiff` - Soft completion sound
 - `/System/Library/Sounds/Bottle.aiff` - Pop sound
 - `/System/Library/Sounds/Frog.aiff` - Quirky sound
-- `/System/Library/Sounds/Funk.aiff` - Funky completion sound
+- `/System/Library/Sounds/Funk.aiff` - Funky completion sound (currently used for completion)
+- `/System/Library/Sounds/Glass.aiff` - Pleasant completion sound  
 - `/System/Library/Sounds/Hero.aiff` - Triumphant sound
 - `/System/Library/Sounds/Morse.aiff` - Beep sound
+- `/System/Library/Sounds/Ping.aiff` - Classic attention sound
 - `/System/Library/Sounds/Purr.aiff` - Soft sound
 - `/System/Library/Sounds/Sosumi.aiff` - Classic Mac sound
 - `/System/Library/Sounds/Submarine.aiff` - Sonar sound
 - `/System/Library/Sounds/Tink.aiff` - Metallic click
+
+**Voice Customization**:
+You can also customize the voice messages by editing the `say` commands:
+```bash
+say "Task finished" &          # Custom completion message
+say "Attention required" &     # Custom input message
+say -v "Samantha" "Done" &     # Use specific voice
+```
