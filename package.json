@@ -7,9 +7,9 @@
   "scripts": {
     "start": "node dist/cli.js",
     "build": "tsc",
-    "dev": "tsx src/cli.ts",
+    "dev": "tsx cli.ts",
     "test": "jest",
-    "lint": "eslint src/**/*.ts",
+    "lint": "eslint *.ts",
     "typecheck": "tsc --noEmit"
   },
   "keywords": ["todoist", "todo", "sync"],
