@@ -1,8 +1,6 @@
 #!/usr/bin/env node
 
 import { Command } from 'commander';
-import inquirer from 'inquirer';
-import { ConfigManager } from './config.js';
 import { SyncEngine } from './syncEngine.js';
 import logger from './logger.js';
 import { mkdirSync } from 'fs';
@@ -17,12 +15,42 @@ const ConflictResolution = {
     NEWEST_WINS: 'newest'
 };
 
+// Configuration with hardcoded defaults and environment variable overrides
+function getConfig() {
+    return {
+        todoist: {
+            apiToken: process.env.TODOIST_API_TOKEN || '',
+            projectName: process.env.TODOIST_PROJECT_NAME || 'Synced Tasks'
+        },
+        sync: {
+            conflictResolution: process.env.CONFLICT_RESOLUTION || ConflictResolution.INTERACTIVE,
+            backupBeforeSync: process.env.BACKUP_BEFORE_SYNC !== 'false'
+        },
+        duplicateDetection: {
+            enabled: process.env.DUPLICATE_DETECTION !== 'false',
+            similarityThreshold: parseFloat(process.env.SIMILARITY_THRESHOLD || '0.85'),
+            ignoreCase: process.env.IGNORE_CASE !== 'false',
+            ignoreWhitespace: process.env.IGNORE_WHITESPACE !== 'false',
+            enableFuzzyMatching: process.env.FUZZY_MATCHING !== 'false',
+            strategy: process.env.DUPLICATE_STRATEGY || 'interactive'
+        },
+        mapping: {
+            priorityMapping: {
+                '0': { todoistPriority: 4, dueString: 'today' },
+                '1': { todoistPriority: 3 },
+                '2': { todoistPriority: 2 },
+                '3': { todoistPriority: 1 },
+                '4': { todoistPriority: 1 }
+            }
+        }
+    };
+}
+
 // Ensure log directory exists
 const logDir = join(homedir(), '.todo-sync');
 mkdirSync(logDir, { recursive: true });
 
 const program = new Command();
-const configManager = new ConfigManager();
 
 program
     .name('todo-sync')
@@ -34,15 +62,15 @@ program
     .description('Run synchronization')
     .option('-d, --dry-run', 'Preview changes without applying them')
     .action(async (options) => {
-        const config = configManager.get();
+        const config = getConfig();
 
         if (!config.todoist.apiToken) {
-            console.error('No API token configured. Run "todo-sync setup" first.');
+            console.error('No API token configured. Set TODOIST_API_TOKEN environment variable.');
             process.exit(1);
         }
 
         try {
-            const syncEngine = new SyncEngine(configManager);
+            const syncEngine = new SyncEngine(config);
 
             if (options.dryRun) {
                 console.log('Dry run mode - no changes will be made');
@@ -75,60 +103,30 @@ program
 
 program
     .command('setup')
-    .description('Configure todo-sync')
-    .action(async () => {
-        const answers = await inquirer.prompt([
-            {
-                type: 'password',
-                name: 'apiToken',
-                message: 'Enter your Todoist API token:',
-                validate: (input) => input.length > 0 || 'API token is required'
-            },
-            {
-                type: 'input',
-                name: 'projectName',
-                message: 'Enter the Todoist project name for sync:',
-                default: 'Synced Tasks'
-            },
-            {
-                type: 'list',
-                name: 'conflictResolution',
-                message: 'How should conflicts be resolved?',
-                choices: [
-                    { name: 'Ask me each time', value: ConflictResolution.INTERACTIVE },
-                    { name: 'Local file wins', value: ConflictResolution.LOCAL_WINS },
-                    { name: 'Todoist wins', value: ConflictResolution.REMOTE_WINS },
-                    { name: 'Newest change wins', value: ConflictResolution.NEWEST_WINS }
-                ],
-                default: ConflictResolution.INTERACTIVE
-            },
-            {
-                type: 'confirm',
-                name: 'backupBeforeSync',
-                message: 'Backup ~/.todo before each sync?',
-                default: true
-            }
-        ]);
-
-        configManager.setApiToken(answers.apiToken);
-        configManager.setProjectName(answers.projectName);
-        configManager.setConflictResolution(answers.conflictResolution);
-        configManager.set({
-            sync: {
-                ...configManager.get().sync,
-                backupBeforeSync: answers.backupBeforeSync
-            }
-        });
-
-        console.log('\nConfiguration saved successfully!');
-        console.log('You can now run "todo-sync" to synchronize your todos.');
+    .description('Show environment variable setup instructions')
+    .action(() => {
+        console.log('Todo Sync Setup Instructions\n');
+        console.log('Set the following environment variables:');
+        console.log('');
+        console.log('Required:');
+        console.log('  export TODOIST_API_TOKEN=your_todoist_api_token');
+        console.log('');
+        console.log('Optional (defaults shown):');
+        console.log('  export TODOIST_PROJECT_NAME="Synced Tasks"');
+        console.log('  export CONFLICT_RESOLUTION="interactive"  # local, remote, interactive, newest');
+        console.log('  export BACKUP_BEFORE_SYNC="true"          # true, false');
+        console.log('  export DUPLICATE_DETECTION="true"         # true, false');
+        console.log('  export SIMILARITY_THRESHOLD="0.85"        # 0.0-1.0');
+        console.log('');
+        console.log('You can add these to your ~/.bashrc, ~/.zshrc, or create a .env file.');
+        console.log('After setting TODOIST_API_TOKEN, run "todo-sync sync" to start syncing.');
     });
 
 program
     .command('status')
     .description('Show sync status and configuration')
     .action(() => {
-        const config = configManager.get();
+        const config = getConfig();
 
         console.log('Todo Sync Status\n');
         console.log('Configuration:');
@@ -136,12 +134,10 @@ program
         console.log(`- Project Name: ${config.todoist.projectName}`);
         console.log(`- Conflict Resolution: ${config.sync.conflictResolution}`);
         console.log(`- Backup Before Sync: ${config.sync.backupBeforeSync}`);
-
-        if (config.sync.lastSync) {
-            console.log(`\nLast sync: ${new Date(config.sync.lastSync).toLocaleString()}`);
-        } else {
-            console.log('\nNever synced');
-        }
+        console.log(`- Duplicate Detection: ${config.duplicateDetection.enabled}`);
+        console.log(`- Similarity Threshold: ${config.duplicateDetection.similarityThreshold}`);
+        console.log('\nNote: Configuration is read from environment variables.');
+        console.log('Run "todo-sync setup" to see all available options.');
     });
 
 program
@@ -156,7 +152,7 @@ program
 
         const runSync = async () => {
             try {
-                const syncEngine = new SyncEngine(configManager);
+                const syncEngine = new SyncEngine(getConfig());
                 const result = await syncEngine.sync();
                 console.log(`[${new Date().toLocaleTimeString()}] Sync completed`);
                 logger.info('Daemon sync completed', result);
