@@ -66,3 +66,8 @@ high priority task
 - Supports daemon mode with configurable sync intervals
 - Backup functionality before sync operations
 - Dry-run mode for previewing changes
+
+## Claude Code Configuration
+
+ALWAYS use `.claude/settings.json` for project settings (not settings.local.json or settings.yaml).
+This is the official project settings file according to Claude Code documentation.
