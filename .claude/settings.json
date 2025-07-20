@@ -1,48 +1,80 @@
 {
-  "permissions": {
-    "allow": ["*"],
-    "deny": []
-  },
-  "hooks": {
-    "Stop": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": ".claude/hooks/event_notification_voice.py"
-          }
+    "permissions": {
+        "allow": ["*"],
+        "deny": []
+    },
+    "hooks": {
+        "UserPromptSubmit": [
+            {
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "uv run .claude/hooks/user_prompt_submit.py --log-only"
+                    }
+                ]
+            }
+        ],
+        "PreToolUse": [
+            {
+                "matcher": "",
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "uv run .claude/hooks/pre_tool_use.py"
+                    }
+                ]
+            }
+        ],
+        "PostToolUse": [
+            {
+                "matcher": "",
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "uv run .claude/hooks/post_tool_use.py"
+                    }
+                ]
+            }
+        ],
+        "Stop": [
+            {
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "uv run .claude/hooks/event_notification_voice.py"
+                    }
+                ]
+            }
+        ],
+        "SubagentStop": [
+            {
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "uv run .claude/hooks/event_notification_voice.py"
+                    }
+                ]
+            }
+        ],
+        "PreCompact": [
+            {
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "uv run .claude/hooks/event_notification_voice.py"
+                    }
+                ]
+            }
+        ],
+        "Notification": [
+            {
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "uv run .claude/hooks/event_notification_voice.py"
+                    }
+                ]
+            }
         ]
-      }
-    ],
-    "SubagentStop": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": ".claude/hooks/event_notification_voice.py"
-          }
-        ]
-      }
-    ],
-    "PreCompact": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": ".claude/hooks/event_notification_voice.py"
-          }
-        ]
-      }
-    ],
-    "Notification": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": ".claude/hooks/event_notification_voice.py"
-          }
-        ]
-      }
-    ]
-  }
+    }
 }

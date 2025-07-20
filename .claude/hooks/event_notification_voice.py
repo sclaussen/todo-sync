@@ -1,4 +1,8 @@
-#!/usr/bin/env python3
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.11"
+# dependencies = []
+# ///
 
 # Voice notifications for Claude Code events
 # Reads JSON input from stdin to determine event type
@@ -14,7 +18,7 @@ try:
     
     messages = {
         'Notification': 'Input Required',
-        'Stop': 'Done',
+        'Stop': 'Ready',
         'SubagentStop': 'Subtask Done',
         'PreCompact': 'Compacting'
     }
