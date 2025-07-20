@@ -1,46 +1,6 @@
 {
   "permissions": {
-    "allow": [
-      "Bash(*)",
-      "WebFetch(*)",
-      "WebSearch(*)",
-      "Edit(*)",
-      "Write(*)",
-      "MultiEdit(*)"
-    ],
+    "allow": ["*"],
     "deny": []
-  },
-  "hooks": {
-    "PostToolUse": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "/Users/shane/src/sync/.claude/hooks/step-complete.sh"
-          }
-        ]
-      }
-    ],
-    "Stop": [
-      {
-        "hooks": [
-          {
-            "type": "command", 
-            "command": "/Users/shane/src/sync/.claude/hooks/step-complete.sh"
-          }
-        ]
-      }
-    ],
-    "Notification": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "/Users/shane/src/sync/.claude/hooks/user-input-required.sh"
-          }
-        ]
-      }
-    ]
-  },
-  "defaultMode": "acceptAll"
+  }
 }
