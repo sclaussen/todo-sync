@@ -54,5 +54,19 @@
     "cwd": "/Users/shane/src/sync",
     "hook_event_name": "UserPromptSubmit",
     "prompt": "`yes"
+  },
+  {
+    "session_id": "31919f15-efcd-4a45-af82-22241bf524df",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/31919f15-efcd-4a45-af82-22241bf524df.jsonl",
+    "cwd": "/Users/shane/src/sync",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "commit"
+  },
+  {
+    "session_id": "37b6b51d-8f8e-429a-9bb3-bad7f5100cd5",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/37b6b51d-8f8e-429a-9bb3-bad7f5100cd5.jsonl",
+    "cwd": "/Users/shane/src/sync",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "commit all the code, including the tools"
   }
 ]
