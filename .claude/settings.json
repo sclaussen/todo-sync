@@ -2,5 +2,47 @@
   "permissions": {
     "allow": ["*"],
     "deny": []
+  },
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/Users/shane/src/sync/.claude/hooks/voice.sh stop"
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/Users/shane/src/sync/.claude/hooks/voice.sh subagent-stop"
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/Users/shane/src/sync/.claude/hooks/voice.sh pre-compact"
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/Users/shane/src/sync/.claude/hooks/voice.sh notification"
+          }
+        ]
+      }
+    ]
   }
 }
