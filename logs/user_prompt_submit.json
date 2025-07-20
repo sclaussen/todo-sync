@@ -47,5 +47,12 @@
     "cwd": "/Users/shane/src/sync",
     "hook_event_name": "UserPromptSubmit",
     "prompt": "yes 3"
+  },
+  {
+    "session_id": "31919f15-efcd-4a45-af82-22241bf524df",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/31919f15-efcd-4a45-af82-22241bf524df.jsonl",
+    "cwd": "/Users/shane/src/sync",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "`yes"
   }
 ]
