@@ -1,0 +1,20 @@
+node_modules/
+dist/
+*.log
+.env
+.DS_Store
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
+coverage/
+.nyc_output/
+
+# Config files with sensitive data
+.todo-sync.json
+*.todo-sync.json
+
+# TypeScript
+*.tsbuildinfo
+*.d.ts.map

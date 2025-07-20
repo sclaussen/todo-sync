@@ -1,0 +1,40 @@
+{
+  "name": "todo-sync",
+  "version": "1.0.0",
+  "description": "Bidirectional sync between ~/.todo file and Todoist",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node dist/cli.js",
+    "build": "tsc",
+    "dev": "tsx src/cli.ts",
+    "test": "jest",
+    "lint": "eslint src/**/*.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": ["todoist", "todo", "sync"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@doist/todoist-api-typescript": "^3.0.0",
+    "commander": "^11.0.0",
+    "crypto": "^1.0.1",
+    "dotenv": "^16.3.1",
+    "inquirer": "^9.2.12",
+    "uuid": "^9.0.1",
+    "winston": "^3.11.0"
+  },
+  "devDependencies": {
+    "@types/inquirer": "^9.0.7",
+    "@types/jest": "^29.5.11",
+    "@types/node": "^20.10.4",
+    "@types/uuid": "^9.0.7",
+    "@typescript-eslint/eslint-plugin": "^6.13.2",
+    "@typescript-eslint/parser": "^6.13.2",
+    "eslint": "^8.55.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.1",
+    "tsx": "^4.6.2",
+    "typescript": "^5.3.3"
+  }
+}
