@@ -4,68 +4,73 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a bidirectional todo synchronization tool that syncs between a local `~/.todo` file and Todoist. The application uses TypeScript with ES modules and provides a CLI interface for sync operations.
+This is a bidirectional todo synchronization tool that syncs between a local `~/.todo` file and Todoist. The application uses JavaScript with ES modules and provides a CLI interface for todo management and sync operations.
 
 ## Development Commands
 
-- `npm run dev` - Run CLI in development mode using tsx
-- `npm run build` - Build TypeScript to dist/
-- `npm run start` - Run built CLI from dist/
+- `npm run tasks` - Run CLI for todo operations
+- `npm run tasks -- -s` - Show sync preview (dry-run)
+- `npm run tasks -- -R` - Remove duplicates
+- `npm run tasks -- -l` - Show local todos only
+- `npm run tasks -- -r` - Show remote todos only
 - `npm test` - Run Jest tests  
-- `npm run lint` - Run ESLint on TypeScript files
-- `npm run typecheck` - Run TypeScript type checking without emitting files
+- `npm run lint` - Run ESLint on JavaScript files
 
 ## Architecture
 
 ### Core Components
 
-- **cli.ts**: Main CLI interface using Commander.js with commands for sync, setup, status, and daemon mode
-- **syncEngine.ts**: Core synchronization logic handling bidirectional sync between local and Todoist
-- **todoParser.ts**: Parses and writes the structured `~/.todo` file format with priority sections
-- **todoistClient.ts**: Todoist API client wrapper handling task CRUD operations
-- **config.ts**: Configuration management for `~/.todo-sync.json` with defaults and validation
-- **types.ts**: TypeScript interfaces and enums, including TodoItem, SyncState, and ConflictResolution
+- **tasks.js**: Main CLI interface with commands for listing, duplicates, and sync preview operations
+- **lib.js**: Core functionality for reading/writing todos and Todoist API integration  
+- **syncState.js**: Sync state management and correlation tracking with YAML persistence
 
 ### Sync Architecture
 
 The sync engine maintains state using:
-- **Sync IDs**: UUIDs linking local todos to Todoist tasks
-- **Checksums**: MD5 hashes for change detection
-- **Sync State File**: `~/.todo-sync-state.json` tracking sync metadata
+- **Correlation IDs**: 8-character hashes linking local todos to Todoist tasks (e.g., `d4e5f6g7`)
+- **Sync IDs**: Full UUIDs for robust programmatic correlation
+- **Checksums**: MD5 hashes for change detection  
+- **Sync State File**: `~/.todo-sync-state.yaml` tracking sync metadata
+- **Local Correlation Markers**: Tasks marked with `# [corrId]` for tracking
 - **Conflict Resolution**: Multiple strategies (interactive, local wins, remote wins, newest wins)
 
 ### Priority Mapping
 
 Local priorities (0-4) map to Todoist priorities:
-- Priority 0 → Todoist Priority 4 (urgent) + due date "today"
-- Priority 1 → Todoist Priority 3
-- Priority 2 → Todoist Priority 2  
-- Priority 3 → Todoist Priority 1
-- Priority 4 → Todoist Priority 1
+- Priority 0 → Todoist Priority 4 (highest/red) + due date "today" or prior
+- Priority 1 → Todoist Priority 4 (highest/red) without due date or future due date
+- Priority 2 → Todoist Priority 3 (orange)
+- Priority 3 → Todoist Priority 2 (blue)
+- Priority 4 → Todoist Priority 1 (lowest/no flag)
 
 ### Todo File Format
 
-The `~/.todo` file uses structured sections:
+The `~/.todo` file uses structured sections with optional correlation markers:
 ```
 Priority 0
 -------------------------------------------------------------------------------
-urgent task content
+urgent task content # [d4e5f6g7]
 another urgent task
 
 Priority 1
 -------------------------------------------------------------------------------
-high priority task
+high priority task # [a1b2c3d4]
 ```
 
 ## Key Implementation Details
 
-- Uses ES modules with `.js` imports in TypeScript files
-- Configuration stored in `~/.todo-sync.json` in user's home directory
-- Sync state persisted in `~/.todo-sync-state.json`
-- Logs stored in `~/.todo-sync/` directory
-- Supports daemon mode with configurable sync intervals
-- Backup functionality before sync operations
-- Dry-run mode for previewing changes
+- Uses ES modules with `.js` imports in JavaScript files
+- Configuration via environment variables (TODOIST_API_TOKEN, TODOIST_PROJECT_NAME)
+- Sync state persisted in `~/.todo-sync-state.yaml`
+- Completed tasks filtered to last 30 days only
+- Correlation tracking for rename detection
+- Content similarity detection (80% threshold) for potential renames
+- Dry-run sync preview mode showing what changes would be made
+
+## Code Organization
+
+- **Function Order**: Organize functions top-down with main/entry functions at the top, followed by helper functions in order of their call hierarchy
+- **Avoid Bottom-Up Organization**: Do not place main functions at the bottom of files
 
 ## Claude Code Configuration
 
