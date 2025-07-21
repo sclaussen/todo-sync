@@ -791,5 +791,56 @@
       "interrupted": false,
       "isImage": false
     }
+  },
+  {
+    "session_id": "2c71faac-64e8-430d-8fad-1e15064a4351",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/2c71faac-64e8-430d-8fad-1e15064a4351.jsonl",
+    "cwd": "/Users/shane/src/sync",
+    "hook_event_name": "PostToolUse",
+    "tool_name": "Bash",
+    "tool_input": {
+      "command": "git add .",
+      "description": "Stage all changes"
+    },
+    "tool_response": {
+      "stdout": "",
+      "stderr": "",
+      "interrupted": false,
+      "isImage": false
+    }
+  },
+  {
+    "session_id": "2c71faac-64e8-430d-8fad-1e15064a4351",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/2c71faac-64e8-430d-8fad-1e15064a4351.jsonl",
+    "cwd": "/Users/shane/src/sync",
+    "hook_event_name": "PostToolUse",
+    "tool_name": "Bash",
+    "tool_input": {
+      "command": "git status",
+      "description": "Check what will be committed"
+    },
+    "tool_response": {
+      "stdout": "On branch main\nYour branch is ahead of 'origin/main' by 2 commits.\n  (use \"git push\" to publish your local commits)\n\nChanges to be committed:\n  (use \"git restore --staged <file>...\" to unstage)\n\tnew file:   .eslintrc\n\tmodified:   CLAUDE.md\n\tnew file:   lib.js\n\tmodified:   logs/post_tool_use.json\n\tmodified:   logs/pre_tool_use.json\n\tmodified:   logs/user_prompt_submit.json\n\tmodified:   package-lock.json\n\tmodified:   package.json\n\tdeleted:    sync.js\n\tnew file:   tasks.js\n\tnew file:   todoLog.js\n\tdeleted:    util.js\n\nChanges not staged for commit:\n  (use \"git add <file>...\" to update what will be committed)\n  (use \"git restore <file>...\" to discard changes in working directory)\n\tmodified:   logs/post_tool_use.json\n\tmodified:   logs/pre_tool_use.json",
+      "stderr": "",
+      "interrupted": false,
+      "isImage": false
+    }
+  },
+  {
+    "session_id": "2c71faac-64e8-430d-8fad-1e15064a4351",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/2c71faac-64e8-430d-8fad-1e15064a4351.jsonl",
+    "cwd": "/Users/shane/src/sync",
+    "hook_event_name": "PostToolUse",
+    "tool_name": "Bash",
+    "tool_input": {
+      "command": "git commit -m \"$(cat <<'EOF'\nComplete todo sync application with all remaining changes\n\n- Update CLAUDE.md with current architecture and commands\n- Add all core application files (tasks.js, lib.js, todoLog.js)\n- Add ESLint configuration (.eslintrc)\n- Remove old files (sync.js, util.js)\n- Update package.json with current dependencies and scripts\n- Update all log files with latest execution data\n\nThis completes the todo sync application with JavaScript ES modules,\nCLI interface, Todoist integration, and correlation tracking.\n\n\ud83e\udd16 Generated with [Claude Code](https://claude.ai/code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\"",
+      "description": "Commit all remaining changes"
+    },
+    "tool_response": {
+      "stdout": "[main 22e5af8] Complete todo sync application with all remaining changes\n 12 files changed, 4457 insertions(+), 4925 deletions(-)\n create mode 100644 .eslintrc\n create mode 100644 lib.js\n delete mode 100644 sync.js\n create mode 100755 tasks.js\n create mode 100644 todoLog.js\n delete mode 100644 util.js",
+      "stderr": "",
+      "interrupted": false,
+      "isImage": false
+    }
   }
 ]

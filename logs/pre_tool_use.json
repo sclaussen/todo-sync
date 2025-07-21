@@ -42,5 +42,38 @@
       "command": "git add .",
       "description": "Stage all changes"
     }
+  },
+  {
+    "session_id": "2c71faac-64e8-430d-8fad-1e15064a4351",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/2c71faac-64e8-430d-8fad-1e15064a4351.jsonl",
+    "cwd": "/Users/shane/src/sync",
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Bash",
+    "tool_input": {
+      "command": "git status",
+      "description": "Check what will be committed"
+    }
+  },
+  {
+    "session_id": "2c71faac-64e8-430d-8fad-1e15064a4351",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/2c71faac-64e8-430d-8fad-1e15064a4351.jsonl",
+    "cwd": "/Users/shane/src/sync",
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Bash",
+    "tool_input": {
+      "command": "git commit -m \"$(cat <<'EOF'\nComplete todo sync application with all remaining changes\n\n- Update CLAUDE.md with current architecture and commands\n- Add all core application files (tasks.js, lib.js, todoLog.js)\n- Add ESLint configuration (.eslintrc)\n- Remove old files (sync.js, util.js)\n- Update package.json with current dependencies and scripts\n- Update all log files with latest execution data\n\nThis completes the todo sync application with JavaScript ES modules,\nCLI interface, Todoist integration, and correlation tracking.\n\n\ud83e\udd16 Generated with [Claude Code](https://claude.ai/code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\"",
+      "description": "Commit all remaining changes"
+    }
+  },
+  {
+    "session_id": "2c71faac-64e8-430d-8fad-1e15064a4351",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/2c71faac-64e8-430d-8fad-1e15064a4351.jsonl",
+    "cwd": "/Users/shane/src/sync",
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Bash",
+    "tool_input": {
+      "command": "git add logs/post_tool_use.json logs/pre_tool_use.json",
+      "description": "Stage remaining log file changes"
+    }
   }
 ]
