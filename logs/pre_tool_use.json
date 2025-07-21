@@ -75,5 +75,38 @@
       "command": "git add logs/post_tool_use.json logs/pre_tool_use.json",
       "description": "Stage remaining log file changes"
     }
+  },
+  {
+    "session_id": "2c71faac-64e8-430d-8fad-1e15064a4351",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/2c71faac-64e8-430d-8fad-1e15064a4351.jsonl",
+    "cwd": "/Users/shane/src/sync",
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Bash",
+    "tool_input": {
+      "command": "git commit -m \"$(cat <<'EOF'\nUpdate final log file changes from current session\n\n- Capture latest tool execution logs for sync bug fix session\n- Include pre and post tool use logging data\n\n\ud83e\udd16 Generated with [Claude Code](https://claude.ai/code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\"",
+      "description": "Commit final log changes"
+    }
+  },
+  {
+    "session_id": "2c71faac-64e8-430d-8fad-1e15064a4351",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/2c71faac-64e8-430d-8fad-1e15064a4351.jsonl",
+    "cwd": "/Users/shane/src/sync",
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Bash",
+    "tool_input": {
+      "command": "git status",
+      "description": "Verify all changes are committed"
+    }
+  },
+  {
+    "session_id": "2c71faac-64e8-430d-8fad-1e15064a4351",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/2c71faac-64e8-430d-8fad-1e15064a4351.jsonl",
+    "cwd": "/Users/shane/src/sync",
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Bash",
+    "tool_input": {
+      "command": "git add logs/ && git commit -m \"$(cat <<'EOF'\nFinal log file update from commit session\n\n- Capture the complete tool execution log from sync bug fix session\n- Include all pre/post tool use data from this commit process\n\n\ud83e\udd16 Generated with [Claude Code](https://claude.ai/code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\"",
+      "description": "Final commit for log files"
+    }
   }
 ]
