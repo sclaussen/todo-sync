@@ -8,11 +8,33 @@ This is a bidirectional todo synchronization tool that syncs between a local `~/
 
 ## Development Commands
 
-- `npm run tasks` - Run CLI for todo operations
-- `npm run tasks -- -s` - Show sync preview (dry-run)
-- `npm run tasks -- -R` - Remove duplicates
-- `npm run tasks -- -l` - Show local todos only
-- `npm run tasks -- -r` - Show remote todos only
+### Task Management
+- `npm run tasks` or `npm run tasks -- list` - Show current todos from both local and remote
+- `npm run tasks -- list -l` - Show only local current todos
+- `npm run tasks -- list -r` - Show only remote current todos
+- `npm run tasks -- list -c` - Show completed tasks from both sources
+
+### Task Creation
+- `npm run tasks -- create "New task"` - Create task locally (default)
+- `npm run tasks -- create "New task" -r` - Create task on Todoist only
+- `npm run tasks -- create "Urgent task" -p 0` - Create high priority task locally
+
+### Synchronization
+- `npm run tasks -- sync` - Full bidirectional sync
+- `npm run tasks -- sync -p` - Show sync preview (dry-run)
+- `npm run tasks -- sync -b` - Create backup only
+
+### Duplicates Management
+- `npm run tasks -- dups` - Find and remove duplicates from both sources
+- `npm run tasks -- dups -p` - Show duplicates without removing them
+- `npm run tasks -- dups -l` - Process local duplicates only
+- `npm run tasks -- dups -r` - Process remote duplicates only
+
+### Advanced Commands
+- `npm run tasks -- bootstrap` - Bootstrap correlations by matching tasks by content
+- `npm run tasks -- clean-dates` - Clean duplicate completion dates
+
+### Development Tools
 - `npm test` - Run Jest tests  
 - `npm run lint` - Run ESLint on JavaScript files
 
@@ -20,19 +42,15 @@ This is a bidirectional todo synchronization tool that syncs between a local `~/
 
 ### Core Components
 
-- **tasks.js**: Main CLI interface with commands for listing, duplicates, and sync preview operations
-- **lib.js**: Core functionality for reading/writing todos and Todoist API integration  
-- **syncState.js**: Sync state management and correlation tracking with YAML persistence
+- **tasks.js**: Main CLI interface with subcommands for listing, creating, syncing, and duplicates management
+- **lib.js**: Core functionality for reading/writing todos, Todoist API integration, and sync logic
 
 ### Sync Architecture
 
-The sync engine maintains state using:
-- **Correlation IDs**: 8-character hashes linking local todos to Todoist tasks (e.g., `d4e5f6g7`)
-- **Sync IDs**: Full UUIDs for robust programmatic correlation
-- **Checksums**: MD5 hashes for change detection  
-- **Sync State File**: `~/.todo-sync-state.yaml` tracking sync metadata
-- **Local Correlation Markers**: Tasks marked with `# [corrId]` for tracking
-- **Conflict Resolution**: Multiple strategies (interactive, local wins, remote wins, newest wins)
+The sync engine uses direct Todoist IDs for correlation:
+- **Todoist IDs**: Tasks correlated using actual Todoist task IDs (e.g., `(12345678)`)
+- **Local Correlation Markers**: Tasks marked with `(todoistId)` for tracking
+- **Conflict Resolution**: Local changes always win over remote changes
 
 ### Priority Mapping
 
@@ -45,26 +63,24 @@ Local priorities (0-4) map to Todoist priorities:
 
 ### Todo File Format
 
-The `~/.todo` file uses structured sections with optional correlation markers:
+The `~/.todo` file uses structured sections with optional Todoist ID markers:
 ```
 Priority 0
 -------------------------------------------------------------------------------
-urgent task content # [d4e5f6g7]
+urgent task content (12345678)
 another urgent task
 
 Priority 1
 -------------------------------------------------------------------------------
-high priority task # [a1b2c3d4]
+high priority task (87654321)
 ```
 
 ## Key Implementation Details
 
 - Uses ES modules with `.js` imports in JavaScript files
 - Configuration via environment variables (TODOIST_API_TOKEN, TODOIST_PROJECT_NAME)
-- Sync state persisted in `~/.todo-sync-state.yaml`
 - Completed tasks filtered to last 30 days only
-- Correlation tracking for rename detection
-- Content similarity detection (80% threshold) for potential renames
+- Direct Todoist ID correlation for task tracking
 - Dry-run sync preview mode showing what changes would be made
 
 ## Code Organization

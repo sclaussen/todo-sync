@@ -9,8 +9,7 @@ import {
     stripCorrelationId,
     addCorrelationId,
     logSyncOperation
-} from './todoLog.js';
-import { generateCorrelationId } from './syncState.js';
+} from './taskLog.js';
 
 // Load environment variables from .env file
 // Temporarily suppress dotenv console output
@@ -24,14 +23,22 @@ const config = {
     todoist: {
         apiToken: process.env.TODOIST_API_TOKEN || '',
         projectName: process.env.TODOIST_PROJECT_NAME || 'Sync'
+    },
+    local: {
+        todoDir: process.env.TODO_DIR || homedir()
     }
 };
 
-export async function getTodos(source) {
+// Helper function to get todo file path
+function getTodoFilePath(filename = '.tasks') {
+    return join(config.local.todoDir, filename);
+}
+
+export async function getTasks(source) {
     if (source === 'local') {
-        return getLocalTodos();
+        return getLocalTasks();
     } else if (source === 'remote') {
-        return await getRemoteTodos();
+        return await getRemoteTasks();
     } else {
         throw new Error('Source must be either "local" or "remote"');
     }
@@ -47,9 +54,13 @@ export async function findDuplicates(source) {
     }
 }
 
-function getLocalTodos() {
-    const current = parseLocalTodos('.todo');
-    const completed = parseLocalTodos('.todo.completed');
+function getPriorityLabel(priority) {
+    return priority === 'unknown' ? 'Unknown Priority' : `Priority ${priority}`;
+}
+
+function getLocalTasks() {
+    const current = parseLocalTasks('.tasks');
+    const completed = parseLocalTasks('.tasks.completed');
 
     return {
         current: current.error ? { tasks: [], error: current.error } : current,
@@ -57,8 +68,8 @@ function getLocalTodos() {
     };
 }
 
-function parseLocalTodos(filename = '.todo') {
-    const filepath = join(homedir(), filename);
+function parseLocalTasks(filename = '.tasks') {
+    const filepath = getTodoFilePath(filename);
 
     if (!existsSync(filepath)) {
         return { tasks: [], error: `File ${filepath} does not exist` };
@@ -100,14 +111,18 @@ function parseLocalTodos(filename = '.todo') {
                 if (currentParentTask) {
                     // This is a subtask
                     const subtaskContent = trimmedLine.substring(2).trim(); // Remove "- " prefix
+                    const cleanSubtaskContent = cleanTaskContent(subtaskContent);
+                    const subtaskTodoistId = extractCorrelationId(subtaskContent);
+                    const subtaskName = stripCorrelationId(cleanSubtaskContent);
                     const subtask = {
-                        content: cleanTaskContent(subtaskContent),
+                        content: subtaskName, // Clean subtask name without ID
+                        todoistId: subtaskTodoistId, // Separate Todoist ID property
                         priority: currentPriority !== null ? currentPriority : 'unknown',
                         lineNumber: i + 1,
                         file: filename,
                         isSubtask: true,
                         parentTaskId: currentParentTask.taskId,
-                        parentContent: cleanTaskContent(currentParentTask.content),
+                        parentContent: currentParentTask.content, // Use clean parent content
                         originalLine: line // Preserve original formatting
                     };
 
@@ -122,8 +137,12 @@ function parseLocalTodos(filename = '.todo') {
                 } else {
                     // Orphaned subtask (no parent) - treat as regular task but warn
                     console.warn(`Warning: Orphaned subtask found at line ${i + 1}: ${trimmedLine}`);
+                    const cleanOrphanContent = cleanTaskContent(trimmedLine);
+                    const orphanTodoistId = extractCorrelationId(trimmedLine);
+                    const orphanName = stripCorrelationId(cleanOrphanContent);
                     tasks.push({
-                        content: cleanTaskContent(trimmedLine),
+                        content: orphanName, // Clean task name without ID
+                        todoistId: orphanTodoistId, // Separate Todoist ID property
                         priority: currentPriority !== null ? currentPriority : 'unknown',
                         lineNumber: i + 1,
                         file: filename,
@@ -134,9 +153,12 @@ function parseLocalTodos(filename = '.todo') {
             } else {
                 // This is a main task
                 const cleanContent = cleanTaskContent(trimmedLine);
-                const taskId = generateTaskId(cleanContent, i);
+                const todoistId = extractCorrelationId(trimmedLine);
+                const taskName = stripCorrelationId(cleanContent);
+                const taskId = generateTaskId(taskName, i);
                 const task = {
-                    content: cleanContent,
+                    content: taskName, // Clean task name without ID
+                    todoistId: todoistId, // Separate Todoist ID property
                     priority: currentPriority !== null ? currentPriority : 'unknown',
                     lineNumber: i + 1,
                     file: filename,
@@ -187,7 +209,7 @@ function generateTaskId(content, lineNumber) {
     return hash.substring(0, 8);
 }
 
-async function getRemoteTodos() {
+async function getRemoteTasks() {
     if (!config.todoist.apiToken) {
         return {
             current: { tasks: [], message: 'No Todoist API token configured' },
@@ -267,11 +289,7 @@ async function getRemoteTodos() {
                 id: task.id,
                 priority: task.priority,
                 created: task.created_at,
-                due: task.due ? {
-                    date: task.due.date,
-                    string: task.due.string,
-                    datetime: task.due.datetime
-                } : null,
+                due: task.due ? task.due.date : null,
                 projectId: task.project_id,
                 labels: task.labels || [],
                 parentId: task.parent_id || null,
@@ -302,7 +320,7 @@ async function getRemoteTodos() {
         // Create flat list for sync purposes while preserving hierarchy
         const formattedActiveTasks = Array.from(taskMap.values());
 
-        // Deduplicate completed tasks by content (Todoist can have duplicates)
+        // Deduplicate completed tasks by content (Remote can have duplicates)
         const uniqueCompletedTasks = [];
         const seenContent = new Set();
 
@@ -338,7 +356,7 @@ async function getRemoteTodos() {
 }
 
 function findLocalDuplicates() {
-    const localFiles = [ '.todo' ]; // Only check current todos
+    const localFiles = [ '.tasks' ]; // Only check current tasks
     const results = [];
 
     for (const filename of localFiles) {
@@ -352,7 +370,7 @@ function findLocalDuplicates() {
 }
 
 function findDuplicatesInFile(filename) {
-    const filepath = join(homedir(), filename);
+    const filepath = getTodoFilePath(filename);
 
     if (!existsSync(filepath)) {
         return {
@@ -498,27 +516,14 @@ async function findRemoteDuplicates() {
     }
 }
 
-function mapTodoistPriority(task) {
+function mapRemotePriority(task) {
     // Check if task is Priority 4 and due today or in the past
     if (task.priority === 4 && task.due) {
         const today = new Date();
         today.setHours(0, 0, 0, 0); // Set to start of day for comparison
 
-        // Parse the due date from Todoist format
-        let dueDate;
-        if (task.due.date) {
-            // Use the date field (YYYY-MM-DD format)
-            dueDate = new Date(task.due.date + 'T00:00:00');
-        } else if (task.due.datetime) {
-            // Use datetime field if available
-            dueDate = new Date(task.due.datetime);
-        } else if (typeof task.due === 'string') {
-            // Fallback to string parsing
-            dueDate = new Date(task.due);
-        } else {
-            // Last resort
-            dueDate = new Date(task.due);
-        }
+        // Parse the due date (now simplified to just the date string)
+        const dueDate = new Date(task.due + 'T00:00:00');
 
         dueDate.setHours(0, 0, 0, 0); // Set to start of day for comparison
 
@@ -528,20 +533,20 @@ function mapTodoistPriority(task) {
         }
     }
 
-    // Map Todoist priorities to local priorities
+    // Map Remote priorities to local priorities
     const priorityMap = {
-        4: 1, // Todoist Priority 4 (highest) -> Local Priority 1 (unless overdue, then Priority 0 above)
-        3: 2, // Todoist Priority 3 -> Local Priority 2
-        2: 3, // Todoist Priority 2 -> Local Priority 3
-        1: 4  // Todoist Priority 1 (lowest) -> Local Priority 4
+        4: 1, // Remote Priority 4 (highest) -> Local Priority 1 (unless overdue, then Priority 0 above)
+        3: 2, // Remote Priority 3 -> Local Priority 2
+        2: 3, // Remote Priority 2 -> Local Priority 3
+        1: 4  // Remote Priority 1 (lowest) -> Local Priority 4
     };
 
     return priorityMap[task.priority] || 4;
 }
 
-export function displayTodos(data, source) {
+export function displayTasks(data, source) {
     const isLocal = source === 'local';
-    const title = isLocal ? '📁 LOCAL TODOS (.todo)' : '☁️  TODOIST TODOS';
+    const title = isLocal ? '📁 LOCAL TASKS (.tasks)' : '☁️  TODOIST TASKS';
     const separator = isLocal ? '-' : '=';
 
     console.log(`\n${title}`);
@@ -552,7 +557,7 @@ export function displayTodos(data, source) {
     } else if (data.current.message) {
         console.log(`ℹ️  ${data.current.message}`);
     } else if (data.current.tasks.length === 0) {
-        console.log('✅ No current todos found');
+        console.log('✅ No current tasks found');
     } else {
         // Group by priority
         const groupedByPriority = data.current.tasks.reduce((groups, task) => {
@@ -561,8 +566,8 @@ export function displayTodos(data, source) {
             if (isLocal) {
                 priority = task.priority;
             } else {
-                // Map Todoist priorities to 0-4 scale
-                priority = mapTodoistPriority(task);
+                // Map Remote priorities to 0-4 scale
+                priority = mapRemotePriority(task);
             }
 
             if (!groups[priority]) {
@@ -576,22 +581,20 @@ export function displayTodos(data, source) {
         const priorities = Object.keys(groupedByPriority).sort((a, b) =>
             a === 'unknown' ? 1 : b === 'unknown' ? -1 : parseInt(a) - parseInt(b)
         );
-        const priorityLabels = (priority) => priority === 'unknown' ? 'Unknown Priority' : `Priority ${priority}`;
-
         for (const priority of priorities) {
-            const priorityLabel = priorityLabels(priority);
+            const priorityLabel = getPriorityLabel(priority);
             console.log(`\n  ${priorityLabel} (${groupedByPriority[priority].length} tasks):`);
             // Filter out subtasks for main display (they'll be shown under their parents)
             const mainTasks = groupedByPriority[priority].filter(task => !task.isSubtask);
 
             mainTasks.forEach((task, index) => {
-                const dueInfo = !isLocal && task.due ? ` (due: ${task.due.string || task.due.date || task.due})` : '';
+                const dueInfo = !isLocal && task.due ? ` (due: ${task.due})` : '';
                 console.log(`    ${index + 1}. ${task.content}${dueInfo}`);
 
                 // Display subtasks if they exist
                 if (task.subtasks && task.subtasks.length > 0) {
                     task.subtasks.forEach((subtask, subIndex) => {
-                        const subDueInfo = !isLocal && subtask.due ? ` (due: ${subtask.due.string || subtask.due.date || subtask.due})` : '';
+                        const subDueInfo = !isLocal && subtask.due ? ` (due: ${subtask.due})` : '';
                         console.log(`       ${String.fromCharCode(97 + subIndex)}. ${subtask.content}${subDueInfo}`);
                     });
                 }
@@ -605,7 +608,7 @@ export function displayTodos(data, source) {
                                (data.completed.message && !data.completed.message.includes('Use --all'));
 
     if (shouldShowCompleted) {
-        console.log(`\n✅ COMPLETED TODOS${isLocal ? ' (.todo.completed)' : ''}`);
+        console.log(`\n✅ COMPLETED TASKS${isLocal ? ' (.tasks.completed)' : ''}`);
         console.log('-'.repeat(50));
 
         if (data.completed.error) {
@@ -613,7 +616,7 @@ export function displayTodos(data, source) {
         } else if (data.completed.message) {
             console.log(`ℹ️  ${data.completed.message}`);
         } else if (data.completed.tasks.length === 0) {
-            console.log('📭 No completed todos found');
+            console.log('📭 No completed tasks found');
         } else {
             data.completed.tasks.forEach((task, index) => {
                 if (!isLocal && task.completed) {
@@ -663,7 +666,7 @@ export function displayDuplicates(results, source) {
     }
 
     if (!foundAnyDuplicates) {
-        console.log(`\n🎉 No duplicates found in ${isLocal ? 'local files' : 'Todoist'}!`);
+        console.log(`\n🎉 No duplicates found in ${isLocal ? 'local files' : 'Remote'}!`);
     }
 }
 
@@ -678,8 +681,8 @@ export async function removeDuplicates(source) {
 }
 
 function removeLocalDuplicates() {
-    const filename = '.todo';
-    const filepath = join(homedir(), filename);
+    const filename = '.tasks';
+    const filepath = getTodoFilePath(filename);
 
     try {
         const content = readFileSync(filepath, 'utf8');
@@ -831,7 +834,7 @@ async function removeRemoteDuplicates() {
         }
 
         if (tasksToDelete.length === 0) {
-            console.log('\n✅ No duplicates found in Todoist');
+            console.log('\n✅ No duplicates found in Remote');
             return;
         }
 
@@ -896,9 +899,9 @@ async function removeRemoteDuplicates() {
             }
         }
 
-        console.log(`\n✅ Removed ${totalDeleted} duplicate(s) from Todoist`);
+        console.log(`\n✅ Removed ${totalDeleted} duplicate(s) from Remote`);
     } catch (error) {
-        console.error(`❌ Error removing duplicates from Todoist: ${error.message}`);
+        console.error(`❌ Error removing duplicates from Remote: ${error.message}`);
     }
 }
 
@@ -913,7 +916,7 @@ export async function executeSync(changes, showLocal, showRemote) {
     let todoistChanges = 0;
 
     try {
-        // Execute local changes (from Todoist to local)
+        // Execute local changes (from Remote to local)
         if (showLocal || (!showLocal && !showRemote)) {
             const localResults = await executeLocalChanges(changes.local);
             localChanges = localResults.totalChanges;
@@ -922,9 +925,9 @@ export async function executeSync(changes, showLocal, showRemote) {
             }
         }
 
-        // Execute Todoist changes (from local to Todoist)
+        // Execute Remote changes (from local to Remote)
         if (showRemote || (!showLocal && !showRemote)) {
-            const todoistResults = await executeTodoistChanges(changes.todoist);
+            const todoistResults = await executeRemoteChanges(changes.todoist);
             todoistChanges = todoistResults.totalChanges;
             if (todoistResults.errors.length > 0) {
                 results.errors.push(...todoistResults.errors);
@@ -938,7 +941,7 @@ export async function executeSync(changes, showLocal, showRemote) {
             changes.conflicts.forEach((conflict, index) => {
                 console.log(`  ${index + 1}. Correlation ID: ${conflict.corrId}`);
                 console.log(`     Local:   "${conflict.localTask.content}"`);
-                console.log(`     Todoist: "${conflict.todoistTask.content}"`);
+                console.log(`     Remote: "${conflict.todoistTask.content}"`);
             });
         }
 
@@ -948,7 +951,7 @@ export async function executeSync(changes, showLocal, showRemote) {
             summary.push(`${localChanges} local changes applied`);
         }
         if (todoistChanges > 0) {
-            summary.push(`${todoistChanges} Todoist changes applied`);
+            summary.push(`${todoistChanges} Remote changes applied`);
         }
         if (summary.length === 0) {
             summary.push('No changes needed - everything is in sync');
@@ -985,24 +988,21 @@ async function executeLocalChanges(localChanges) {
     console.log(`\n📝 Applying ${allChanges.length} local changes...`);
 
     try {
-        // Apply new current tasks from Todoist
+        // Apply new current tasks from Remote
         for (const change of localChanges.noneToCurrent) {
-            const corrId = await addTaskToLocalFile(change);
-            if (corrId && change.id) {
-                // Log the new correlation
-                logSyncOperation('create', 'local', {
-                    corrId,
-                    todoistId: change.id,
-                    content: stripCorrelationId(change.content),
-                    priority: change.metadata?.priority,
-                    source: 'todoist'
-                });
-            }
+            await addTaskToLocalFile(change);
+            // Log the new sync operation
+            logSyncOperation('create', 'local', {
+                todoistId: change.id,
+                content: change.content, // Should already be clean
+                priority: change.metadata?.priority,
+                source: 'todoist'
+            });
             console.log(`  ✓ Added new task: ${change.content}`);
             results.totalChanges++;
         }
 
-        // Apply new completed tasks from Todoist
+        // Apply new completed tasks from Remote
         for (const change of localChanges.noneToCompleted) {
             await addCompletedTaskToLocalFile(change);
             console.log(`  ✓ Added completed task: ${change.content}`);
@@ -1034,7 +1034,7 @@ async function executeLocalChanges(localChanges) {
     return results;
 }
 
-async function executeTodoistChanges(todoistChanges) {
+async function executeRemoteChanges(todoistChanges) {
     const results = {
         totalChanges: 0,
         errors: []
@@ -1056,11 +1056,11 @@ async function executeTodoistChanges(todoistChanges) {
         return results;
     }
 
-    console.log(`\n☁️  Applying ${allChanges.length} Todoist changes...`);
+    console.log(`\n☁️  Applying ${allChanges.length} Remote changes...`);
 
     try {
         // Get project ID first
-        const projectId = await getTodoistProjectId();
+        const projectId = await getRemoteProjectId();
         if (!projectId) {
             results.errors.push(`Project "${config.todoist.projectName}" not found`);
             return results;
@@ -1068,16 +1068,19 @@ async function executeTodoistChanges(todoistChanges) {
 
         // Apply new current tasks from local
         for (const change of todoistChanges.noneToCurrent) {
-            const result = await createTodoistTask(change, projectId);
+            const result = await createRemoteTask(change, projectId);
             if (result) {
-                // Log the new correlation
+                // Log the new sync operation
                 logSyncOperation('create', 'todoist', {
-                    corrId: result.corrId,
                     todoistId: result.taskId,
-                    content: stripCorrelationId(change.content),
+                    content: change.content, // Should already be clean
                     priority: change.metadata?.priority,
                     source: 'local'
                 });
+
+                // Add Todoist ID to the local task file
+                await updateLocalTaskWithCorrelationId(change.content, result.taskId);
+
                 console.log(`  ✓ Created task: ${change.content}`);
                 results.totalChanges++;
             } else {
@@ -1087,7 +1090,7 @@ async function executeTodoistChanges(todoistChanges) {
 
         // Apply new completed tasks from local
         for (const change of todoistChanges.noneToCompleted) {
-            const result = await createTodoistTask(change, projectId, true);
+            const result = await createRemoteTask(change, projectId, true);
             if (result) {
                 console.log(`  ✓ Created completed task: ${change.content}`);
                 results.totalChanges++;
@@ -1098,7 +1101,7 @@ async function executeTodoistChanges(todoistChanges) {
 
         // Mark current tasks as completed
         for (const change of todoistChanges.currentToCompleted) {
-            const success = await completeTodoistTask(change.metadata?.todoistId);
+            const success = await completeRemoteTask(change.metadata?.todoistId);
             if (success) {
                 console.log(`  ✓ Marked completed: ${change.content}`);
                 results.totalChanges++;
@@ -1109,12 +1112,11 @@ async function executeTodoistChanges(todoistChanges) {
 
         // Apply renames/priority changes
         for (const change of todoistChanges.renames) {
-            const success = await updateTodoistTask(change);
+            const success = await updateRemoteTask(change);
             if (success) {
                 // Log the update
                 if (change.changeType === 'priority_update') {
                     logSyncOperation('update', 'todoist', {
-                        corrId: change.corrId,
                         todoistId: change.todoistId,
                         content: change.content,
                         priority: change.newPriority,
@@ -1124,7 +1126,6 @@ async function executeTodoistChanges(todoistChanges) {
                     console.log(`  ✓ Updated priority: ${change.content} (${change.oldPriority}→${change.newPriority})`);
                 } else {
                     logSyncOperation('update', 'todoist', {
-                        corrId: change.corrId,
                         todoistId: change.todoistId,
                         oldContent: change.oldContent,
                         content: change.newContent,
@@ -1146,7 +1147,7 @@ async function executeTodoistChanges(todoistChanges) {
 }
 
 
-async function getTodoistProjectId() {
+async function getRemoteProjectId() {
     try {
         const response = await fetch('https://api.todoist.com/rest/v2/projects', {
             headers: {
@@ -1167,10 +1168,43 @@ async function getTodoistProjectId() {
     }
 }
 
-async function createTodoistTask(task, projectId, isCompleted = false) {
+async function updateLocalTaskWithCorrelationId(taskContent, todoistId) {
+    const filepath = getTodoFilePath('.tasks');
+
     try {
-        const priority = mapLocalPriorityToTodoist(task.metadata?.priority || task.priority || 4);
-        const cleanContent = stripCorrelationId(task.content);
+        // Read the current task file
+        const content = readFileSync(filepath, 'utf8');
+        const lines = content.split('\n');
+
+        // Find the line with the task content (without Todoist ID)
+        const cleanTaskContent = stripCorrelationId(taskContent);
+        const targetLineIndex = lines.findIndex(line => {
+            const cleanLine = stripCorrelationId(line.trim());
+            return cleanLine === cleanTaskContent;
+        });
+
+        if (targetLineIndex !== -1) {
+            // Add Todoist ID to the found line
+            const updatedLine = addCorrelationId(lines[targetLineIndex], todoistId);
+            lines[targetLineIndex] = updatedLine;
+
+            // Write the updated content back to the file
+            writeFileSync(filepath, lines.join('\n'), 'utf8');
+            console.log(`  📎 Added Todoist ID (${todoistId}) to local task: ${cleanTaskContent}`);
+        } else {
+            console.warn(`  ⚠️  Could not find local task to update with Todoist ID: ${cleanTaskContent}`);
+        }
+    } catch (error) {
+        console.error(`  ❌ Failed to update local task with Todoist ID: ${error.message}`);
+        throw error;
+    }
+}
+
+async function createRemoteTask(task, projectId, isCompleted = false) {
+    try {
+        const localPriority = task.metadata?.priority || task.priority || 4;
+        const priority = mapLocalPriorityToRemote(localPriority);
+        const cleanContent = task.content; // Should already be clean
         const taskData = {
             content: cleanContent,
             project_id: projectId,
@@ -1178,9 +1212,10 @@ async function createTodoistTask(task, projectId, isCompleted = false) {
         };
 
         // Add due date for priority 0 tasks
-        if ((task.metadata?.priority || task.priority) === 0) {
+        if (localPriority === 0) {
             taskData.due_string = 'today';
         }
+
 
         const response = await fetch('https://api.todoist.com/rest/v2/tasks', {
             method: 'POST',
@@ -1198,25 +1233,21 @@ async function createTodoistTask(task, projectId, isCompleted = false) {
 
         const createdTask = await response.json();
 
-        // Generate correlation ID for tracking
-        const corrId = generateCorrelationId(cleanContent);
-
         // If task should be completed, complete it immediately
         if (isCompleted) {
-            await completeTodoistTask(createdTask.id);
+            await completeRemoteTask(createdTask.id);
         }
 
         return {
-            taskId: createdTask.id,
-            corrId: corrId
+            taskId: createdTask.id
         };
     } catch (error) {
-        console.error('Error creating Todoist task:', error.message);
+        console.error('Error creating Remote task:', error.message);
         return null;
     }
 }
 
-async function completeTodoistTask(taskId) {
+async function completeRemoteTask(taskId) {
     try {
         const response = await fetch(`https://api.todoist.com/rest/v2/tasks/${taskId}/close`, {
             method: 'POST',
@@ -1227,17 +1258,17 @@ async function completeTodoistTask(taskId) {
 
         return response.ok;
     } catch (error) {
-        console.error('Error completing Todoist task:', error.message);
+        console.error('Error completing Remote task:', error.message);
         return false;
     }
 }
 
-async function updateTodoistTask(change) {
+async function updateRemoteTask(change) {
     try {
         const updateData = {};
 
         if (change.changeType === 'priority_update') {
-            updateData.priority = mapLocalPriorityToTodoist(change.newPriority);
+            updateData.priority = mapLocalPriorityToRemote(change.newPriority);
             // Add/remove due date based on priority
             if (change.newPriority === 0) {
                 updateData.due_string = 'today';
@@ -1245,7 +1276,7 @@ async function updateTodoistTask(change) {
                 // Remove due date when moving from Priority 0 to any other priority
                 updateData.due_string = 'no date';
             }
-            console.log(`🔧 Updating task ${change.todoistId}: priority ${change.oldPriority} → ${change.newPriority} (Todoist: ${updateData.priority})`);
+            console.log(`🔧 Updating task ${change.todoistId}: priority ${change.oldPriority} → ${change.newPriority} (Remote: ${updateData.priority})`);
         } else if (change.newContent) {
             updateData.content = change.newContent;
             console.log(`🔧 Updating task ${change.todoistId}: content "${change.oldContent}" → "${change.newContent}"`);
@@ -1280,7 +1311,7 @@ async function updateTodoistTask(change) {
             const updatedTask = await verifyResponse.json();
             console.log(`🔍 Verification: Task priority is now ${updatedTask.priority}`);
             if (change.changeType === 'priority_update') {
-                const expectedPriority = mapLocalPriorityToTodoist(change.newPriority);
+                const expectedPriority = mapLocalPriorityToRemote(change.newPriority);
                 if (updatedTask.priority === expectedPriority) {
                     console.log('✅ Priority update verified successfully');
                     return true;
@@ -1295,25 +1326,25 @@ async function updateTodoistTask(change) {
 
         return true;
     } catch (error) {
-        console.error('Error updating Todoist task:', error.message);
+        console.error('Error updating Remote task:', error.message);
         return false;
     }
 }
 
-function mapLocalPriorityToTodoist(localPriority) {
+function mapLocalPriorityToRemote(localPriority) {
     const priorityMap = {
-        0: 4, // Priority 0 -> Todoist Priority 4 (highest/red)
-        1: 4, // Priority 1 -> Todoist Priority 4 (highest/red)
-        2: 3, // Priority 2 -> Todoist Priority 3 (orange)
-        3: 2, // Priority 3 -> Todoist Priority 2 (blue)
-        4: 1  // Priority 4 -> Todoist Priority 1 (lowest/no flag)
+        0: 4, // Priority 0 -> Remote Priority 4 (highest/red)
+        1: 4, // Priority 1 -> Remote Priority 4 (highest/red)
+        2: 3, // Priority 2 -> Remote Priority 3 (orange)
+        3: 2, // Priority 3 -> Remote Priority 2 (blue)
+        4: 1  // Priority 4 -> Remote Priority 1 (lowest/no flag)
     };
 
     return priorityMap[localPriority] || 1;
 }
 
 async function addTaskToLocalFile(task) {
-    const filepath = join(homedir(), '.todo');
+    const filepath = getTodoFilePath('.tasks');
     const priority = task.metadata?.priority !== undefined ? task.metadata.priority : 4;
 
     try {
@@ -1322,13 +1353,11 @@ async function addTaskToLocalFile(task) {
             content = readFileSync(filepath, 'utf8');
         }
 
-        // Generate correlation ID for new task if it's from Todoist
-        let corrId = null;
+        // Add Todoist ID for new task if it's from Remote
         let taskContentWithCorr = task.content;
 
         if (task.metadata?.source === 'todoist' && task.id) {
-            corrId = generateCorrelationId(task.content);
-            taskContentWithCorr = addCorrelationId(task.content, corrId);
+            taskContentWithCorr = addCorrelationId(task.content, task.id);
         }
 
         const newTaskLine = `${taskContentWithCorr}\n`;
@@ -1383,14 +1412,14 @@ async function addTaskToLocalFile(task) {
         }
 
         writeFileSync(filepath, content, 'utf8');
-        return corrId;
+        return task.id || null;
     } catch (error) {
         throw new Error(`Failed to add task to local file: ${error.message}`);
     }
 }
 
 async function addCompletedTaskToLocalFile(task) {
-    const filepath = join(homedir(), '.todo.completed');
+    const filepath = getTodoFilePath('.tasks.completed');
 
     try {
         let content = '';
@@ -1438,8 +1467,8 @@ async function addCompletedTaskToLocalFile(task) {
 }
 
 async function markTaskCompletedInLocalFile(task) {
-    const currentFilepath = join(homedir(), '.todo');
-    const completedFilepath = join(homedir(), '.todo.completed');
+    const currentFilepath = getTodoFilePath('.tasks');
+    const completedFilepath = getTodoFilePath('.tasks.completed');
 
     try {
         // Remove from current file
@@ -1462,11 +1491,11 @@ async function markTaskCompletedInLocalFile(task) {
 }
 
 async function updateTaskInLocalFile(change) {
-    const filepath = join(homedir(), '.todo');
+    const filepath = getTodoFilePath('.tasks');
 
     try {
         if (!existsSync(filepath)) {
-            throw new Error('Local todo file does not exist');
+            throw new Error('Local task file does not exist');
         }
 
         const content = readFileSync(filepath, 'utf8');
@@ -1493,7 +1522,7 @@ async function updateTaskInLocalFile(change) {
                 // Remove from current location
                 lines.splice(taskLineIndex, 1);
 
-                // Add correlation ID if not present and we have one
+                // Add Todoist ID if not present and we have one
                 let updatedTaskLine = taskLine;
                 if (change.corrId && !extractCorrelationId(taskLine)) {
                     const cleanContent = stripCorrelationId(taskLine.trim());
@@ -1542,7 +1571,7 @@ async function updateTaskInLocalFile(change) {
 export async function cleanDuplicateCompletionDates() {
     console.log('🧹 Cleaning duplicate completion dates in completed tasks...');
 
-    const filepath = join(homedir(), '.todo.completed');
+    const filepath = getTodoFilePath('.tasks.completed');
 
     try {
         if (!existsSync(filepath)) {
@@ -1589,17 +1618,17 @@ export async function cleanDuplicateCompletionDates() {
 }
 
 export async function bootstrapCorrelations() {
-    console.log('🔗 Bootstrapping correlations between local and Todoist tasks...');
+    console.log('🔗 Bootstrapping correlations between local and Remote tasks...');
 
     try {
-        const localData = await getTodos('local');
-        const todoistData = await getTodos('remote');
+        const localData = await getTasks('local');
+        const todoistData = await getTasks('remote');
 
         if (!localData.current.tasks || !todoistData.current.tasks) {
-            throw new Error('Unable to load local or Todoist tasks');
+            throw new Error('Unable to load local or Remote tasks');
         }
 
-        const filepath = join(homedir(), '.todo');
+        const filepath = getTodoFilePath('.tasks');
         const content = readFileSync(filepath, 'utf8');
         const lines = content.split('\n');
         let updated = false;
@@ -1613,41 +1642,53 @@ export async function bootstrapCorrelations() {
                 continue;
             }
 
-            // Skip tasks that already have correlation IDs
-            if (extractCorrelationId(line)) {
+            // Check if task has old format correlation ID
+            const oldCorrId = line.match(/# \[([a-f0-9]{8})\]/);
+            const newTodoistId = line.match(/\((\d+)\)/);
+
+            // Skip tasks that already have new format Todoist IDs
+            if (newTodoistId) {
                 continue;
             }
 
-            // Find matching Todoist task by content
+            // Find matching Remote task by content
             const cleanLocalContent = stripCorrelationId(line).toLowerCase().trim();
-            const matchingTodoistTask = todoistData.current.tasks.find(task =>
+            const matchingRemoteTask = todoistData.current.tasks.find(task =>
                 task.content.toLowerCase().trim() === cleanLocalContent
             );
 
-            if (matchingTodoistTask) {
-                // Generate correlation ID and add it to the local task
-                const corrId = generateCorrelationId(cleanLocalContent);
-                const taskWithCorr = addCorrelationId(line, corrId);
-                lines[i] = taskWithCorr;
+            if (matchingRemoteTask) {
+                // Replace old format with new Todoist ID format
+                let taskWithId;
+                if (oldCorrId) {
+                    // Replace old correlation ID with new Todoist ID
+                    taskWithId = line.replace(/# \[[a-f0-9]{8}\]/, `(${matchingRemoteTask.id})`);
+                    console.log(`  ✓ Migrated: ${cleanLocalContent} # [${oldCorrId[1]}] → (${matchingRemoteTask.id})`);
+                } else {
+                    // Add new Todoist ID
+                    taskWithId = addCorrelationId(line, matchingRemoteTask.id);
+                    console.log(`  ✓ Added: ${cleanLocalContent} (${matchingRemoteTask.id})`);
+                }
 
-                // Log the correlation
+                lines[i] = taskWithId;
+
+                // Log the bootstrap operation
                 logSyncOperation('bootstrap', 'correlation', {
-                    corrId,
-                    todoistId: matchingTodoistTask.id,
+                    todoistId: matchingRemoteTask.id,
                     content: cleanLocalContent,
-                    source: 'bootstrap'
+                    source: 'bootstrap',
+                    migration: !!oldCorrId
                 });
 
                 updated = true;
-                console.log(`  ✓ Correlated: ${cleanLocalContent}`);
             }
         }
 
         if (updated) {
             writeFileSync(filepath, lines.join('\n'), 'utf8');
-            console.log('\n✅ Bootstrap completed! Added correlation IDs to matched tasks.');
+            console.log('\n✅ Bootstrap completed! Added Todoist IDs to matched tasks.');
         } else {
-            console.log('\n✨ No new correlations needed - all tasks already have correlation IDs.');
+            console.log('\n✨ No new correlations needed - all tasks already have Todoist IDs.');
         }
 
         return { success: true };
@@ -1666,7 +1707,7 @@ export async function createBackup() {
                      now.getHours().toString().padStart(2, '0') +
                      now.getMinutes().toString().padStart(2, '0') +
                      now.getSeconds().toString().padStart(2, '0');
-    const backupDir = join(homedir(), '.todos', timestamp);
+    const backupDir = join(config.local.todoDir, '.tasks.backups', timestamp);
 
     try {
         // Create backup directory
@@ -1690,35 +1731,29 @@ export async function createBackup() {
 async function backupLocalFiles(backupDir) {
     const homeDir = homedir();
 
-    // Backup current todos
-    const currentTodoPath = join(homeDir, '.todo');
-    if (existsSync(currentTodoPath)) {
-        const currentContent = readFileSync(currentTodoPath, 'utf8');
-        const currentData = parseLocalTodoContent(currentContent);
+    // Backup current tasks
+    const currentTaskPath = join(homeDir, '.tasks');
+    if (existsSync(currentTaskPath)) {
+        const currentContent = readFileSync(currentTaskPath, 'utf8');
+        const currentData = parseLocalTaskContent(currentContent);
         const yamlContent = yaml.dump(currentData, { indent: 2, lineWidth: 120 });
         writeFileSync(join(backupDir, 'local.current.yaml'), yamlContent);
         console.log('📄 Backed up: local.current.yaml');
     }
 
-    // Backup completed todos
-    const completedTodoPath = join(homeDir, '.todo.completed');
-    if (existsSync(completedTodoPath)) {
-        const completedContent = readFileSync(completedTodoPath, 'utf8');
-        const completedData = parseLocalTodoContent(completedContent);
+    // Backup completed tasks
+    const completedTaskPath = join(homeDir, '.tasks.completed');
+    if (existsSync(completedTaskPath)) {
+        const completedContent = readFileSync(completedTaskPath, 'utf8');
+        const completedData = parseLocalTaskContent(completedContent);
         const yamlContent = yaml.dump(completedData, { indent: 2, lineWidth: 120 });
         writeFileSync(join(backupDir, 'local.completed.yaml'), yamlContent);
         console.log('📄 Backed up: local.completed.yaml');
     }
 
-    // Backup sync state
-    const syncStatePath = join(homeDir, '.todo-sync-state.yaml');
-    if (existsSync(syncStatePath)) {
-        copyFileSync(syncStatePath, join(backupDir, 'local.sync-state.yaml'));
-        console.log('📄 Backed up: local.sync-state.yaml');
-    }
 }
 
-function parseLocalTodoContent(content) {
+function parseLocalTaskContent(content) {
     const sections = [];
     const lines = content.split('\n');
     let currentSection = null;
@@ -1785,7 +1820,7 @@ async function backupRemoteData(backupDir) {
 
         if (tasksResponse.ok) {
             const tasks = await tasksResponse.json();
-            const todoFormatData = convertTodoistToTodoFormat(tasks);
+            const todoFormatData = convertRemoteToTaskFormat(tasks);
             const yamlContent = yaml.dump(todoFormatData, { indent: 2, lineWidth: 120 });
             writeFileSync(join(backupDir, 'remote.current.yaml'), yamlContent);
             console.log(`☁️  Backed up ${tasks.length} current tasks`);
@@ -1813,30 +1848,30 @@ async function backupRemoteData(backupDir) {
     }
 }
 
-function convertTodoistToTodoFormat(todoistTasks) {
-    // Map Todoist priorities to local priorities
-    const mapTodoistPriorityToLocal = (todoistPriority) => {
+function convertRemoteToTaskFormat(todoistTasks) {
+    // Map Remote priorities to local priorities
+    function mapRemotePriorityToLocal(todoistPriority) {
         const priorityMap = {
-            4: 1, // Todoist Priority 4 (highest) -> Local Priority 1
-            3: 2, // Todoist Priority 3 -> Local Priority 2
-            2: 3, // Todoist Priority 2 -> Local Priority 3
-            1: 4  // Todoist Priority 1 (lowest) -> Local Priority 4
+            4: 1, // Remote Priority 4 (highest) -> Local Priority 1
+            3: 2, // Remote Priority 3 -> Local Priority 2
+            2: 3, // Remote Priority 2 -> Local Priority 3
+            1: 4  // Remote Priority 1 (lowest) -> Local Priority 4
         };
         return priorityMap[todoistPriority] || 4; // Default to Priority 4
-    };
+    }
 
     // Group tasks by priority
     const tasksByPriority = {};
 
     for (const task of todoistTasks) {
-        const localPriority = mapTodoistPriorityToLocal(task.priority);
+        const localPriority = mapRemotePriorityToLocal(task.priority);
 
         if (!tasksByPriority[localPriority]) {
             tasksByPriority[localPriority] = [];
         }
 
-        // Format task content (include Todoist ID for reference)
-        const taskContent = `${task.content} # [Todoist ID: ${task.id}]`;
+        // Format task content (include Remote ID for reference)
+        const taskContent = `${task.content} # [Remote ID: ${task.id}]`;
         tasksByPriority[localPriority].push(taskContent);
     }
 
@@ -1851,7 +1886,7 @@ function convertTodoistToTodoFormat(todoistTasks) {
         });
     }
 
-    // Also create a raw format that matches .todo file structure
+    // Also create a raw format that matches .tasks file structure
     let rawContent = '';
     for (const priority of priorities) {
         rawContent += `Priority ${priority}\n`;
@@ -1868,4 +1903,885 @@ function convertTodoistToTodoFormat(todoistTasks) {
         totalTasks: todoistTasks.length,
         source: 'todoist'
     };
+}
+
+// Task creation functions
+export async function createLocalTask(content, priority = 4) {
+    try {
+        const filepath = getTodoFilePath('.tasks');
+        let fileContent = '';
+
+        // Read existing content if file exists
+        if (existsSync(filepath)) {
+            fileContent = readFileSync(filepath, 'utf8');
+        }
+
+        // Find the appropriate priority section
+        const lines = fileContent.split('\n');
+        const prioritySection = `Priority ${priority}`;
+        const separator = '-------------------------------------------------------------------------------';
+
+        let insertIndex = -1;
+        let foundPrioritySection = false;
+
+        // Look for the priority section
+        for (let i = 0; i < lines.length; i++) {
+            if (lines[i] === prioritySection) {
+                foundPrioritySection = true;
+                // Find where to insert after the separator
+                for (let j = i + 1; j < lines.length; j++) {
+                    if (lines[j].includes('---')) {
+                        insertIndex = j + 1;
+                        break;
+                    }
+                }
+                break;
+            }
+        }
+
+        if (!foundPrioritySection) {
+            // Need to create the priority section
+            if (fileContent.trim()) {
+                fileContent += '\n\n';
+            }
+            fileContent += `${prioritySection}\n${separator}\n${content}\n`;
+        } else {
+            // Insert into existing section
+            lines.splice(insertIndex, 0, content);
+            fileContent = lines.join('\n');
+        }
+
+        writeFileSync(filepath, fileContent);
+        console.log(`✅ Created local task: "${content}" (Priority ${priority})`);
+        return true;
+    } catch (error) {
+        console.error('❌ Failed to create local task:', error.message);
+        return false;
+    }
+}
+
+export async function createRemoteTaskByContent(content, priority = 4) {
+    try {
+        if (!config.todoist.apiToken) {
+            console.error('❌ No Todoist API token configured');
+            return false;
+        }
+
+        // Get project ID
+        const projectsResponse = await fetch('https://api.todoist.com/rest/v2/projects', {
+            headers: {
+                Authorization: `Bearer ${config.todoist.apiToken}`
+            }
+        });
+
+        if (!projectsResponse.ok) {
+            console.error('❌ Failed to fetch projects');
+            return false;
+        }
+
+        const projects = await projectsResponse.json();
+        const syncProject = projects.find(p => p.name === config.todoist.projectName);
+
+        if (!syncProject) {
+            console.error(`❌ Project "${config.todoist.projectName}" not found`);
+            return false;
+        }
+
+        // Map local priority to Todoist priority
+        const todoistPriority = mapLocalPriorityToRemote(priority);
+
+        const taskData = {
+            content: content,
+            project_id: syncProject.id,
+            priority: todoistPriority
+        };
+
+        // Add due date for priority 0 tasks
+        if (priority === 0) {
+            taskData.due_string = 'today';
+        }
+
+        const response = await fetch('https://api.todoist.com/rest/v2/tasks', {
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${config.todoist.apiToken}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(taskData)
+        });
+
+        if (response.ok) {
+            const newTask = await response.json();
+            console.log(`✅ Created remote task: "${content}" (Priority ${priority}, Todoist ID: ${newTask.id})`);
+            return true;
+        } else {
+            console.error(`❌ Failed to create remote task: ${response.status} ${response.statusText}`);
+            return false;
+        }
+    } catch (error) {
+        console.error('❌ Failed to create remote task:', error.message);
+        return false;
+    }
+}
+
+// Task update functions
+export async function updateLocalTask(taskName, options) {
+    try {
+        const filepath = getTodoFilePath('.tasks');
+
+        if (!existsSync(filepath)) {
+            console.error('❌ Local task file not found');
+            return false;
+        }
+
+        let content = readFileSync(filepath, 'utf8');
+        const lines = content.split('\n');
+        let taskFound = false;
+        let currentPriority = null;
+
+        // Find the task
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i].trim();
+
+            // Track current priority section
+            if (line.startsWith('Priority ')) {
+                const match = line.match(/Priority (\d+)/);
+                if (match) {
+                    currentPriority = parseInt(match[1]);
+                }
+                continue;
+            }
+
+            // Skip separators and empty lines
+            if (line.includes('---') || !line) {
+                continue;
+            }
+
+            // Check if this line contains our task
+            const cleanLine = stripCorrelationId(line).trim();
+            if (cleanLine.toLowerCase().includes(taskName.toLowerCase())) {
+                taskFound = true;
+
+                if (options.priority !== undefined) {
+                    const newPriority = parseInt(options.priority);
+
+                    // If changing priority, need to move task
+                    if (newPriority !== currentPriority) {
+                        // Remove from current location
+                        lines.splice(i, 1);
+
+                        // Add to new priority section
+                        const corrId = extractCorrelationId(lines[i] || line);
+                        const taskContent = corrId ? addCorrelationId(cleanLine, corrId) : cleanLine;
+
+                        // Insert into new priority section
+                        await insertTaskIntoPrioritySection(lines, taskContent, newPriority);
+                        console.log(`✅ Moved local task "${taskName}" from Priority ${currentPriority} to Priority ${newPriority}`);
+                    } else {
+                        console.log(`ℹ️  Local task "${taskName}" already at Priority ${newPriority}`);
+                    }
+                }
+
+                if (options.dueDate) {
+                    // Toggle due date for local means toggle between P0 and P1
+                    if (currentPriority === 0) {
+                        // Move from P0 to P1 (remove due date)
+                        lines.splice(i, 1);
+                        const corrId = extractCorrelationId(line);
+                        const taskContent = corrId ? addCorrelationId(cleanLine, corrId) : cleanLine;
+                        await insertTaskIntoPrioritySection(lines, taskContent, 1);
+                        console.log(`✅ Removed due date from local task "${taskName}" (moved from P0 to P1)`);
+                    } else {
+                        // Move to P0 (add due date)
+                        lines.splice(i, 1);
+                        const corrId = extractCorrelationId(line);
+                        const taskContent = corrId ? addCorrelationId(cleanLine, corrId) : cleanLine;
+                        await insertTaskIntoPrioritySection(lines, taskContent, 0);
+                        console.log(`✅ Added due date to local task "${taskName}" (moved to P0)`);
+                    }
+                }
+
+                break;
+            }
+        }
+
+        if (!taskFound) {
+            console.error(`❌ Local task "${taskName}" not found`);
+            return false;
+        }
+
+        writeFileSync(filepath, lines.join('\n'));
+        return true;
+
+    } catch (error) {
+        console.error('❌ Failed to update local task:', error.message);
+        return false;
+    }
+}
+
+export async function updateRemoteTaskByName(taskName, options) {
+    try {
+        if (!config.todoist.apiToken) {
+            console.error('❌ No Todoist API token configured');
+            return false;
+        }
+
+        // Find the task first
+        const remoteData = await getTasks('remote');
+        let targetTask = null;
+
+        for (const task of remoteData.current.tasks) {
+            if (task.content.toLowerCase().includes(taskName.toLowerCase())) {
+                targetTask = task;
+                break;
+            }
+        }
+
+        if (!targetTask) {
+            console.error(`❌ Remote task "${taskName}" not found`);
+            return false;
+        }
+
+        let updateData = {};
+
+        if (options.priority !== undefined) {
+            const newPriority = parseInt(options.priority);
+            const todoistPriority = mapLocalPriorityToRemote(newPriority);
+            updateData.priority = todoistPriority;
+
+            // Handle due date for P0
+            if (newPriority === 0) {
+                updateData.due_string = 'today';
+            } else if (targetTask.due && newPriority !== 0) {
+                // Remove due date if not P0
+                updateData.due_string = null;
+            }
+        }
+
+        if (options.dueDate) {
+            // Toggle due date for remote
+            if (targetTask.due) {
+                // Remove due date (P1 with due -> P1 without due)
+                updateData.due_string = null;
+                if (targetTask.priority === 4) { // If it was P0/P1, keep as P1
+                    updateData.priority = 4; // Todoist P4 = Local P1
+                }
+                console.log(`✅ Removing due date from remote task "${taskName}"`);
+            } else {
+                // Add due date (P1 -> P1 with due date)
+                updateData.due_string = 'today';
+                updateData.priority = 4; // Ensure it's P1 priority
+                console.log(`✅ Adding due date to remote task "${taskName}"`);
+            }
+        }
+
+        const response = await fetch(`https://api.todoist.com/rest/v2/tasks/${targetTask.id}`, {
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${config.todoist.apiToken}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(updateData)
+        });
+
+        if (response.ok) {
+            console.log(`✅ Updated remote task: "${taskName}"`);
+            return true;
+        } else {
+            console.error(`❌ Failed to update remote task: ${response.status} ${response.statusText}`);
+            return false;
+        }
+
+    } catch (error) {
+        console.error('❌ Failed to update remote task:', error.message);
+        return false;
+    }
+}
+
+// Task completion functions
+export async function completeLocalTask(taskName) {
+    try {
+        const filepath = getTodoFilePath('.tasks');
+        const completedFilepath = getTodoFilePath('.tasks.completed');
+
+        if (!existsSync(filepath)) {
+            console.error('❌ Local task file not found');
+            return false;
+        }
+
+        let content = readFileSync(filepath, 'utf8');
+        const lines = content.split('\n');
+        let taskFound = false;
+        let taskLine = '';
+
+        // Find and remove the task
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i].trim();
+
+            // Skip headers and separators
+            if (line.startsWith('Priority ') || line.includes('---') || !line) {
+                continue;
+            }
+
+            const cleanLine = stripCorrelationId(line).trim();
+            if (cleanLine.toLowerCase().includes(taskName.toLowerCase())) {
+                taskFound = true;
+                taskLine = line;
+                lines.splice(i, 1);
+                break;
+            }
+        }
+
+        if (!taskFound) {
+            console.error(`❌ Local task "${taskName}" not found`);
+            return false;
+        }
+
+        // Write updated task file
+        writeFileSync(filepath, lines.join('\n'));
+
+        // Add to completed file with timestamp
+        const completedDate = new Date().toISOString().split('T')[0];
+        const completedTask = `${taskLine.trim()} (completed: ${completedDate})`;
+
+        let completedContent = '';
+        if (existsSync(completedFilepath)) {
+            completedContent = readFileSync(completedFilepath, 'utf8');
+        }
+
+        // Add to completed section
+        if (completedContent.includes('Completed')) {
+            completedContent += `\n${completedTask}`;
+        } else {
+            completedContent = `Completed\n-------------------------------------------------------------------------------\n${completedTask}${completedContent ? '\n' + completedContent : ''}`;
+        }
+
+        writeFileSync(completedFilepath, completedContent);
+        console.log(`✅ Completed local task: "${taskName}"`);
+        return true;
+
+    } catch (error) {
+        console.error('❌ Failed to complete local task:', error.message);
+        return false;
+    }
+}
+
+export async function completeRemoteTaskByName(taskName) {
+    try {
+        if (!config.todoist.apiToken) {
+            console.error('❌ No Todoist API token configured');
+            return false;
+        }
+
+        // Find the task first
+        const remoteData = await getTasks('remote');
+        let targetTask = null;
+
+        for (const task of remoteData.current.tasks) {
+            if (task.content.toLowerCase().includes(taskName.toLowerCase())) {
+                targetTask = task;
+                break;
+            }
+        }
+
+        if (!targetTask) {
+            console.error(`❌ Remote task "${taskName}" not found`);
+            return false;
+        }
+
+        const response = await fetch(`https://api.todoist.com/rest/v2/tasks/${targetTask.id}/close`, {
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${config.todoist.apiToken}`
+            }
+        });
+
+        if (response.ok) {
+            console.log(`✅ Completed remote task: "${taskName}"`);
+            return true;
+        } else {
+            console.error(`❌ Failed to complete remote task: ${response.status} ${response.statusText}`);
+            return false;
+        }
+
+    } catch (error) {
+        console.error('❌ Failed to complete remote task:', error.message);
+        return false;
+    }
+}
+
+// Task cancellation functions
+export async function cancelLocalTask(taskName) {
+    try {
+        const filepath = getTodoFilePath('.tasks');
+
+        if (!existsSync(filepath)) {
+            console.error('❌ Local task file not found');
+            return false;
+        }
+
+        let content = readFileSync(filepath, 'utf8');
+        const lines = content.split('\n');
+        let taskFound = false;
+
+        // Find and remove the task
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i].trim();
+
+            // Skip headers and separators
+            if (line.startsWith('Priority ') || line.includes('---') || !line) {
+                continue;
+            }
+
+            const cleanLine = stripCorrelationId(line).trim();
+            if (cleanLine.toLowerCase().includes(taskName.toLowerCase())) {
+                taskFound = true;
+                lines.splice(i, 1);
+                console.log(`✅ Cancelled local task: "${taskName}"`);
+                break;
+            }
+        }
+
+        if (!taskFound) {
+            console.error(`❌ Local task "${taskName}" not found`);
+            return false;
+        }
+
+        // Write updated file
+        writeFileSync(filepath, lines.join('\n'));
+        return true;
+
+    } catch (error) {
+        console.error('❌ Failed to cancel local task:', error.message);
+        return false;
+    }
+}
+
+export async function cancelRemoteTask(taskName) {
+    try {
+        if (!config.todoist.apiToken) {
+            console.error('❌ No Todoist API token configured');
+            return false;
+        }
+
+        // Find the task first
+        const remoteData = await getTasks('remote');
+        let targetTask = null;
+
+        for (const task of remoteData.current.tasks) {
+            if (task.content.toLowerCase().includes(taskName.toLowerCase())) {
+                targetTask = task;
+                break;
+            }
+        }
+
+        if (!targetTask) {
+            console.error(`❌ Remote task "${taskName}" not found`);
+            return false;
+        }
+
+        const response = await fetch(`https://api.todoist.com/rest/v2/tasks/${targetTask.id}`, {
+            method: 'DELETE',
+            headers: {
+                Authorization: `Bearer ${config.todoist.apiToken}`
+            }
+        });
+
+        if (response.ok) {
+            console.log(`✅ Cancelled remote task: "${taskName}"`);
+            return true;
+        } else {
+            console.error(`❌ Failed to cancel remote task: ${response.status} ${response.statusText}`);
+            return false;
+        }
+
+    } catch (error) {
+        console.error('❌ Failed to cancel remote task:', error.message);
+        return false;
+    }
+}
+
+// Helper function to insert task into priority section
+async function insertTaskIntoPrioritySection(lines, taskContent, priority) {
+    const prioritySection = `Priority ${priority}`;
+    const separator = '-------------------------------------------------------------------------------';
+
+    let insertIndex = -1;
+    let foundPrioritySection = false;
+
+    // Look for the priority section
+    for (let i = 0; i < lines.length; i++) {
+        if (lines[i] === prioritySection) {
+            foundPrioritySection = true;
+            // Find where to insert after the separator
+            for (let j = i + 1; j < lines.length; j++) {
+                if (lines[j].includes('---')) {
+                    insertIndex = j + 1;
+                    break;
+                }
+            }
+            break;
+        }
+    }
+
+    if (!foundPrioritySection) {
+        // Need to create the priority section
+        lines.push('', prioritySection, separator, taskContent);
+    } else {
+        // Insert into existing section
+        lines.splice(insertIndex, 0, taskContent);
+    }
+}
+
+export function categorizeChanges(localTasks, todoistTasks, legacySyncState = null, previewMode = false) {
+    // Simplified logic using direct Todoist IDs
+    const changes = {
+        local: {
+            noneToCurrent: [],
+            noneToCompleted: [],
+            currentToCompleted: [],
+            currentToNone: [],
+            completedToCurrent: [],
+            renames: []
+        },
+        todoist: {
+            noneToCurrent: [],
+            noneToCompleted: [],
+            currentToCompleted: [],
+            currentToNone: [],
+            completedToCurrent: [],
+            renames: []
+        },
+        conflicts: [],
+        potentialRenames: []
+    };
+
+    const processedTodoistIds = new Set();
+    const uncorrelatedLocal = [];
+    const uncorrelatedTodoist = [];
+
+    for (const localTask of localTasks.current.tasks) {
+        const todoistId = extractCorrelationId(localTask.content);
+
+        if (todoistId) {
+            const todoistTask = todoistTasks.current.tasks.find(t => t.id === parseInt(todoistId));
+
+            if (todoistTask) {
+                const cleanLocalContent = stripCorrelationId(localTask.content);
+
+                // Simple content comparison - if different, it's a conflict to resolve
+                if (cleanLocalContent.toLowerCase().trim() !== todoistTask.content.toLowerCase().trim()) {
+                    // Content changed - check priority too
+                    const localPriority = localTask.priority !== undefined ? localTask.priority : 'unknown';
+                    const todoistPriority = mapRemotePriority(todoistTask);
+
+                    if (localPriority !== todoistPriority) {
+                        // Both content and priority differ - conflict
+                        changes.conflicts.push({
+                            corrId: todoistId,
+                            localTask: { ...localTask, content: cleanLocalContent },
+                            todoistTask,
+                            correlation: { todoistId: parseInt(todoistId) }
+                        });
+                    } else {
+                        // Content differs but priority same - update Todoist content
+                        changes.todoist.renames.push({
+                            corrId: todoistId,
+                            oldContent: todoistTask.content,
+                            newContent: cleanLocalContent,
+                            todoistId: parseInt(todoistId)
+                        });
+                    }
+                } else {
+                    // Content same - check priority
+                    const localPriority = localTask.priority !== undefined ? localTask.priority : 'unknown';
+                    const todoistPriority = mapRemotePriority(todoistTask);
+
+                    if (localPriority !== todoistPriority) {
+                        // Priority mismatch - local wins
+                        changes.todoist.renames.push({
+                            content: cleanLocalContent,
+                            oldPriority: todoistPriority,
+                            newPriority: localPriority,
+                            changeType: 'priority_update',
+                            todoistId: parseInt(todoistId),
+                            corrId: todoistId
+                        });
+                    }
+                }
+
+                processedTodoistIds.add(parseInt(todoistId));
+            } else {
+                // Local task has Todoist ID but Todoist task not found (deleted remotely)
+                uncorrelatedLocal.push(localTask); // Content is already clean
+            }
+        } else {
+            uncorrelatedLocal.push(localTask);
+        }
+    }
+
+    for (const todoistTask of todoistTasks.current.tasks) {
+        if (!processedTodoistIds.has(todoistTask.id)) {
+            uncorrelatedTodoist.push(todoistTask);
+        }
+    }
+
+    // Cross-match uncorrelated tasks to find exact content matches (potential priority changes)
+    const localTasksToSync = [];
+    const todoistTasksToSync = [];
+    const exactMatches = [];
+
+    for (const localTask of uncorrelatedLocal) {
+        const cleanLocalContent = localTask.content; // Already clean from parsing
+
+        // Look for exact content match in uncorrelated Todoist tasks
+        const exactMatch = uncorrelatedTodoist.find(todoistTask => {
+            const cleanTodoistContent = todoistTask.content.trim();
+            return cleanLocalContent.toLowerCase().trim() === cleanTodoistContent.toLowerCase().trim();
+        });
+
+        if (exactMatch) {
+            const localPriority = localTask.priority !== undefined ? localTask.priority : 'unknown';
+            const todoistPriority = mapRemotePriority(exactMatch);
+
+            if (localPriority !== todoistPriority) {
+                // Priority mismatch - treat as priority change
+                exactMatches.push({
+                    localTask,
+                    todoistTask: exactMatch,
+                    type: 'priority_change',
+                    localPriority,
+                    todoistPriority
+                });
+            } else {
+                // Same content and priority - likely a sync correlation issue, treat as already synced
+                exactMatches.push({
+                    localTask,
+                    todoistTask: exactMatch,
+                    type: 'already_synced'
+                });
+            }
+        } else {
+            localTasksToSync.push(localTask);
+        }
+    }
+
+    for (const todoistTask of uncorrelatedTodoist) {
+        const cleanTodoistContent = todoistTask.content.trim();
+
+        // Check if this task was already matched
+        const alreadyMatched = exactMatches.some(match =>
+            match.todoistTask.content.toLowerCase().trim() === cleanTodoistContent.toLowerCase().trim()
+        );
+
+        if (!alreadyMatched) {
+            todoistTasksToSync.push(todoistTask);
+        }
+    }
+
+    // Handle exact matches
+    for (const match of exactMatches) {
+        if (match.type === 'priority_change') {
+            // Always favor local priority over remote
+            const resolution = { winner: 'local', reason: 'local_always_wins' };
+
+            // Use Todoist ID directly as correlation ID
+            const corrId = match.todoistTask?.id?.toString() || 'unknown';
+
+            // Local priority always wins - update Todoist
+            changes.todoist.renames.push({
+                content: match.localTask.content, // Already clean from parsing
+                oldPriority: match.todoistPriority,
+                newPriority: match.localPriority,
+                changeType: 'priority_update',
+                reason: resolution.reason,
+                todoistId: match.todoistTask.id,
+                corrId: corrId,
+                metadata: {
+                    priority: match.localPriority,
+                    source: 'local',
+                    isAutomaticResolution: true,
+                    resolutionReason: resolution.reason
+                }
+            });
+        }
+        // For 'already_synced', we don't add them to changes (no action needed)
+    }
+
+    // Process remaining unmatched tasks - no content similarity matching needed
+    for (const localTask of localTasksToSync) {
+        changes.todoist.noneToCurrent.push({
+            ...localTask,
+            stateTransition: 'none→current',
+            metadata: {
+                priority: localTask.priority !== undefined ? localTask.priority : 'unknown',
+                source: 'local',
+                isNew: true
+            }
+        });
+    }
+
+    for (const todoistTask of todoistTasksToSync) {
+        changes.local.noneToCurrent.push({
+            ...todoistTask,
+            stateTransition: 'none→current',
+            metadata: {
+                priority: mapRemotePriority(todoistTask),
+                source: 'todoist',
+                isNew: true,
+                created: todoistTask.created
+            }
+        });
+    }
+
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    // Track processed local completed tasks to avoid duplicates
+    const processedLocalContent = new Set();
+
+    for (const localCompleted of localTasks.completed.tasks) {
+        // Skip invalid entries (separators, empty content, etc.)
+        let cleanContent = localCompleted.content ? localCompleted.content.trim() : '';
+
+        // Skip entries that are separators, empty, or contain only dashes
+        if (!cleanContent ||
+            cleanContent.includes('---') ||
+            cleanContent.match(/^-+$/) ||
+            cleanContent.length < 3) {
+            continue;
+        }
+
+        // Remove the "- " prefix if it exists (these shouldn't be in completed file)
+        cleanContent = cleanContent.replace(/^-\s+/, '').trim();
+
+        // Skip if still empty after cleaning
+        if (!cleanContent) {
+            continue;
+        }
+
+        // Skip if we've already processed this content
+        const normalizedLocalContent = cleanContent.toLowerCase().trim();
+        if (processedLocalContent.has(normalizedLocalContent)) {
+            continue;
+        }
+        processedLocalContent.add(normalizedLocalContent);
+
+        const todoistId = localCompleted.todoistId;
+
+        if (!todoistId) {
+            // Check if this completion already exists in Todoist completed tasks
+            const alreadyExistsInTodoist = todoistTasks.completed.tasks.some(todoistTask => {
+                const todoistCleanContent = stripCorrelationId(todoistTask.content).toLowerCase().trim();
+                return todoistCleanContent === normalizedLocalContent;
+            });
+
+            if (!alreadyExistsInTodoist) {
+                changes.todoist.noneToCompleted.push({
+                    content: cleanContent,
+                    priority: localCompleted.priority,
+                    stateTransition: 'none→completed',
+                    metadata: {
+                        priority: localCompleted.priority || 'unknown',
+                        source: 'local',
+                        isNew: true,
+                        wasDirectlyCompleted: true
+                    }
+                });
+            }
+        } else {
+            // Task was previously current, now completed
+            changes.todoist.currentToCompleted.push({
+                content: cleanContent,
+                corrId: todoistId,
+                stateTransition: 'current→completed',
+                metadata: {
+                    priority: localCompleted.priority || 'unknown',
+                    source: 'local',
+                    wasCurrentTask: true,
+                    todoistId: parseInt(todoistId)
+                }
+            });
+        }
+    }
+
+    // Track processed Todoist completed tasks to avoid duplicates
+    const processedTodoistContent = new Set();
+
+    for (const todoistCompleted of todoistTasks.completed.tasks) {
+        if (new Date(todoistCompleted.completed) > thirtyDaysAgo) {
+            // Clean the content and check for duplicates
+            let cleanContent = stripCorrelationId(todoistCompleted.content);
+            cleanContent = cleanContent.replace(/\s*\(completed:.*?\)$/, '').trim();
+
+            // Skip invalid entries (separators, empty content, etc.)
+            if (!cleanContent ||
+                cleanContent.includes('---') ||
+                cleanContent.match(/^-+$/) ||
+                cleanContent.length < 3) {
+                continue;
+            }
+
+            // Remove the "- " prefix if it exists
+            cleanContent = cleanContent.replace(/^-\s+/, '').trim();
+
+            // Skip if still empty after cleaning
+            if (!cleanContent) {
+                continue;
+            }
+
+            // Skip if we've already processed this content
+            const normalizedContent = cleanContent.toLowerCase().trim();
+            if (processedTodoistContent.has(normalizedContent)) {
+                continue;
+            }
+            processedTodoistContent.add(normalizedContent);
+
+            // Check if this task exists in local todos with the same Todoist ID
+            const hasLocalCorrelation = localTasks.current.tasks.some(localTask => {
+                return localTask.todoistId && parseInt(localTask.todoistId) === todoistCompleted.id;
+            });
+
+            if (!hasLocalCorrelation) {
+                // Check if this completion already exists in local completed tasks
+                const alreadyExistsInLocal = localTasks.completed.tasks.some(localTask => {
+                    // Remove completion date from local task (content is already clean)
+                    let localCleanContent = localTask.content || '';
+                    localCleanContent = localCleanContent.replace(/\s*\(completed:.*?\)$/, '').replace(/^-\s+/, '').toLowerCase().trim();
+                    return localCleanContent === normalizedContent;
+                });
+
+                if (!alreadyExistsInLocal) {
+                    changes.local.noneToCompleted.push({
+                        ...todoistCompleted,
+                        content: cleanContent,
+                        stateTransition: 'none→completed',
+                        metadata: {
+                            priority: mapRemotePriority(todoistCompleted),
+                            source: 'todoist',
+                            isNew: true,
+                            wasDirectlyCompleted: true,
+                            completed: todoistCompleted.completed
+                        }
+                    });
+                }
+            } else {
+                // Task was previously current, now completed
+                changes.local.currentToCompleted.push({
+                    ...todoistCompleted,
+                    content: cleanContent,
+                    stateTransition: 'current→completed',
+                    metadata: {
+                        priority: mapRemotePriority(todoistCompleted),
+                        source: 'todoist',
+                        wasCurrentTask: true,
+                        completed: todoistCompleted.completed,
+                        corrId: todoistCompleted?.id?.toString() || 'unknown'
+                    }
+                });
+            }
+        }
+    }
+
+    return changes;
 }

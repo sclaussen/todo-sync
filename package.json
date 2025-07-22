@@ -10,6 +10,9 @@
     "tasks": "node tasks.js",
     "usage": "npx ccusage",
     "test": "jest",
+    "test:cli": "node test/index.js",
+    "test:cli:basic": "node test/index.js basic",
+    "test:cli:advanced": "node test/index.js advanced",
     "lint": "eslint *.js"
   },
   "keywords": [

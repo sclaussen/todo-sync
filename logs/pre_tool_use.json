@@ -1,112 +1,13 @@
 [
   {
-    "session_id": "2c71faac-64e8-430d-8fad-1e15064a4351",
-    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/2c71faac-64e8-430d-8fad-1e15064a4351.jsonl",
+    "session_id": "7847375f-b4ed-4b78-a8f0-6d4e54ec5124",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/7847375f-b4ed-4b78-a8f0-6d4e54ec5124.jsonl",
     "cwd": "/Users/shane/src/sync",
     "hook_event_name": "PreToolUse",
     "tool_name": "Bash",
     "tool_input": {
-      "command": "git add syncState.js",
-      "description": "Stage syncState.js changes"
-    }
-  },
-  {
-    "session_id": "2c71faac-64e8-430d-8fad-1e15064a4351",
-    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/2c71faac-64e8-430d-8fad-1e15064a4351.jsonl",
-    "cwd": "/Users/shane/src/sync",
-    "hook_event_name": "PreToolUse",
-    "tool_name": "Bash",
-    "tool_input": {
-      "command": "git commit -m \"$(cat <<'EOF'\nFix sync bug: prevent duplicate and invalid completed tasks from syncing\n\n- Add validation to skip invalid entries (separators, empty content, short content)\n- Remove \"- \" prefixes from completed tasks \n- Implement duplicate detection using Set to track processed content\n- Clean and normalize content before comparison\n- Ensure sync preview (-s) shows no changes after sync (-S) completes\n\nThis fixes the issue where running -S followed by -s would show duplicate \ncompleted tasks and invalid entries like separator lines.\n\n\ud83e\udd16 Generated with [Claude Code](https://claude.ai/code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\"",
-      "description": "Commit the sync bug fix"
-    }
-  },
-  {
-    "session_id": "2c71faac-64e8-430d-8fad-1e15064a4351",
-    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/2c71faac-64e8-430d-8fad-1e15064a4351.jsonl",
-    "cwd": "/Users/shane/src/sync",
-    "hook_event_name": "PreToolUse",
-    "tool_name": "Bash",
-    "tool_input": {
-      "command": "git status",
-      "description": "Check git status after commit"
-    }
-  },
-  {
-    "session_id": "2c71faac-64e8-430d-8fad-1e15064a4351",
-    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/2c71faac-64e8-430d-8fad-1e15064a4351.jsonl",
-    "cwd": "/Users/shane/src/sync",
-    "hook_event_name": "PreToolUse",
-    "tool_name": "Bash",
-    "tool_input": {
-      "command": "git add .",
-      "description": "Stage all changes"
-    }
-  },
-  {
-    "session_id": "2c71faac-64e8-430d-8fad-1e15064a4351",
-    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/2c71faac-64e8-430d-8fad-1e15064a4351.jsonl",
-    "cwd": "/Users/shane/src/sync",
-    "hook_event_name": "PreToolUse",
-    "tool_name": "Bash",
-    "tool_input": {
-      "command": "git status",
-      "description": "Check what will be committed"
-    }
-  },
-  {
-    "session_id": "2c71faac-64e8-430d-8fad-1e15064a4351",
-    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/2c71faac-64e8-430d-8fad-1e15064a4351.jsonl",
-    "cwd": "/Users/shane/src/sync",
-    "hook_event_name": "PreToolUse",
-    "tool_name": "Bash",
-    "tool_input": {
-      "command": "git commit -m \"$(cat <<'EOF'\nComplete todo sync application with all remaining changes\n\n- Update CLAUDE.md with current architecture and commands\n- Add all core application files (tasks.js, lib.js, todoLog.js)\n- Add ESLint configuration (.eslintrc)\n- Remove old files (sync.js, util.js)\n- Update package.json with current dependencies and scripts\n- Update all log files with latest execution data\n\nThis completes the todo sync application with JavaScript ES modules,\nCLI interface, Todoist integration, and correlation tracking.\n\n\ud83e\udd16 Generated with [Claude Code](https://claude.ai/code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\"",
-      "description": "Commit all remaining changes"
-    }
-  },
-  {
-    "session_id": "2c71faac-64e8-430d-8fad-1e15064a4351",
-    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/2c71faac-64e8-430d-8fad-1e15064a4351.jsonl",
-    "cwd": "/Users/shane/src/sync",
-    "hook_event_name": "PreToolUse",
-    "tool_name": "Bash",
-    "tool_input": {
-      "command": "git add logs/post_tool_use.json logs/pre_tool_use.json",
-      "description": "Stage remaining log file changes"
-    }
-  },
-  {
-    "session_id": "2c71faac-64e8-430d-8fad-1e15064a4351",
-    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/2c71faac-64e8-430d-8fad-1e15064a4351.jsonl",
-    "cwd": "/Users/shane/src/sync",
-    "hook_event_name": "PreToolUse",
-    "tool_name": "Bash",
-    "tool_input": {
-      "command": "git commit -m \"$(cat <<'EOF'\nUpdate final log file changes from current session\n\n- Capture latest tool execution logs for sync bug fix session\n- Include pre and post tool use logging data\n\n\ud83e\udd16 Generated with [Claude Code](https://claude.ai/code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\"",
-      "description": "Commit final log changes"
-    }
-  },
-  {
-    "session_id": "2c71faac-64e8-430d-8fad-1e15064a4351",
-    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/2c71faac-64e8-430d-8fad-1e15064a4351.jsonl",
-    "cwd": "/Users/shane/src/sync",
-    "hook_event_name": "PreToolUse",
-    "tool_name": "Bash",
-    "tool_input": {
-      "command": "git status",
-      "description": "Verify all changes are committed"
-    }
-  },
-  {
-    "session_id": "2c71faac-64e8-430d-8fad-1e15064a4351",
-    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/2c71faac-64e8-430d-8fad-1e15064a4351.jsonl",
-    "cwd": "/Users/shane/src/sync",
-    "hook_event_name": "PreToolUse",
-    "tool_name": "Bash",
-    "tool_input": {
-      "command": "git add logs/ && git commit -m \"$(cat <<'EOF'\nFinal log file update from commit session\n\n- Capture the complete tool execution log from sync bug fix session\n- Include all pre/post tool use data from this commit process\n\n\ud83e\udd16 Generated with [Claude Code](https://claude.ai/code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\"",
-      "description": "Final commit for log files"
+      "command": "git add CLAUDE.md lib.js logs/post_tool_use.json logs/pre_tool_use.json logs/user_prompt_submit.json package.json tasks.js taskLog.js tasks-original.js .claude/ src/ test/",
+      "description": "Add all modified and new files to staging"
     }
   }
 ]
