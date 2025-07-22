@@ -53,5 +53,38 @@
       "command": "git add logs/post_tool_use.json logs/pre_tool_use.json",
       "description": "Add updated log files"
     }
+  },
+  {
+    "session_id": "7847375f-b4ed-4b78-a8f0-6d4e54ec5124",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/7847375f-b4ed-4b78-a8f0-6d4e54ec5124.jsonl",
+    "cwd": "/Users/shane/src/sync",
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Bash",
+    "tool_input": {
+      "command": "git commit -m \"$(cat <<'EOF'\nClean up: remove old sync state and log files\n\n- Removed syncState.js and todoLog.js (replaced by taskLog.js)\n- Updated tool execution logs\n\n\ud83e\udd16 Generated with [Claude Code](https://claude.ai/code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\"",
+      "description": "Commit cleanup changes"
+    }
+  },
+  {
+    "session_id": "7847375f-b4ed-4b78-a8f0-6d4e54ec5124",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/7847375f-b4ed-4b78-a8f0-6d4e54ec5124.jsonl",
+    "cwd": "/Users/shane/src/sync",
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Bash",
+    "tool_input": {
+      "command": "git status",
+      "description": "Verify final commit status"
+    }
+  },
+  {
+    "session_id": "7847375f-b4ed-4b78-a8f0-6d4e54ec5124",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/7847375f-b4ed-4b78-a8f0-6d4e54ec5124.jsonl",
+    "cwd": "/Users/shane/src/sync",
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Bash",
+    "tool_input": {
+      "command": "git add logs/post_tool_use.json logs/pre_tool_use.json",
+      "description": "Add final log updates"
+    }
   }
 ]
