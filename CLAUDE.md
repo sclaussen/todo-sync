@@ -2,9 +2,13 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Important Development Notes
+
+**NEVER show dotenv debug messages** - The user has explicitly requested that dotenv debug output (like "[dotenv@17.2.0] injecting env (0) from .env") should NEVER be displayed. Always suppress these messages when working with dotenv configuration.
+
 ## Project Overview
 
-This is a bidirectional todo synchronization tool that syncs between a local `~/.todo` file and Todoist. The application uses JavaScript with ES modules and provides a CLI interface for todo management and sync operations.
+This is a bidirectional todo synchronization tool that syncs between a local `~/.tasks` file and Todoist. The application uses JavaScript with ES modules and provides a CLI interface for todo management and sync operations.
 
 ## Development Commands
 
@@ -38,6 +42,27 @@ This is a bidirectional todo synchronization tool that syncs between a local `~/
 - `npm test` - Run Jest tests  
 - `npm run lint` - Run ESLint on JavaScript files
 
+### Testing
+- Tests use a separate Todoist project called "Test" for isolation from production data
+- The test environment is configured via `test/util.js` with `TODOIST_PROJECT_NAME: 'Test'`
+- Test utilities automatically create/clear the "Test" project to ensure clean test runs
+
+### Test Infrastructure
+- **test/util.js**: Core testing utilities with functions for setup, cleanup, and command execution
+  - `init()`: Sets up clean test environment (creates test project, clears tasks, initializes local files)
+  - `sh()`: Executes CLI commands with test environment variables
+  - `normalize()`: Normalizes YAML output by removing location/due fields for comparison
+  - `diff()`: Compares local vs remote task outputs
+  - `cleanup()`: Cleans up test files and remote project after tests
+- **test/test.js**: Example test implementation showing sync functionality
+  - Use this as a template for creating new tests
+  - Keep tests simple, focused, and easy to read
+  - Provide just enough output to verify functionality (single ✅ success message per test)
+  - Follow the pattern: setup → action → verify → cleanup
+- **Test file isolation**: Tests use `test/temp/` directory for local task files (`.tasks`, `.tasks.completed`)
+  - This prevents interference with production `~/.tasks` files
+  - Test environment automatically redirects `TODO_DIR` to `test/temp/`
+
 ## Architecture
 
 ### Core Components
@@ -63,7 +88,7 @@ Local priorities (0-4) map to Todoist priorities:
 
 ### Todo File Format
 
-The `~/.todo` file uses structured sections with optional Todoist ID markers:
+The `~/.tasks` file uses structured sections with optional Todoist ID markers:
 ```
 Priority 0
 -------------------------------------------------------------------------------

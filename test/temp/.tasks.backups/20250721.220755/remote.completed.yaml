@@ -1,0 +1,143 @@
+items:
+  - completed_at: '2025-07-22T02:40:07.000000Z'
+    content: 'Figure out how to use workout mode on Garmin (completed: 7/15/2025)'
+    id: '8520401331'
+    item_object: null
+    meta_data: null
+    note_count: 0
+    notes: []
+    project_id: '2357211370'
+    section_id: null
+    task_id: '9370814776'
+    user_id: '16778938'
+    v2_project_id: 6cQvXqfV3Jm7vhrX
+    v2_section_id: null
+    v2_task_id: 6cQvgFrhPw9Vm9PX
+  - completed_at: '2025-07-22T02:40:05.000000Z'
+    content: 'Esc esc for history (completed: 7/15/2025)'
+    id: '8520401283'
+    item_object: null
+    meta_data: null
+    note_count: 0
+    notes: []
+    project_id: '2357211370'
+    section_id: null
+    task_id: '9370814760'
+    user_id: '16778938'
+    v2_project_id: 6cQvXqfV3Jm7vhrX
+    v2_section_id: null
+    v2_task_id: 6cQvgFfW4C5XV3W5
+  - completed_at: '2025-07-22T02:40:04.000000Z'
+    content: 'Ctrl r shows more output (completed: 7/15/2025)'
+    id: '8520401254'
+    item_object: null
+    meta_data: null
+    note_count: 0
+    notes: []
+    project_id: '2357211370'
+    section_id: null
+    task_id: '9370814738'
+    user_id: '16778938'
+    v2_project_id: 6cQvXqfV3Jm7vhrX
+    v2_section_id: null
+    v2_task_id: 6cQvgFWm5Jgq3X2X
+  - completed_at: '2025-07-22T02:40:02.000000Z'
+    content: 'Claude / commands (completed: 7/8/2025)'
+    id: '8520401217'
+    item_object: null
+    meta_data: null
+    note_count: 0
+    notes: []
+    project_id: '2357211370'
+    section_id: null
+    task_id: '9370814690'
+    user_id: '16778938'
+    v2_project_id: 6cQvXqfV3Jm7vhrX
+    v2_section_id: null
+    v2_task_id: 6cQvgFMCMmq6MXpX
+  - completed_at: '2025-07-22T02:40:00.000000Z'
+    content: 'Claude - system settings dictation enable (completed: 7/8/2025)'
+    id: '8520401176'
+    item_object: null
+    meta_data: null
+    note_count: 0
+    notes: []
+    project_id: '2357211370'
+    section_id: null
+    task_id: '9370814646'
+    user_id: '16778938'
+    v2_project_id: 6cQvXqfV3Jm7vhrX
+    v2_section_id: null
+    v2_task_id: 6cQvgFCpcpvFg9CX
+  - completed_at: '2025-07-22T02:39:59.000000Z'
+    content: 'Allow for sub tasks in todo (completed: 7/8/2025)'
+    id: '8520401150'
+    item_object: null
+    meta_data: null
+    note_count: 0
+    notes: []
+    project_id: '2357211370'
+    section_id: null
+    task_id: '9370814625'
+    user_id: '16778938'
+    v2_project_id: 6cQvXqfV3Jm7vhrX
+    v2_section_id: null
+    v2_task_id: 6cQvgF83rRPHJVJX
+  - completed_at: '2025-07-22T02:39:58.000000Z'
+    content: 'Summary of options (completed: 7/20/2025)'
+    id: '8520401113'
+    item_object: null
+    meta_data: null
+    note_count: 0
+    notes: []
+    project_id: '2357211370'
+    section_id: null
+    task_id: '9370814605'
+    user_id: '16778938'
+    v2_project_id: 6cQvXqfV3Jm7vhrX
+    v2_section_id: null
+    v2_task_id: 6cQvgF4pPH55J4G5
+  - completed_at: '2025-07-22T02:39:56.000000Z'
+    content: 'Health (completed: 7/20/2025)'
+    id: '8520401076'
+    item_object: null
+    meta_data: null
+    note_count: 0
+    notes: []
+    project_id: '2357211370'
+    section_id: null
+    task_id: '9370814580'
+    user_id: '16778938'
+    v2_project_id: 6cQvXqfV3Jm7vhrX
+    v2_section_id: null
+    v2_task_id: 6cQvgCvcq935G7wX
+  - completed_at: '2025-07-22T02:39:55.000000Z'
+    content: 'describes what is in (completed: 7/20/2025)'
+    id: '8520401049'
+    item_object: null
+    meta_data: null
+    note_count: 0
+    notes: []
+    project_id: '2357211370'
+    section_id: null
+    task_id: '9370814558'
+    user_id: '16778938'
+    v2_project_id: 6cQvXqfV3Jm7vhrX
+    v2_section_id: null
+    v2_task_id: 6cQvgCmQHjF9v2p5
+  - completed_at: '2025-07-22T02:39:53.000000Z'
+    content: 'Climbs, Half Dome, Whitney, ... (completed: 7/20/2025)'
+    id: '8520400996'
+    item_object: null
+    meta_data: null
+    note_count: 0
+    notes: []
+    project_id: '2357211370'
+    section_id: null
+    task_id: '9370814502'
+    user_id: '16778938'
+    v2_project_id: 6cQvXqfV3Jm7vhrX
+    v2_section_id: null
+    v2_task_id: 6cQvgCXgWW7P9G5X
+projects: {}
+sections: {}

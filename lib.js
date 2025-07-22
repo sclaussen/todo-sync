@@ -12,26 +12,130 @@ import {
 } from './taskLog.js';
 
 // Load environment variables from .env file
-// Temporarily suppress dotenv console output
+// Temporarily suppress all dotenv console output
 const originalConsoleLog = console.log;
+const originalConsoleError = console.error;
+const originalConsoleWarn = console.warn;
+const originalConsoleInfo = console.info;
 console.log = () => {};
+console.error = () => {};
+console.warn = () => {};
+console.info = () => {};
 dotenv.config();
 console.log = originalConsoleLog;
+console.error = originalConsoleError;
+console.warn = originalConsoleWarn;
+console.info = originalConsoleInfo;
 
-// Configuration
-const config = {
-    todoist: {
-        apiToken: process.env.TODOIST_API_TOKEN || '',
-        projectName: process.env.TODOIST_PROJECT_NAME || 'Sync'
-    },
-    local: {
-        todoDir: process.env.TODO_DIR || homedir()
+// Configuration - use functions to read environment at runtime
+function getConfig() {
+    return {
+        todoist: {
+            apiToken: process.env.TODOIST_API_TOKEN || '',
+            projectName: process.env.TODOIST_PROJECT_NAME || 'Sync'
+        },
+        local: {
+            todoDir: process.env.TODO_DIR || homedir()
+        }
+    };
+}
+
+// Shared API client for Todoist requests
+class TodoistAPI {
+    constructor(apiToken) {
+        this.apiToken = apiToken;
+        this.baseURL = 'https://api.todoist.com';
     }
-};
+
+    async request(endpoint, options = {}) {
+        if (!this.apiToken) {
+            throw new Error('No Todoist API token configured');
+        }
+
+        const url = endpoint.startsWith('http') ? endpoint : `${this.baseURL}${endpoint}`;
+        const response = await fetch(url, {
+            ...options,
+            headers: {
+                Authorization: `Bearer ${this.apiToken}`,
+                'Content-Type': 'application/json',
+                ...options.headers
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`Todoist API error: ${response.status} ${response.statusText}`);
+        }
+
+        return response.json();
+    }
+
+    async getProjects() {
+        return this.request('/rest/v2/projects');
+    }
+
+    async createProject(name) {
+        return this.request('/rest/v2/projects', {
+            method: 'POST',
+            body: JSON.stringify({ name })
+        });
+    }
+
+    async getTasks(projectId) {
+        return this.request(`/rest/v2/tasks?project_id=${projectId}`);
+    }
+
+    async getCompletedTasks() {
+        return this.request('https://api.todoist.com/sync/v9/completed/get_all', {
+            method: 'POST',
+            body: JSON.stringify({})
+        });
+    }
+
+    async createTask(taskData) {
+        return this.request('/rest/v2/tasks', {
+            method: 'POST',
+            body: JSON.stringify(taskData)
+        });
+    }
+
+    async updateTask(taskId, updateData) {
+        return this.request(`/rest/v2/tasks/${taskId}`, {
+            method: 'POST',
+            body: JSON.stringify(updateData)
+        });
+    }
+
+    async closeTask(taskId) {
+        return this.request(`/rest/v2/tasks/${taskId}/close`, {
+            method: 'POST'
+        });
+    }
+
+    async reopenTask(taskId) {
+        return this.request(`/rest/v2/tasks/${taskId}/reopen`, {
+            method: 'POST'
+        });
+    }
+}
+
+const todoistAPI = new TodoistAPI(getConfig().todoist.apiToken);
+
+// Error handling utilities
+function createErrorResult(error, context = '') {
+    const message = context ? `${context}: ${error.message}` : error.message;
+    console.error(`❌ ${message}`);
+    return { tasks: [], error: message };
+}
+
+function handleAsyncError(error, context = '') {
+    const message = context ? `${context}: ${error.message}` : error.message;
+    console.error(`❌ ${message}`);
+    return false;
+}
 
 // Helper function to get todo file path
 function getTodoFilePath(filename = '.tasks') {
-    return join(config.local.todoDir, filename);
+    return join(getConfig().local.todoDir, filename);
 }
 
 export async function getTasks(source) {
@@ -68,6 +172,70 @@ function getLocalTasks() {
     };
 }
 
+// Helper functions for parsing tasks
+function shouldSkipLine(line) {
+    const trimmed = line.trim();
+    return !trimmed || trimmed.includes('---');
+}
+
+function parsePriorityHeader(line) {
+    const match = line.trim().match(/Priority (\d+)/);
+    return match ? parseInt(match[1]) : null;
+}
+
+function createSubtask(line, content, currentPriority, currentParentTask, filename, lineNumber) {
+    const subtaskContent = content.substring(2).trim(); // Remove "- " prefix
+    const cleanContent = cleanTaskContent(subtaskContent);
+    const todoistId = extractCorrelationId(subtaskContent);
+    const taskName = stripCorrelationId(cleanContent);
+
+    return {
+        content: taskName,
+        todoistId: todoistId,
+        priority: currentPriority !== null ? currentPriority : 'unknown',
+        lineNumber: lineNumber,
+        file: filename,
+        isSubtask: true,
+        parentTaskId: currentParentTask.taskId,
+        parentContent: currentParentTask.content,
+        originalLine: line
+    };
+}
+
+function createOrphanedSubtask(line, content, currentPriority, filename, lineNumber) {
+    const cleanContent = cleanTaskContent(content);
+    const todoistId = extractCorrelationId(content);
+    const taskName = stripCorrelationId(cleanContent);
+
+    return {
+        content: taskName,
+        todoistId: todoistId,
+        priority: currentPriority !== null ? currentPriority : 'unknown',
+        lineNumber: lineNumber,
+        file: filename,
+        isOrphanedSubtask: true,
+        originalLine: line
+    };
+}
+
+function createMainTask(line, content, currentPriority, filename, lineNumber) {
+    const cleanContent = cleanTaskContent(content);
+    const todoistId = extractCorrelationId(content);
+    const taskName = stripCorrelationId(cleanContent);
+    const taskId = generateTaskId(taskName, lineNumber - 1);
+
+    return {
+        content: taskName,
+        todoistId: todoistId,
+        priority: currentPriority !== null ? currentPriority : 'unknown',
+        lineNumber: lineNumber,
+        file: filename,
+        taskId: taskId,
+        subtasks: [],
+        originalLine: line
+    };
+}
+
 function parseLocalTasks(filename = '.tasks') {
     const filepath = getTodoFilePath(filename);
 
@@ -86,95 +254,46 @@ function parseLocalTasks(filename = '.tasks') {
             const line = lines[i];
             const trimmedLine = line.trim();
 
-            // Skip empty lines
-            if (!trimmedLine) {
+            if (shouldSkipLine(line)) {
                 continue;
             }
 
             // Check for priority section headers
             if (trimmedLine.startsWith('Priority ')) {
-                const match = trimmedLine.match(/Priority (\d+)/);
-                if (match) {
-                    currentPriority = parseInt(match[1]);
-                    currentParentTask = null; // Reset parent when entering new priority section
+                const priority = parsePriorityHeader(trimmedLine);
+                if (priority !== null) {
+                    currentPriority = priority;
+                    currentParentTask = null;
                 }
                 continue;
             }
 
-            // Skip separator lines
-            if (trimmedLine.includes('---')) {
-                continue;
-            }
-
-            // Check if this is a subtask (starts with -)
+            // Handle subtasks
             if (trimmedLine.startsWith('- ')) {
                 if (currentParentTask) {
-                    // This is a subtask
-                    const subtaskContent = trimmedLine.substring(2).trim(); // Remove "- " prefix
-                    const cleanSubtaskContent = cleanTaskContent(subtaskContent);
-                    const subtaskTodoistId = extractCorrelationId(subtaskContent);
-                    const subtaskName = stripCorrelationId(cleanSubtaskContent);
-                    const subtask = {
-                        content: subtaskName, // Clean subtask name without ID
-                        todoistId: subtaskTodoistId, // Separate Todoist ID property
-                        priority: currentPriority !== null ? currentPriority : 'unknown',
-                        lineNumber: i + 1,
-                        file: filename,
-                        isSubtask: true,
-                        parentTaskId: currentParentTask.taskId,
-                        parentContent: currentParentTask.content, // Use clean parent content
-                        originalLine: line // Preserve original formatting
-                    };
+                    const subtask = createSubtask(line, trimmedLine, currentPriority, currentParentTask, filename, i + 1);
 
-                    // Add subtask to parent's subtasks array
                     if (!currentParentTask.subtasks) {
                         currentParentTask.subtasks = [];
                     }
                     currentParentTask.subtasks.push(subtask);
-
-                    // Also add to main tasks array for sync purposes
                     tasks.push(subtask);
                 } else {
-                    // Orphaned subtask (no parent) - treat as regular task but warn
                     console.warn(`Warning: Orphaned subtask found at line ${i + 1}: ${trimmedLine}`);
-                    const cleanOrphanContent = cleanTaskContent(trimmedLine);
-                    const orphanTodoistId = extractCorrelationId(trimmedLine);
-                    const orphanName = stripCorrelationId(cleanOrphanContent);
-                    tasks.push({
-                        content: orphanName, // Clean task name without ID
-                        todoistId: orphanTodoistId, // Separate Todoist ID property
-                        priority: currentPriority !== null ? currentPriority : 'unknown',
-                        lineNumber: i + 1,
-                        file: filename,
-                        isOrphanedSubtask: true,
-                        originalLine: line
-                    });
+                    const orphanedTask = createOrphanedSubtask(line, trimmedLine, currentPriority, filename, i + 1);
+                    tasks.push(orphanedTask);
                 }
             } else {
-                // This is a main task
-                const cleanContent = cleanTaskContent(trimmedLine);
-                const todoistId = extractCorrelationId(trimmedLine);
-                const taskName = stripCorrelationId(cleanContent);
-                const taskId = generateTaskId(taskName, i);
-                const task = {
-                    content: taskName, // Clean task name without ID
-                    todoistId: todoistId, // Separate Todoist ID property
-                    priority: currentPriority !== null ? currentPriority : 'unknown',
-                    lineNumber: i + 1,
-                    file: filename,
-                    taskId: taskId,
-                    subtasks: [],
-                    originalLine: line
-                };
-
+                // Main task
+                const task = createMainTask(line, trimmedLine, currentPriority, filename, i + 1);
                 tasks.push(task);
-                currentParentTask = task; // Set as potential parent for following subtasks
+                currentParentTask = task;
             }
         }
 
         return { tasks };
     } catch (error) {
-        return { tasks: [], error: error.message };
+        return createErrorResult(error, 'Failed to parse local tasks');
     }
 }
 
@@ -210,7 +329,7 @@ function generateTaskId(content, lineNumber) {
 }
 
 async function getRemoteTasks() {
-    if (!config.todoist.apiToken) {
+    if (!getConfig().todoist.apiToken) {
         return {
             current: { tasks: [], message: 'No Todoist API token configured' },
             completed: { tasks: [], message: 'No Todoist API token configured' }
@@ -218,65 +337,31 @@ async function getRemoteTasks() {
     }
 
     try {
-        // First, get the project ID for the "Sync" project
-        const projectsResponse = await fetch('https://api.todoist.com/rest/v2/projects', {
-            headers: {
-                Authorization: `Bearer ${config.todoist.apiToken}`
-            }
-        });
-
-        if (!projectsResponse.ok) {
-            throw new Error(`Todoist API error: ${projectsResponse.status} ${projectsResponse.statusText}`);
-        }
-
-        const projects = await projectsResponse.json();
-        const syncProject = projects.find(p => p.name === config.todoist.projectName);
+        // Get projects and find sync project
+        const projects = await todoistAPI.getProjects();
+        const syncProject = projects.find(p => p.name === getConfig().todoist.projectName);
 
         if (!syncProject) {
-            throw new Error(`Project "${config.todoist.projectName}" not found`);
+            throw new Error(`Project "${getConfig().todoist.projectName}" not found`);
         }
 
-        // Fetch active tasks filtered by project
-        const activeResponse = await fetch(`https://api.todoist.com/rest/v2/tasks?project_id=${syncProject.id}`, {
-            headers: {
-                Authorization: `Bearer ${config.todoist.apiToken}`
+        // Fetch active and completed tasks
+        const [ activeTasks, completedData ] = await Promise.all([
+            todoistAPI.getTasks(syncProject.id),
+            todoistAPI.getCompletedTasks().catch(() => ({ items: [] }))
+        ]);
+
+        // Filter completed tasks by project and last 30 days
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+        const completedTasks = (completedData.items || []).filter(task => {
+            if (task.project_id !== syncProject.id) {
+                return false;
             }
+            const completedDate = new Date(task.completed_at);
+            return completedDate > thirtyDaysAgo;
         });
-
-        if (!activeResponse.ok) {
-            throw new Error(`Todoist API error: ${activeResponse.status} ${activeResponse.statusText}`);
-        }
-
-        const activeTasks = await activeResponse.json();
-
-        // Fetch completed tasks (using sync API for completed tasks)
-        const completedResponse = await fetch('https://api.todoist.com/sync/v9/completed/get_all', {
-            method: 'POST',
-            headers: {
-                Authorization: `Bearer ${config.todoist.apiToken}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({})
-        });
-
-        let completedTasks = [];
-        if (completedResponse.ok) {
-            const completedData = await completedResponse.json();
-
-            // Filter completed tasks by the sync project and last 30 days
-            const thirtyDaysAgo = new Date();
-            thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-
-            completedTasks = (completedData.items || []).filter(task => {
-                if (task.project_id !== syncProject.id) {
-                    return false;
-                }
-
-                // Check if completed within last 30 days
-                const completedDate = new Date(task.completed_at);
-                return completedDate > thirtyDaysAgo;
-            });
-        }
 
         // Group tasks by parent relationship and format
         const taskMap = new Map();
@@ -348,9 +433,10 @@ async function getRemoteTasks() {
         };
 
     } catch (error) {
+        const errorResult = createErrorResult(error, 'Failed to fetch remote tasks');
         return {
-            current: { tasks: [], error: error.message },
-            completed: { tasks: [], error: error.message }
+            current: errorResult,
+            completed: errorResult
         };
     }
 }
@@ -434,7 +520,7 @@ function findDuplicatesInFile(filename) {
 }
 
 async function findRemoteDuplicates() {
-    if (!config.todoist.apiToken) {
+    if (!getConfig().todoist.apiToken) {
         return [ {
             source: 'remote',
             duplicates: [],
@@ -446,7 +532,7 @@ async function findRemoteDuplicates() {
         // First, get the project ID for the "Sync" project
         const projectsResponse = await fetch('https://api.todoist.com/rest/v2/projects', {
             headers: {
-                Authorization: `Bearer ${config.todoist.apiToken}`
+                Authorization: `Bearer ${getConfig().todoist.apiToken}`
             }
         });
 
@@ -455,16 +541,16 @@ async function findRemoteDuplicates() {
         }
 
         const projects = await projectsResponse.json();
-        const syncProject = projects.find(p => p.name === config.todoist.projectName);
+        const syncProject = projects.find(p => p.name === getConfig().todoist.projectName);
 
         if (!syncProject) {
-            throw new Error(`Project "${config.todoist.projectName}" not found`);
+            throw new Error(`Project "${getConfig().todoist.projectName}" not found`);
         }
 
         // Fetch tasks from the "Sync" project only
         const response = await fetch(`https://api.todoist.com/rest/v2/tasks?project_id=${syncProject.id}`, {
             headers: {
-                Authorization: `Bearer ${config.todoist.apiToken}`
+                Authorization: `Bearer ${getConfig().todoist.apiToken}`
             }
         });
 
@@ -516,16 +602,36 @@ async function findRemoteDuplicates() {
     }
 }
 
+// Priority mapping utilities
+const PRIORITY_MAPPING = {
+    LOCAL_TO_REMOTE: {
+        0: 4, // Priority 0 -> Remote Priority 4 (highest/red)
+        1: 4, // Priority 1 -> Remote Priority 4 (highest/red)
+        2: 3, // Priority 2 -> Remote Priority 3 (orange)
+        3: 2, // Priority 3 -> Remote Priority 2 (blue)
+        4: 1  // Priority 4 -> Remote Priority 1 (lowest/no flag)
+    },
+    REMOTE_TO_LOCAL: {
+        4: 4, // Remote Priority 4 (highest) -> Local Priority 4
+        3: 3, // Remote Priority 3 -> Local Priority 3
+        2: 2, // Remote Priority 2 -> Local Priority 2
+        1: 1, // Remote Priority 1 (lowest) -> Local Priority 1
+        0: 0  // Remote Priority 0 (urgent) -> Local Priority 0
+    }
+};
+
 function mapRemotePriority(task) {
+    // Remote Priority 0 tasks should always map to Local Priority 0
+    if (task.priority === 0) {
+        return 0;
+    }
+
     // Check if task is Priority 4 and due today or in the past
     if (task.priority === 4 && task.due) {
         const today = new Date();
-        today.setHours(0, 0, 0, 0); // Set to start of day for comparison
-
-        // Parse the due date (now simplified to just the date string)
+        today.setHours(0, 0, 0, 0);
         const dueDate = new Date(task.due + 'T00:00:00');
-
-        dueDate.setHours(0, 0, 0, 0); // Set to start of day for comparison
+        dueDate.setHours(0, 0, 0, 0);
 
         // If due today or in the past, make it Priority 0
         if (dueDate <= today) {
@@ -533,15 +639,7 @@ function mapRemotePriority(task) {
         }
     }
 
-    // Map Remote priorities to local priorities
-    const priorityMap = {
-        4: 1, // Remote Priority 4 (highest) -> Local Priority 1 (unless overdue, then Priority 0 above)
-        3: 2, // Remote Priority 3 -> Local Priority 2
-        2: 3, // Remote Priority 2 -> Local Priority 3
-        1: 4  // Remote Priority 1 (lowest) -> Local Priority 4
-    };
-
-    return priorityMap[task.priority] || 4;
+    return PRIORITY_MAPPING.REMOTE_TO_LOCAL[task.priority] || 4;
 }
 
 export function displayTasks(data, source) {
@@ -766,7 +864,7 @@ function removeLocalDuplicates() {
 }
 
 async function removeRemoteDuplicates() {
-    if (!config.todoist.apiToken) {
+    if (!getConfig().todoist.apiToken) {
         console.error('❌ No Todoist API token configured');
         return;
     }
@@ -775,7 +873,7 @@ async function removeRemoteDuplicates() {
         // First, get the project ID for the "Sync" project
         const projectsResponse = await fetch('https://api.todoist.com/rest/v2/projects', {
             headers: {
-                Authorization: `Bearer ${config.todoist.apiToken}`
+                Authorization: `Bearer ${getConfig().todoist.apiToken}`
             }
         });
 
@@ -784,16 +882,16 @@ async function removeRemoteDuplicates() {
         }
 
         const projects = await projectsResponse.json();
-        const syncProject = projects.find(p => p.name === config.todoist.projectName);
+        const syncProject = projects.find(p => p.name === getConfig().todoist.projectName);
 
         if (!syncProject) {
-            throw new Error(`Project "${config.todoist.projectName}" not found`);
+            throw new Error(`Project "${getConfig().todoist.projectName}" not found`);
         }
 
         // Fetch tasks from the "Sync" project only
         const response = await fetch(`https://api.todoist.com/rest/v2/tasks?project_id=${syncProject.id}`, {
             headers: {
-                Authorization: `Bearer ${config.todoist.apiToken}`
+                Authorization: `Bearer ${getConfig().todoist.apiToken}`
             }
         });
 
@@ -847,7 +945,7 @@ async function removeRemoteDuplicates() {
                 const deleteResponse = await fetch(`https://api.todoist.com/rest/v2/tasks/${task.id}`, {
                     method: 'DELETE',
                     headers: {
-                        Authorization: `Bearer ${config.todoist.apiToken}`
+                        Authorization: `Bearer ${getConfig().todoist.apiToken}`
                     }
                 });
 
@@ -1040,7 +1138,7 @@ async function executeRemoteChanges(todoistChanges) {
         errors: []
     };
 
-    if (!config.todoist.apiToken) {
+    if (!getConfig().todoist.apiToken) {
         results.errors.push('No Todoist API token configured');
         return results;
     }
@@ -1062,7 +1160,7 @@ async function executeRemoteChanges(todoistChanges) {
         // Get project ID first
         const projectId = await getRemoteProjectId();
         if (!projectId) {
-            results.errors.push(`Project "${config.todoist.projectName}" not found`);
+            results.errors.push(`Project "${getConfig().todoist.projectName}" not found`);
             return results;
         }
 
@@ -1151,7 +1249,7 @@ async function getRemoteProjectId() {
     try {
         const response = await fetch('https://api.todoist.com/rest/v2/projects', {
             headers: {
-                Authorization: `Bearer ${config.todoist.apiToken}`
+                Authorization: `Bearer ${getConfig().todoist.apiToken}`
             }
         });
 
@@ -1160,7 +1258,7 @@ async function getRemoteProjectId() {
         }
 
         const projects = await response.json();
-        const syncProject = projects.find(p => p.name === config.todoist.projectName);
+        const syncProject = projects.find(p => p.name === getConfig().todoist.projectName);
         return syncProject?.id || null;
     } catch (error) {
         console.error('Error getting project ID:', error.message);
@@ -1202,9 +1300,12 @@ async function updateLocalTaskWithCorrelationId(taskContent, todoistId) {
 
 async function createRemoteTask(task, projectId, isCompleted = false) {
     try {
-        const localPriority = task.metadata?.priority || task.priority || 4;
+        const localPriority = task.metadata?.priority !== undefined ? task.metadata.priority : (task.priority !== undefined ? task.priority : 4);
         const priority = mapLocalPriorityToRemote(localPriority);
         const cleanContent = task.content; // Should already be clean
+        
+        // Debug logging
+        console.log(`DEBUG: createRemoteTask - content: "${cleanContent}", localPriority: ${localPriority}, todoistPriority: ${priority}`);
         const taskData = {
             content: cleanContent,
             project_id: projectId,
@@ -1220,7 +1321,7 @@ async function createRemoteTask(task, projectId, isCompleted = false) {
         const response = await fetch('https://api.todoist.com/rest/v2/tasks', {
             method: 'POST',
             headers: {
-                Authorization: `Bearer ${config.todoist.apiToken}`,
+                Authorization: `Bearer ${getConfig().todoist.apiToken}`,
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify(taskData)
@@ -1252,7 +1353,7 @@ async function completeRemoteTask(taskId) {
         const response = await fetch(`https://api.todoist.com/rest/v2/tasks/${taskId}/close`, {
             method: 'POST',
             headers: {
-                Authorization: `Bearer ${config.todoist.apiToken}`
+                Authorization: `Bearer ${getConfig().todoist.apiToken}`
             }
         });
 
@@ -1287,7 +1388,7 @@ async function updateRemoteTask(change) {
         const response = await fetch(`https://api.todoist.com/rest/v2/tasks/${change.todoistId}`, {
             method: 'POST',
             headers: {
-                Authorization: `Bearer ${config.todoist.apiToken}`,
+                Authorization: `Bearer ${getConfig().todoist.apiToken}`,
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify(updateData)
@@ -1303,7 +1404,7 @@ async function updateRemoteTask(change) {
         console.log('✅ Update API returned OK, verifying...');
         const verifyResponse = await fetch(`https://api.todoist.com/rest/v2/tasks/${change.todoistId}`, {
             headers: {
-                Authorization: `Bearer ${config.todoist.apiToken}`
+                Authorization: `Bearer ${getConfig().todoist.apiToken}`
             }
         });
 
@@ -1332,15 +1433,7 @@ async function updateRemoteTask(change) {
 }
 
 function mapLocalPriorityToRemote(localPriority) {
-    const priorityMap = {
-        0: 4, // Priority 0 -> Remote Priority 4 (highest/red)
-        1: 4, // Priority 1 -> Remote Priority 4 (highest/red)
-        2: 3, // Priority 2 -> Remote Priority 3 (orange)
-        3: 2, // Priority 3 -> Remote Priority 2 (blue)
-        4: 1  // Priority 4 -> Remote Priority 1 (lowest/no flag)
-    };
-
-    return priorityMap[localPriority] || 1;
+    return PRIORITY_MAPPING.LOCAL_TO_REMOTE[localPriority] || 1;
 }
 
 async function addTaskToLocalFile(task) {
@@ -1356,8 +1449,10 @@ async function addTaskToLocalFile(task) {
         // Add Todoist ID for new task if it's from Remote
         let taskContentWithCorr = task.content;
 
-        if (task.metadata?.source === 'todoist' && task.id) {
-            taskContentWithCorr = addCorrelationId(task.content, task.id);
+        // Check both task.id and task.todoistId (the actual field used)
+        const todoistId = task.id || task.todoistId;
+        if (todoistId) {
+            taskContentWithCorr = addCorrelationId(task.content, todoistId);
         }
 
         const newTaskLine = `${taskContentWithCorr}\n`;
@@ -1707,7 +1802,7 @@ export async function createBackup() {
                      now.getHours().toString().padStart(2, '0') +
                      now.getMinutes().toString().padStart(2, '0') +
                      now.getSeconds().toString().padStart(2, '0');
-    const backupDir = join(config.local.todoDir, '.tasks.backups', timestamp);
+    const backupDir = join(getConfig().local.todoDir, '.tasks.backups', timestamp);
 
     try {
         // Create backup directory
@@ -1783,7 +1878,7 @@ function parseLocalTaskContent(content) {
 }
 
 async function backupRemoteData(backupDir) {
-    if (!config.todoist.apiToken) {
+    if (!getConfig().todoist.apiToken) {
         console.log('⚠️  No Todoist API token - skipping remote backup');
         return;
     }
@@ -1792,7 +1887,7 @@ async function backupRemoteData(backupDir) {
         // Get project info
         const projectsResponse = await fetch('https://api.todoist.com/rest/v2/projects', {
             headers: {
-                Authorization: `Bearer ${config.todoist.apiToken}`
+                Authorization: `Bearer ${getConfig().todoist.apiToken}`
             }
         });
 
@@ -1801,10 +1896,10 @@ async function backupRemoteData(backupDir) {
         }
 
         const projects = await projectsResponse.json();
-        const syncProject = projects.find(p => p.name === config.todoist.projectName);
+        const syncProject = projects.find(p => p.name === getConfig().todoist.projectName);
 
         if (!syncProject) {
-            throw new Error(`Project "${config.todoist.projectName}" not found`);
+            throw new Error(`Project "${getConfig().todoist.projectName}" not found`);
         }
 
         // Save project info as YAML
@@ -1814,7 +1909,7 @@ async function backupRemoteData(backupDir) {
         // Backup current tasks
         const tasksResponse = await fetch(`https://api.todoist.com/rest/v2/tasks?project_id=${syncProject.id}`, {
             headers: {
-                Authorization: `Bearer ${config.todoist.apiToken}`
+                Authorization: `Bearer ${getConfig().todoist.apiToken}`
             }
         });
 
@@ -1830,7 +1925,7 @@ async function backupRemoteData(backupDir) {
         const completedResponse = await fetch('https://api.todoist.com/sync/v9/completed/get_all', {
             method: 'POST',
             headers: {
-                Authorization: `Bearer ${config.todoist.apiToken}`,
+                Authorization: `Bearer ${getConfig().todoist.apiToken}`,
                 'Content-Type': 'application/x-www-form-urlencoded'
             },
             body: `project_id=${syncProject.id}&limit=200`
@@ -1851,13 +1946,7 @@ async function backupRemoteData(backupDir) {
 function convertRemoteToTaskFormat(todoistTasks) {
     // Map Remote priorities to local priorities
     function mapRemotePriorityToLocal(todoistPriority) {
-        const priorityMap = {
-            4: 1, // Remote Priority 4 (highest) -> Local Priority 1
-            3: 2, // Remote Priority 3 -> Local Priority 2
-            2: 3, // Remote Priority 2 -> Local Priority 3
-            1: 4  // Remote Priority 1 (lowest) -> Local Priority 4
-        };
-        return priorityMap[todoistPriority] || 4; // Default to Priority 4
+        return PRIORITY_MAPPING.REMOTE_TO_LOCAL[todoistPriority] || 4;
     }
 
     // Group tasks by priority
@@ -1870,8 +1959,8 @@ function convertRemoteToTaskFormat(todoistTasks) {
             tasksByPriority[localPriority] = [];
         }
 
-        // Format task content (include Remote ID for reference)
-        const taskContent = `${task.content} # [Remote ID: ${task.id}]`;
+        // Format task content (include Todoist ID for correlation)
+        const taskContent = `${task.content} (${task.id})`;
         tasksByPriority[localPriority].push(taskContent);
     }
 
@@ -1960,64 +2049,61 @@ export async function createLocalTask(content, priority = 4) {
     }
 }
 
+// Shared task operations using TodoistAPI
+async function getProjectId() {
+    const projects = await todoistAPI.getProjects();
+    const syncProject = projects.find(p => p.name === getConfig().todoist.projectName);
+
+    if (!syncProject) {
+        throw new Error(`Project "${getConfig().todoist.projectName}" not found`);
+    }
+
+    return syncProject.id;
+}
+
+async function ensureProjectExists(projectName, apiToken) {
+    const api = new TodoistAPI(apiToken);
+    const projects = await api.getProjects();
+    const existingProject = projects.find(p => p.name === projectName);
+    
+    if (existingProject) {
+        return existingProject;
+    }
+    
+    console.log(`📋 Creating Todoist project: ${projectName}`);
+    const newProject = await api.createProject(projectName);
+    console.log(`✅ Created project: ${projectName} (ID: ${newProject.id})`);
+    return newProject;
+}
+
+function buildTaskData(content, priority, projectId) {
+    const taskData = {
+        content: content,
+        project_id: projectId,
+        priority: mapLocalPriorityToRemote(priority)
+    };
+
+    // Add due date for priority 0 tasks
+    if (priority === 0) {
+        taskData.due_string = 'today';
+    }
+
+    return taskData;
+}
+
 export async function createRemoteTaskByContent(content, priority = 4) {
     try {
-        if (!config.todoist.apiToken) {
+        if (!getConfig().todoist.apiToken) {
             console.error('❌ No Todoist API token configured');
             return false;
         }
 
-        // Get project ID
-        const projectsResponse = await fetch('https://api.todoist.com/rest/v2/projects', {
-            headers: {
-                Authorization: `Bearer ${config.todoist.apiToken}`
-            }
-        });
+        const projectId = await getProjectId();
+        const taskData = buildTaskData(content, priority, projectId);
 
-        if (!projectsResponse.ok) {
-            console.error('❌ Failed to fetch projects');
-            return false;
-        }
-
-        const projects = await projectsResponse.json();
-        const syncProject = projects.find(p => p.name === config.todoist.projectName);
-
-        if (!syncProject) {
-            console.error(`❌ Project "${config.todoist.projectName}" not found`);
-            return false;
-        }
-
-        // Map local priority to Todoist priority
-        const todoistPriority = mapLocalPriorityToRemote(priority);
-
-        const taskData = {
-            content: content,
-            project_id: syncProject.id,
-            priority: todoistPriority
-        };
-
-        // Add due date for priority 0 tasks
-        if (priority === 0) {
-            taskData.due_string = 'today';
-        }
-
-        const response = await fetch('https://api.todoist.com/rest/v2/tasks', {
-            method: 'POST',
-            headers: {
-                Authorization: `Bearer ${config.todoist.apiToken}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(taskData)
-        });
-
-        if (response.ok) {
-            const newTask = await response.json();
-            console.log(`✅ Created remote task: "${content}" (Priority ${priority}, Todoist ID: ${newTask.id})`);
-            return true;
-        } else {
-            console.error(`❌ Failed to create remote task: ${response.status} ${response.statusText}`);
-            return false;
-        }
+        const newTask = await todoistAPI.createTask(taskData);
+        console.log(`✅ Created remote task: "${content}" (Priority ${priority}, Todoist ID: ${newTask.id})`);
+        return true;
     } catch (error) {
         console.error('❌ Failed to create remote task:', error.message);
         return false;
@@ -2121,7 +2207,7 @@ export async function updateLocalTask(taskName, options) {
 
 export async function updateRemoteTaskByName(taskName, options) {
     try {
-        if (!config.todoist.apiToken) {
+        if (!getConfig().todoist.apiToken) {
             console.error('❌ No Todoist API token configured');
             return false;
         }
@@ -2178,7 +2264,7 @@ export async function updateRemoteTaskByName(taskName, options) {
         const response = await fetch(`https://api.todoist.com/rest/v2/tasks/${targetTask.id}`, {
             method: 'POST',
             headers: {
-                Authorization: `Bearer ${config.todoist.apiToken}`,
+                Authorization: `Bearer ${getConfig().todoist.apiToken}`,
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify(updateData)
@@ -2268,7 +2354,7 @@ export async function completeLocalTask(taskName) {
 
 export async function completeRemoteTaskByName(taskName) {
     try {
-        if (!config.todoist.apiToken) {
+        if (!getConfig().todoist.apiToken) {
             console.error('❌ No Todoist API token configured');
             return false;
         }
@@ -2292,7 +2378,7 @@ export async function completeRemoteTaskByName(taskName) {
         const response = await fetch(`https://api.todoist.com/rest/v2/tasks/${targetTask.id}/close`, {
             method: 'POST',
             headers: {
-                Authorization: `Bearer ${config.todoist.apiToken}`
+                Authorization: `Bearer ${getConfig().todoist.apiToken}`
             }
         });
 
@@ -2359,7 +2445,7 @@ export async function cancelLocalTask(taskName) {
 
 export async function cancelRemoteTask(taskName) {
     try {
-        if (!config.todoist.apiToken) {
+        if (!getConfig().todoist.apiToken) {
             console.error('❌ No Todoist API token configured');
             return false;
         }
@@ -2383,7 +2469,7 @@ export async function cancelRemoteTask(taskName) {
         const response = await fetch(`https://api.todoist.com/rest/v2/tasks/${targetTask.id}`, {
             method: 'DELETE',
             headers: {
-                Authorization: `Bearer ${config.todoist.apiToken}`
+                Authorization: `Bearer ${getConfig().todoist.apiToken}`
             }
         });
 
@@ -2785,3 +2871,5 @@ export function categorizeChanges(localTasks, todoistTasks, legacySyncState = nu
 
     return changes;
 }
+
+export { ensureProjectExists };

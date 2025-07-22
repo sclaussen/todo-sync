@@ -1,0 +1,500 @@
+sections:
+  - priority: '0'
+    tasks:
+      - New test item 2 (9367150104)
+      - New test item (9367132691)
+      - Test correlation ID fix (9367147778)
+      - Upgrade claude code to 200 (9324401971)
+      - Add vinegar to weeds (9366919114)
+  - priority: '1'
+    tasks:
+      - Some new task
+      - Something (9367034737)
+      - New item (9367033805)
+      - Pay for workouts (9324555114)
+      - Yard weeds / deweeding (9323773899)
+      - Kareem about off season (9366919141)
+      - 'Research: Check out cursor mobile app (9366919148)'
+      - Math plan / Investigate summer math classes or camps / alphastar (9323774446)
+      - Investigate PJCC (9323774472)
+      - Verify I got the room cancelled in Jackson (9323774529)
+      - Figure out the wells fargo / apple cash issue (9323774560)
+      - What is our insurance company?  credentials? (9324555122)
+      - Get Caden's laptop ready (9323774626)
+      - Fund Caden's brokerage account (9323774639)
+      - Find good stocks for Caden to invest in (9323774656)
+      - Enhance bm.js to auto replace bookmarks using cursor (9324555140)
+      - Quest project (9323774707)
+      - Pension invest (9323774740)
+      - Cash invest (9323774762)
+      - Scrub CCs (9323774810)
+      - Cancel cursor? (9366998974)
+      - Cursor online web support research (9324403444)
+      - Try google trends (9324415663)
+  - priority: '2'
+    tasks:
+      - P2 medium priority task
+      - P2 medium priority task
+      - P2 medium priority task
+      - P2 medium priority task
+      - P2 medium priority task
+      - P2 medium priority task
+      - P2 medium priority task
+      - P2 medium priority task
+      - P2 medium priority task
+      - P2 medium priority task
+      - Health
+      - Summary of options
+      - describes what is in
+      - Climbs, Half Dome, Whitney, ...
+      - P2 medium priority task
+      - P2 medium priority task
+      - P2 medium priority task
+      - P2 medium priority task
+      - P2 medium priority task
+      - P2 medium priority task
+      - P2 medium priority task
+      - P2 medium priority task
+      - P2 medium priority task
+      - P2 medium priority task
+      - Respond to Jeff (9323774791)
+      - Kaiser physical (9323774899)
+      - Kaiser colon cancer screening (health) (9323774926)
+      - Find solar online credentials (enphase) (9323775119)
+      - Clean solar panels (9323775314)
+      - Reevaluate all the subscriptions once again (9323775328)
+      - Put together a SC & CC summary crash plan (9323775372)
+      - Eval other summer options (Tuolumne, et al) (9323775394)
+      - Wedding time off (Aug 27, 28, 29) (9323775465)
+  - priority: '3'
+    tasks:
+      - Clipboard to downloads (9328562560)
+      - Figure out where my pamplona source doc is (9323775485)
+      - Create a list of adventures to do with Caden (9323775501)
+      - '- Climbs, Half Dome, Whitney, ...'
+      - '- describes what is in'
+      - '- Summary of options'
+      - '- Health'
+      - Allow for sub tasks in todo (9331027679)
+      - Figure out how to use workout mode on Garmin (9331023278)
+      - Garmin hike and walk config (9324422047)
+      - Gw - change to git issues !! (9324424990)
+      - Gw - @claude @copilot to manage issues (9324425305)
+      - Gw - pr reviews (9324425773)
+      - Claude md context (9324430008)
+      - Claude / commands (9324438320)
+      - Gw - single place to store mcp so users get promoted to install when they run Claude (9324438961)
+      - /memory try it (9324439101)
+      - '# can be used to select which memory to use (9324439822)'
+      - Puppeteer mcp server shared at Anthropic (9324440190)
+      - Claude slide in key bindings in photos (9324441157)
+      - Claude hit esc to stop (9324442110)
+      - Ctrl r shows more output (9331028629)
+      - Esc esc for history (9331028664)
+      - '-p is Claude sdk (9324442844)'
+      - 'Concept: autonomous coding agent - concurrency (9328644698)'
+      - 'Concept: parallel Claude using multiple work trees in claud code docs (9328646110)'
+      - >-
+        Claude is workflow multi task [Claude Code Multitasking Made
+        EASY](https://youtu.be/Bz5fyyCa2-0?si=2vfb-wg7jX4eHFmV) (9328677726)
+  - priority: '4'
+    tasks:
+      - Test sync state removal
+      - Anthropic university classes check them out (9353432910)
+      - Uithib- checkout (9353298118)
+      - Subscriptions (9323776106)
+      - npx ccusage latest (9366919199)
+      - Rename/manage all the google drive videos (9323775545)
+      - Zeenat PADI (9323774403)
+      - Shane PADI (9323774424)
+      - Caden PADI (9323773949)
+      - AI Apps (9323775566)
+      - Analyze video generate box score (9323775605)
+      - Analyze video for single player snippets (9323775634)
+      - Aggregate youtubre/X AI news and deliver daily summary (9323775660)
+      - App to take bball game schedules and generate ICS and integrate (9323775687)
+      - Email to todos (9323775710)
+      - AI Technology (9323775727)
+      - Claude Code + VS Code (9323775997)
+      - Context7 MCP (9323776011)
+      - Odin MCP (9323776031)
+      - Enable github AI tools on my repos (9323776050)
+      - Is there something that can be done with sneakers?  Middle man? (9323776077)
+      - Dev Odin mcp server with resources and tools (9323776181)
+      - TikTokenizer site  - tokenizes phrases (9323776234)
+      - Hyperbolic to work with base models (9323776263)
+      - Leaderboard AI (9323776275)
+      - Nate jones substack ai (9323776314)
+      - Mary meeker (9323776364)
+      - Whisper flow - prompt talking (9323776412)
+      - Augment code s tier (9323776432)
+      - Cline and rue code (9323776454)
+      - Vercel for deploying app (9323776478)
+      - Google Jules (9323776502)
+      - OpenAI codex / part of mobile app (9323776549)
+      - Hami   Podcast (9323776572)
+      - Bday investment gift (9323776598)
+      - Ai investments (9323776637)
+      - Agent building (9323776688)
+      - N8n Dave’s spreadsheet (9323776706)
+      - Mechanical Turk (9323776721)
+      - Unfollow in X (9323776747)
+      - Stanford grad school of b (9323776767)
+      - Anthropic co founders (9323776789)
+      - Grok app (9323776804)
+      - Mistral (9323776835)
+      - Manus app (9323776864)
+      - Notebook LM ai investment (9323776894)
+      - Pedantic vs Lang (9323776922)
+      - Add KC text7 to cursor context7 (9323776933)
+      - How does founder stock work (9323776956)
+      - Restaurant menu analyzer (9323776976)
+      - Weight lifting app (9323777047)
+      - Forward game video and returns box score (9323777060)
+      - Game summary (9323777092)
+      - Warren Buffett ai investment strategy (9323777127)
+      - Add adventure to bookmarks (9324376971)
+      - GW project to onboard devs (9324399011)
+      - /terminal setup for shift enter (9324417583)
+      - /themes (9324417841)
+      - Claude getting started guide (9324418107)
+      - /config (9324418832)
+      - Claude - system settings dictation enable (9324419761)
+      - Hit dictation key twice and speak prompt (9324420226)
+      - What did I ship this week - Claude (9324423856)
+      - There is a way to create Claude Md used across all projects (9324432298)
+      - Claude context - see@slide in photos (9324433013)
+      - Improve todo sync to handle work and home (9328558665)
+raw: >-
+  Priority 0
+
+  -------------------------------------------------------------------------------
+
+  New test item 2 (9367150104)
+
+  New test item (9367132691)
+
+  Test correlation ID fix (9367147778)
+
+  Upgrade claude code to 200 (9324401971)
+
+  Add vinegar to weeds (9366919114)
+
+
+  Priority 1
+
+  -------------------------------------------------------------------------------
+
+  Some new task
+
+  Something (9367034737)
+
+  New item (9367033805)
+
+  Pay for workouts (9324555114)
+
+  Yard weeds / deweeding (9323773899)
+
+  Kareem about off season (9366919141)
+
+  Research: Check out cursor mobile app (9366919148)
+
+  Math plan / Investigate summer math classes or camps / alphastar (9323774446)
+
+  Investigate PJCC (9323774472)
+
+  Verify I got the room cancelled in Jackson (9323774529)
+
+  Figure out the wells fargo / apple cash issue (9323774560)
+
+  What is our insurance company?  credentials? (9324555122)
+
+  Get Caden's laptop ready (9323774626)
+
+  Fund Caden's brokerage account (9323774639)
+
+  Find good stocks for Caden to invest in (9323774656)
+
+  Enhance bm.js to auto replace bookmarks using cursor (9324555140)
+
+  Quest project (9323774707)
+
+  Pension invest (9323774740)
+
+  Cash invest (9323774762)
+
+  Scrub CCs (9323774810)
+
+  Cancel cursor? (9366998974)
+
+  Cursor online web support research (9324403444)
+
+  Try google trends (9324415663)
+
+
+  Priority 2
+
+  -------------------------------------------------------------------------------
+
+  P2 medium priority task
+
+  P2 medium priority task
+
+  P2 medium priority task
+
+  P2 medium priority task
+
+  P2 medium priority task
+
+  P2 medium priority task
+
+  P2 medium priority task
+
+  P2 medium priority task
+
+  P2 medium priority task
+
+  P2 medium priority task
+
+  Health
+
+  Summary of options
+
+  describes what is in
+
+  Climbs, Half Dome, Whitney, ...
+
+  P2 medium priority task
+
+  P2 medium priority task
+
+  P2 medium priority task
+
+  P2 medium priority task
+
+  P2 medium priority task
+
+  P2 medium priority task
+
+  P2 medium priority task
+
+  P2 medium priority task
+
+  P2 medium priority task
+
+  P2 medium priority task
+
+  Respond to Jeff (9323774791)
+
+  Kaiser physical (9323774899)
+
+  Kaiser colon cancer screening (health) (9323774926)
+
+  Find solar online credentials (enphase) (9323775119)
+
+  Clean solar panels (9323775314)
+
+  Reevaluate all the subscriptions once again (9323775328)
+
+  Put together a SC & CC summary crash plan (9323775372)
+
+  Eval other summer options (Tuolumne, et al) (9323775394)
+
+  Wedding time off (Aug 27, 28, 29) (9323775465)
+
+
+  Priority 3
+
+  -------------------------------------------------------------------------------
+
+  Clipboard to downloads (9328562560)
+
+  Figure out where my pamplona source doc is (9323775485)
+
+  Create a list of adventures to do with Caden (9323775501)
+
+  - Climbs, Half Dome, Whitney, ...
+
+  - describes what is in
+
+  - Summary of options
+
+  - Health
+
+  Allow for sub tasks in todo (9331027679)
+
+  Figure out how to use workout mode on Garmin (9331023278)
+
+  Garmin hike and walk config (9324422047)
+
+  Gw - change to git issues !! (9324424990)
+
+  Gw - @claude @copilot to manage issues (9324425305)
+
+  Gw - pr reviews (9324425773)
+
+  Claude md context (9324430008)
+
+  Claude / commands (9324438320)
+
+  Gw - single place to store mcp so users get promoted to install when they run Claude (9324438961)
+
+  /memory try it (9324439101)
+
+  # can be used to select which memory to use (9324439822)
+
+  Puppeteer mcp server shared at Anthropic (9324440190)
+
+  Claude slide in key bindings in photos (9324441157)
+
+  Claude hit esc to stop (9324442110)
+
+  Ctrl r shows more output (9331028629)
+
+  Esc esc for history (9331028664)
+
+  -p is Claude sdk (9324442844)
+
+  Concept: autonomous coding agent - concurrency (9328644698)
+
+  Concept: parallel Claude using multiple work trees in claud code docs (9328646110)
+
+  Claude is workflow multi task [Claude Code Multitasking Made EASY](https://youtu.be/Bz5fyyCa2-0?si=2vfb-wg7jX4eHFmV)
+  (9328677726)
+
+
+  Priority 4
+
+  -------------------------------------------------------------------------------
+
+  Test sync state removal
+
+  Anthropic university classes check them out (9353432910)
+
+  Uithib- checkout (9353298118)
+
+  Subscriptions (9323776106)
+
+  npx ccusage latest (9366919199)
+
+  Rename/manage all the google drive videos (9323775545)
+
+  Zeenat PADI (9323774403)
+
+  Shane PADI (9323774424)
+
+  Caden PADI (9323773949)
+
+  AI Apps (9323775566)
+
+  Analyze video generate box score (9323775605)
+
+  Analyze video for single player snippets (9323775634)
+
+  Aggregate youtubre/X AI news and deliver daily summary (9323775660)
+
+  App to take bball game schedules and generate ICS and integrate (9323775687)
+
+  Email to todos (9323775710)
+
+  AI Technology (9323775727)
+
+  Claude Code + VS Code (9323775997)
+
+  Context7 MCP (9323776011)
+
+  Odin MCP (9323776031)
+
+  Enable github AI tools on my repos (9323776050)
+
+  Is there something that can be done with sneakers?  Middle man? (9323776077)
+
+  Dev Odin mcp server with resources and tools (9323776181)
+
+  TikTokenizer site  - tokenizes phrases (9323776234)
+
+  Hyperbolic to work with base models (9323776263)
+
+  Leaderboard AI (9323776275)
+
+  Nate jones substack ai (9323776314)
+
+  Mary meeker (9323776364)
+
+  Whisper flow - prompt talking (9323776412)
+
+  Augment code s tier (9323776432)
+
+  Cline and rue code (9323776454)
+
+  Vercel for deploying app (9323776478)
+
+  Google Jules (9323776502)
+
+  OpenAI codex / part of mobile app (9323776549)
+
+  Hami   Podcast (9323776572)
+
+  Bday investment gift (9323776598)
+
+  Ai investments (9323776637)
+
+  Agent building (9323776688)
+
+  N8n Dave’s spreadsheet (9323776706)
+
+  Mechanical Turk (9323776721)
+
+  Unfollow in X (9323776747)
+
+  Stanford grad school of b (9323776767)
+
+  Anthropic co founders (9323776789)
+
+  Grok app (9323776804)
+
+  Mistral (9323776835)
+
+  Manus app (9323776864)
+
+  Notebook LM ai investment (9323776894)
+
+  Pedantic vs Lang (9323776922)
+
+  Add KC text7 to cursor context7 (9323776933)
+
+  How does founder stock work (9323776956)
+
+  Restaurant menu analyzer (9323776976)
+
+  Weight lifting app (9323777047)
+
+  Forward game video and returns box score (9323777060)
+
+  Game summary (9323777092)
+
+  Warren Buffett ai investment strategy (9323777127)
+
+  Add adventure to bookmarks (9324376971)
+
+  GW project to onboard devs (9324399011)
+
+  /terminal setup for shift enter (9324417583)
+
+  /themes (9324417841)
+
+  Claude getting started guide (9324418107)
+
+  /config (9324418832)
+
+  Claude - system settings dictation enable (9324419761)
+
+  Hit dictation key twice and speak prompt (9324420226)
+
+  What did I ship this week - Claude (9324423856)
+
+  There is a way to create Claude Md used across all projects (9324432298)
+
+  Claude context - see@slide in photos (9324433013)
+
+  Improve todo sync to handle work and home (9328558665)

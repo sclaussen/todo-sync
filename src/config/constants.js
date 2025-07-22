@@ -2,8 +2,17 @@ import { join } from 'path';
 import { homedir } from 'os';
 import dotenv from 'dotenv';
 
-// Load environment variables
+// Load environment variables (suppress all output by temporarily silencing console)
+const originalLog = console.log;
+const originalWarn = console.warn;
+const originalError = console.error;
+console.log = () => {};
+console.warn = () => {};
+console.error = () => {};
 dotenv.config();
+console.log = originalLog;
+console.warn = originalWarn;
+console.error = originalError;
 
 export const PRIORITIES = {
     HIGHEST: 0,
@@ -28,10 +37,17 @@ export const FILES = {
     LOG: '.tasks.yaml'
 };
 
+// Dynamic file paths that respect TODO_DIR environment variable
 export const FILE_PATHS = {
-    TASK: join(homedir(), FILES.TASK),
-    COMPLETED: join(homedir(), FILES.COMPLETED),
-    LOG: join(homedir(), FILES.LOG)
+    get TASK() {
+        return join(process.env.TODO_DIR || homedir(), FILES.TASK);
+    },
+    get COMPLETED() {
+        return join(process.env.TODO_DIR || homedir(), FILES.COMPLETED);
+    },
+    get LOG() {
+        return join(process.env.TODO_DIR || homedir(), FILES.LOG);
+    }
 };
 
 export const TODOIST = {

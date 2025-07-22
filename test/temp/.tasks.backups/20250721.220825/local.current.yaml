@@ -1,0 +1,362 @@
+sections:
+  - priority: '1'
+    tasks:
+      - Some new task
+      - P1 high priority task
+      - P1 high priority task
+      - P1 high priority task
+      - P1 high priority task
+      - P1 high priority task
+      - P1 high priority task
+      - P1 high priority task
+      - Something
+      - New item
+      - Cancel cursor?
+      - 'Research: Check out cursor mobile app'
+      - Kareem about off season
+      - Enhance bm.js to auto replace bookmarks using cursor
+      - What is our insurance company?  credentials?
+      - Pay for workouts
+      - Try google trends
+      - Cursor online web support research
+      - Scrub CCs
+      - Cash invest
+      - Pension invest
+      - Quest project
+      - Find good stocks for Caden to invest in
+      - Fund Caden's brokerage account
+      - Get Caden's laptop ready
+      - Figure out the wells fargo / apple cash issue
+      - Verify I got the room cancelled in Jackson
+      - Investigate PJCC
+      - Math plan / Investigate summer math classes or camps / alphastar
+      - Yard weeds / deweeding
+  - priority: '4'
+    tasks:
+      - P4 lowest priority task
+      - P4 lowest priority task
+      - P4 lowest priority task
+      - P4 lowest priority task
+      - P4 lowest priority task
+      - P4 lowest priority task
+      - P4 lowest priority task
+      - P0 urgent task
+      - P0 urgent task
+      - P0 urgent task
+      - P0 urgent task
+      - P0 urgent task
+      - P0 urgent task
+      - P0 urgent task
+      - Test sync state removal
+      - New test item 2
+      - Test correlation ID fix
+      - New test item
+      - npx ccusage latest
+      - Add vinegar to weeds
+      - Anthropic university classes check them out
+      - Uithib- checkout
+      - Improve todo sync to handle work and home
+      - Claude context - see@slide in photos
+      - There is a way to create Claude Md used across all projects
+      - What did I ship this week - Claude
+      - Hit dictation key twice and speak prompt
+      - Claude - system settings dictation enable
+      - /config
+      - Claude getting started guide
+      - /themes
+      - /terminal setup for shift enter
+      - Upgrade claude code to 200
+      - GW project to onboard devs
+      - Add adventure to bookmarks
+      - Warren Buffett ai investment strategy
+      - Game summary
+      - Forward game video and returns box score
+      - Weight lifting app
+      - Restaurant menu analyzer
+      - How does founder stock work
+      - Add KC text7 to cursor context7
+      - Pedantic vs Lang
+      - Notebook LM ai investment
+      - Manus app
+      - Mistral
+      - Grok app
+      - Anthropic co founders
+      - Stanford grad school of b
+      - Unfollow in X
+      - Mechanical Turk
+      - N8n Dave’s spreadsheet
+      - Agent building
+      - Ai investments
+      - Bday investment gift
+      - Hami   Podcast
+      - OpenAI codex / part of mobile app
+      - Google Jules
+      - Vercel for deploying app
+      - Cline and rue code
+      - Augment code s tier
+      - Whisper flow - prompt talking
+      - Mary meeker
+      - Nate jones substack ai
+      - Leaderboard AI
+      - Hyperbolic to work with base models
+      - TikTokenizer site  - tokenizes phrases
+      - Dev Odin mcp server with resources and tools
+      - Subscriptions
+      - Is there something that can be done with sneakers?  Middle man?
+      - Enable github AI tools on my repos
+      - Odin MCP
+      - Context7 MCP
+      - Claude Code + VS Code
+      - AI Technology
+      - Email to todos
+      - App to take bball game schedules and generate ICS and integrate
+      - Aggregate youtubre/X AI news and deliver daily summary
+      - Analyze video for single player snippets
+      - Analyze video generate box score
+      - AI Apps
+      - Rename/manage all the google drive videos
+      - Shane PADI
+      - Zeenat PADI
+      - Caden PADI
+  - priority: '2'
+    tasks:
+      - P2 medium priority task
+      - P2 medium priority task
+      - P2 medium priority task
+      - P2 medium priority task
+      - P2 medium priority task
+      - P2 medium priority task
+      - P2 medium priority task
+      - Wedding time off (Aug 27, 28, 29)
+      - Eval other summer options (Tuolumne, et al)
+      - Put together a SC & CC summary crash plan
+      - Reevaluate all the subscriptions once again
+      - Clean solar panels
+      - Find solar online credentials (enphase)
+      - Kaiser colon cancer screening (health)
+      - Kaiser physical
+      - Respond to Jeff
+  - priority: '3'
+    tasks:
+      - '- Health'
+      - '- Summary of options'
+      - '- describes what is in'
+      - '- Climbs, Half Dome, Whitney, ...'
+      - P3 low priority task
+      - P3 low priority task
+      - P3 low priority task
+      - P3 low priority task
+      - P3 low priority task
+      - P3 low priority task
+      - P3 low priority task
+      - Health
+      - Summary of options
+      - describes what is in
+      - Climbs, Half Dome, Whitney, ...
+      - Esc esc for history
+      - Ctrl r shows more output
+      - Allow for sub tasks in todo
+      - Figure out how to use workout mode on Garmin
+      - >-
+        Claude is workflow multi task [Claude Code Multitasking Made
+        EASY](https://youtu.be/Bz5fyyCa2-0?si=2vfb-wg7jX4eHFmV)
+      - 'Concept: parallel Claude using multiple work trees in claud code docs'
+      - 'Concept: autonomous coding agent - concurrency'
+      - Clipboard to downloads
+      - '-p is Claude sdk'
+      - Claude hit esc to stop
+      - Claude slide in key bindings in photos
+      - Puppeteer mcp server shared at Anthropic
+      - '# can be used to select which memory to use'
+      - /memory try it
+      - Gw - single place to store mcp so users get promoted to install when they run Claude
+      - Claude / commands
+      - Claude md context
+      - Gw - pr reviews
+      - Gw - @claude @copilot to manage issues
+      - Gw - change to git issues !!
+      - Garmin hike and walk config
+      - Create a list of adventures to do with Caden
+      - Figure out where my pamplona source doc is
+raw: |
+
+  Priority 1
+  -------------------------------------------------------------------------------
+  Some new task
+  P1 high priority task
+  P1 high priority task
+  P1 high priority task
+  P1 high priority task
+  P1 high priority task
+  P1 high priority task
+  P1 high priority task
+  Something
+  New item
+  Cancel cursor?
+  Research: Check out cursor mobile app
+  Kareem about off season
+  Enhance bm.js to auto replace bookmarks using cursor
+  What is our insurance company?  credentials?
+  Pay for workouts
+  Try google trends
+  Cursor online web support research
+  Scrub CCs
+  Cash invest
+  Pension invest
+  Quest project
+  Find good stocks for Caden to invest in
+  Fund Caden's brokerage account
+  Get Caden's laptop ready
+  Figure out the wells fargo / apple cash issue
+  Verify I got the room cancelled in Jackson
+  Investigate PJCC
+  Math plan / Investigate summer math classes or camps / alphastar
+  Yard weeds / deweeding
+
+  Priority 4
+  -------------------------------------------------------------------------------
+  P4 lowest priority task
+  P4 lowest priority task
+  P4 lowest priority task
+  P4 lowest priority task
+  P4 lowest priority task
+  P4 lowest priority task
+  P4 lowest priority task
+  P0 urgent task
+  P0 urgent task
+  P0 urgent task
+  P0 urgent task
+  P0 urgent task
+  P0 urgent task
+  P0 urgent task
+  Test sync state removal
+  New test item 2
+  Test correlation ID fix
+  New test item
+  npx ccusage latest
+  Add vinegar to weeds
+  Anthropic university classes check them out
+  Uithib- checkout
+  Improve todo sync to handle work and home
+  Claude context - see@slide in photos
+  There is a way to create Claude Md used across all projects
+  What did I ship this week - Claude
+  Hit dictation key twice and speak prompt
+  Claude - system settings dictation enable
+  /config
+  Claude getting started guide
+  /themes
+  /terminal setup for shift enter
+  Upgrade claude code to 200
+  GW project to onboard devs
+  Add adventure to bookmarks
+  Warren Buffett ai investment strategy
+  Game summary
+  Forward game video and returns box score
+  Weight lifting app
+  Restaurant menu analyzer
+  How does founder stock work
+  Add KC text7 to cursor context7
+  Pedantic vs Lang
+  Notebook LM ai investment
+  Manus app
+  Mistral
+  Grok app
+  Anthropic co founders
+  Stanford grad school of b
+  Unfollow in X
+  Mechanical Turk
+  N8n Dave’s spreadsheet
+  Agent building
+  Ai investments
+  Bday investment gift
+  Hami   Podcast
+  OpenAI codex / part of mobile app
+  Google Jules
+  Vercel for deploying app
+  Cline and rue code
+  Augment code s tier
+  Whisper flow - prompt talking
+  Mary meeker
+  Nate jones substack ai
+  Leaderboard AI
+  Hyperbolic to work with base models
+  TikTokenizer site  - tokenizes phrases
+  Dev Odin mcp server with resources and tools
+  Subscriptions
+  Is there something that can be done with sneakers?  Middle man?
+  Enable github AI tools on my repos
+  Odin MCP
+  Context7 MCP
+  Claude Code + VS Code
+  AI Technology
+  Email to todos
+  App to take bball game schedules and generate ICS and integrate
+  Aggregate youtubre/X AI news and deliver daily summary
+  Analyze video for single player snippets
+  Analyze video generate box score
+  AI Apps
+  Rename/manage all the google drive videos
+  Shane PADI
+  Zeenat PADI
+  Caden PADI
+
+  Priority 2
+  -------------------------------------------------------------------------------
+  P2 medium priority task
+  P2 medium priority task
+  P2 medium priority task
+  P2 medium priority task
+  P2 medium priority task
+  P2 medium priority task
+  P2 medium priority task
+  Wedding time off (Aug 27, 28, 29)
+  Eval other summer options (Tuolumne, et al)
+  Put together a SC & CC summary crash plan
+  Reevaluate all the subscriptions once again
+  Clean solar panels
+  Find solar online credentials (enphase)
+  Kaiser colon cancer screening (health)
+  Kaiser physical
+  Respond to Jeff
+
+  Priority 3
+  -------------------------------------------------------------------------------
+  - Health
+  - Summary of options
+  - describes what is in
+  - Climbs, Half Dome, Whitney, ...
+  P3 low priority task
+  P3 low priority task
+  P3 low priority task
+  P3 low priority task
+  P3 low priority task
+  P3 low priority task
+  P3 low priority task
+  Health
+  Summary of options
+  describes what is in
+  Climbs, Half Dome, Whitney, ...
+  Esc esc for history
+  Ctrl r shows more output
+  Allow for sub tasks in todo
+  Figure out how to use workout mode on Garmin
+  Claude is workflow multi task [Claude Code Multitasking Made EASY](https://youtu.be/Bz5fyyCa2-0?si=2vfb-wg7jX4eHFmV)
+  Concept: parallel Claude using multiple work trees in claud code docs
+  Concept: autonomous coding agent - concurrency
+  Clipboard to downloads
+  -p is Claude sdk
+  Claude hit esc to stop
+  Claude slide in key bindings in photos
+  Puppeteer mcp server shared at Anthropic
+  # can be used to select which memory to use
+  /memory try it
+  Gw - single place to store mcp so users get promoted to install when they run Claude
+  Claude / commands
+  Claude md context
+  Gw - pr reviews
+  Gw - @claude @copilot to manage issues
+  Gw - change to git issues !!
+  Garmin hike and walk config
+  Create a list of adventures to do with Caden
+  Figure out where my pamplona source doc is

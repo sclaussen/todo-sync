@@ -1167,5 +1167,488 @@
     "cwd": "/Users/shane/src/sync",
     "hook_event_name": "UserPromptSubmit",
     "prompt": "commmit "
+  },
+  {
+    "session_id": "68b1a559-3b69-478c-8afb-21bdba0483c7",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/68b1a559-3b69-478c-8afb-21bdba0483c7.jsonl",
+    "cwd": "/Users/shane/src/sync",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "examine lib.js, see if you can clean it up, dramatically simplify it, make it more readable, remove any redundancy, etc"
+  },
+  {
+    "session_id": "68b1a559-3b69-478c-8afb-21bdba0483c7",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/68b1a559-3b69-478c-8afb-21bdba0483c7.jsonl",
+    "cwd": "/Users/shane/src/sync",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "test?"
+  },
+  {
+    "session_id": "3f393fc7-2342-40b8-9927-321672b7ab11",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/3f393fc7-2342-40b8-9927-321672b7ab11.jsonl",
+    "cwd": "/Users/shane/src/sync",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "ok i want a simple test, the test should start with an empty local .tasks, an empty remote Test project (we need a test utility that has a reset() that sets this default config up).\n\ncreate a local P0, p1, p2, p3, and p4 task\nthen sync\n\nUse the cli to get the remote tasks (-r -y).\n\nVerify those tasks exist and are in the right priority.\n\nI want you to work to keep this test super super simple, something like:\n\nsh('task.js create ...', { echo: true, rc: 0 });\nlet remoteTasks = sh('task.js list -r -y', ...);\nlet localTasks = sh('task.js list -l -y', ...);\nlet diff = diff(localTasks, remoteTasks)\nif (diff) fail, ...\n\nIf any of the commands need a --yaml -y option add it if that helps keep the test simple."
+  },
+  {
+    "session_id": "3f393fc7-2342-40b8-9927-321672b7ab11",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/3f393fc7-2342-40b8-9927-321672b7ab11.jsonl",
+    "cwd": "/Users/shane/src/sync",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "did you run the test?"
+  },
+  {
+    "session_id": "3f393fc7-2342-40b8-9927-321672b7ab11",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/3f393fc7-2342-40b8-9927-321672b7ab11.jsonl",
+    "cwd": "/Users/shane/src/sync",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "create a test/util.js, and move any utils in there from the test you just created"
+  },
+  {
+    "session_id": "3f393fc7-2342-40b8-9927-321672b7ab11",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/3f393fc7-2342-40b8-9927-321672b7ab11.jsonl",
+    "cwd": "/Users/shane/src/sync",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "mv priority-sync.test.js to test.js"
+  },
+  {
+    "session_id": "6786ec8e-1d63-453d-b7b6-ff1776176433",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/6786ec8e-1d63-453d-b7b6-ff1776176433.jsonl",
+    "cwd": "/Users/shane/src/sync",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "run test/test.js and debug"
+  },
+  {
+    "session_id": "6786ec8e-1d63-453d-b7b6-ff1776176433",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/6786ec8e-1d63-453d-b7b6-ff1776176433.jsonl",
+    "cwd": "/Users/shane/src/sync",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "no no no\n"
+  },
+  {
+    "session_id": "6786ec8e-1d63-453d-b7b6-ff1776176433",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/6786ec8e-1d63-453d-b7b6-ff1776176433.jsonl",
+    "cwd": "/Users/shane/src/sync",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "the test util should use the test project not sync, NEVER update that"
+  },
+  {
+    "session_id": "6786ec8e-1d63-453d-b7b6-ff1776176433",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/6786ec8e-1d63-453d-b7b6-ff1776176433.jsonl",
+    "cwd": "/Users/shane/src/sync",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "let's run test.js, if there is a bug, stop, tell me what you plan to fix, don't make a change until I say go"
+  },
+  {
+    "session_id": "6786ec8e-1d63-453d-b7b6-ff1776176433",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/6786ec8e-1d63-453d-b7b6-ff1776176433.jsonl",
+    "cwd": "/Users/shane/src/sync",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "optin a yes"
+  },
+  {
+    "session_id": "a99a97f1-8413-4163-b43d-990fc9897dae",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/a99a97f1-8413-4163-b43d-990fc9897dae.jsonl",
+    "cwd": "/Users/shane/src/sync",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "update reset so it clears everything out of the test project in test/utils"
+  },
+  {
+    "session_id": "a99a97f1-8413-4163-b43d-990fc9897dae",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/a99a97f1-8413-4163-b43d-990fc9897dae.jsonl",
+    "cwd": "/Users/shane/src/sync",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "I want the setuptestproject() to be part of reset, actually rename reset init() but have it create the test proj if not there and if there clear out all tasks"
+  },
+  {
+    "session_id": "a99a97f1-8413-4163-b43d-990fc9897dae",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/a99a97f1-8413-4163-b43d-990fc9897dae.jsonl",
+    "cwd": "/Users/shane/src/sync",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "I never want this printed out\n\n[dotenv@17.2.0] injecting env (0) from .env (tip: \u2699\ufe0f  specify custom .env file path with { path: '/custom/path/.env' })"
+  },
+  {
+    "session_id": "a99a97f1-8413-4163-b43d-990fc9897dae",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/a99a97f1-8413-4163-b43d-990fc9897dae.jsonl",
+    "cwd": "/Users/shane/src/sync",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "For these lines\n\n\ud83d\udd27 Running: node /Users/shane/src/sync/tasks.js create \"P1 high priority task\" -l -P 1\n\u2705 Output:\n[dotenv@17.2.0] injecting env (0) from .env (tip: \u2699\ufe0f  specify custom .env file path with { path: '/custom/path/.env' })\n\u2705 Created local task: \"P1 high priority task\" (Priority 1)\n\nThe only thing I want printed out is node ../tasks.js create \"P1 high risk priority task\" -l -P 1\n\nNOTHING ELSE"
+  },
+  {
+    "session_id": "a99a97f1-8413-4163-b43d-990fc9897dae",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/a99a97f1-8413-4163-b43d-990fc9897dae.jsonl",
+    "cwd": "/Users/shane/src/sync",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "$ node test.js\n\ud83e\uddf9 Initializing test environment...\n\u26a0\ufe0f No Todoist API token - skipping project setup\n\u26a0\ufe0f No Todoist API token - skipping project cleanup\n\u2705 Test environment initialized (local only - no Todoist token)\n\nFix the nmissing token"
+  },
+  {
+    "session_id": "a99a97f1-8413-4163-b43d-990fc9897dae",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/a99a97f1-8413-4163-b43d-990fc9897dae.jsonl",
+    "cwd": "/Users/shane/src/sync",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "same problem\n\n$ node test.js\n[dotenv@17.2.0] injecting env (0) from .env (tip: \u2699\ufe0f  enable debug logging with { debug: true })\n\ud83e\uddf9 Initializing test environment...\n\u26a0\ufe0f No Todoist API token - skipping project setup\n\u26a0\ufe0f No Todoist API token - skipping project cleanup\n\u2705 Test environment initialized (local only - no Todoist token)\nCreating local tasks with all priority levels...\nnode /Users/shane/src/sync/tasks.js create \"P0 urgent task\" -l -P 0\nnode /Users/shane/src/sync/tasks.js create \"P1 high priority task\" -l -P 1\nnode /Users/shane/src/sync/tasks.js create \"P2 medium priority task\" -l -P 2\nnode /Users/shane/src/sync/tasks.js create \"P3 low priority task\" -l -P 3\nnode /Users/shane/src/sync/tasks.js create \"P4 lowest priority task\" -l -P 4\nnode /Users/shane/src/sync/tasks.js sync\n\u274c Command failed: node /Users/shane/src/sync/tasks.js sync\nError: Command failed: node /Users/shane/src/sync/tasks.js sync\n\u274c No Todoist API token configured\n\nSTDOUT: [dotenv@17.2.0] injecting env (0) from .env (tip: \ud83d\udd10 encrypt with dotenvx: https://dotenvx.com)\n\ud83d\udd04 Executing synchronization...\n\ud83d\udcbe Creating backup...\n\ud83d\udcc4 Backed up: local.current.yaml\n\ud83d\udcc4 Backed up: local.completed.yaml\n\u26a0\ufe0f  No Todoist API token - skipping remote backup\n\n\ud83d\udcbe Backup created at: /Users/shane/src/sync/test/temp-test/.tasks.backups/20250721.193837\n\u2705 Backup created: /Users/shane/src/sync/test/temp-test/.tasks.backups/20250721.193837\n\nSTDERR: \u274c No Todoist API token configured"
+  },
+  {
+    "session_id": "a99a97f1-8413-4163-b43d-990fc9897dae",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/a99a97f1-8413-4163-b43d-990fc9897dae.jsonl",
+    "cwd": "/Users/shane/src/sync",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "fix\n\n$ node test.js\n\ud83e\uddf9 Initializing test environment...\n\ud83d\udd27 Ensuring test project \"Test\" exists...\n\u2705 Test project ready: Test (ID: 2357211370)\n\ud83e\uddf9 Clearing all tasks from test project \"Test\"...\n\u26a0\ufe0f Failed to clear test project: Cannot read properties of undefined (reading 'length')\n\u2705 Test environment initialized with project \"Test\""
+  },
+  {
+    "session_id": "994c20d8-381e-4e5c-97bd-abbfce6f5f25",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/994c20d8-381e-4e5c-97bd-abbfce6f5f25.jsonl",
+    "cwd": "/Users/shane/src/sync",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "$ node test.js\n\ud83e\uddf9 Initializing test environment...\n\ud83d\udd27 Ensuring test project \"Test\" exists...\n\u2705 Test project ready: Test (ID: 2357211370)\n\ud83e\uddf9 Clearing all tasks from test project \"Test\"...\n\u2705 No tasks to clear from test project\n\u2705 Test environment initialized with project \"Test\"\n\n\n\n\nTHis says there are no tasks but there are a ton of tasks in teh test project, use the api to verify the tasks exist, fix the code to properly clear them."
+  },
+  {
+    "session_id": "73f13274-2bda-418f-940d-c368d11c788f",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/73f13274-2bda-418f-940d-c368d11c788f.jsonl",
+    "cwd": "/Users/shane/src/sync",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "/continue"
+  },
+  {
+    "session_id": "73f13274-2bda-418f-940d-c368d11c788f",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/73f13274-2bda-418f-940d-c368d11c788f.jsonl",
+    "cwd": "/Users/shane/src/sync",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "I would like you to verify there are tasks in the Test remote project, and then remove them, and then figure out why utils.js::init() is not removing them."
+  },
+  {
+    "session_id": "c8e4c160-57c5-4971-939e-6243f08569c6",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/c8e4c160-57c5-4971-939e-6243f08569c6.jsonl",
+    "cwd": "/Users/shane/src/sync",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "figure out what is wrong with event_notification_voice.py"
+  },
+  {
+    "session_id": "7e83dfa1-ed99-4ab3-903a-f7a508a9ade9",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/7e83dfa1-ed99-4ab3-903a-f7a508a9ade9.jsonl",
+    "cwd": "/Users/shane/src/sync",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "There is a remote todoist project named Tasks, list its tasks"
+  },
+  {
+    "session_id": "7e83dfa1-ed99-4ab3-903a-f7a508a9ade9",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/7e83dfa1-ed99-4ab3-903a-f7a508a9ade9.jsonl",
+    "cwd": "/Users/shane/src/sync",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "Ok, now, update the test/util.js file init() function to so it removes every one of those tasks"
+  },
+  {
+    "session_id": "7e83dfa1-ed99-4ab3-903a-f7a508a9ade9",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/7e83dfa1-ed99-4ab3-903a-f7a508a9ade9.jsonl",
+    "cwd": "/Users/shane/src/sync",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "$ node test.js\n\ud83e\uddf9 Initializing test environment...\n\ud83e\uddf9 Clearing all tasks from project \"Tasks\"...\n\ud83d\udccb Creating Todoist project: Tasks\n\u2705 Created project: Tasks (ID: 2357212177)\n\u2705 No tasks to clear from Tasks project\n\ud83d\udd27 Ensuring test project \"Test\" exists...\n\u2705 Test project ready: Test (ID: 2357211370)\n\ud83e\uddf9 Clearing all tasks from test project \"Test\"...\n\u2705 No tasks to clear from test project\n\u2705 Test environment initialized with project \"Test\"\n\n\nAll the tasks are still there."
+  },
+  {
+    "session_id": "226fb005-e72a-468b-8bc2-4d98056e6993",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/226fb005-e72a-468b-8bc2-4d98056e6993.jsonl",
+    "cwd": "/Users/shane/src/sync",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "The Test project is the appropriate project, add this to CLAUDE.md, for the tests.\nSo that is not the problem.  Have init fetch all the tasks from the Test project, then have the init remove all of them.\nRun the util init() yourself and verify it has removed all the tasks by making the appropriate api call, if they are still there, fix, rinise and repease."
+  },
+  {
+    "session_id": "226fb005-e72a-468b-8bc2-4d98056e6993",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/226fb005-e72a-468b-8bc2-4d98056e6993.jsonl",
+    "cwd": "/Users/shane/src/sync",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "I don't want init to print any of this out\n\n\ud83e\uddf9 Initializing test environment...\n\ud83d\udd27 Ensuring test project \"Test\" exists...\n\u2705 Test project ready: Test (ID: 2357211370)\n\ud83e\uddf9 Clearing all tasks from test project \"Test\"...\n\u2705 No tasks to clear from test project\n\u2705 Test environment initialized with project \"Test\""
+  },
+  {
+    "session_id": "c7eb0f14-986f-4813-8f21-3404f161ea95",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/c7eb0f14-986f-4813-8f21-3404f161ea95.jsonl",
+    "cwd": "/Users/shane/src/sync",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "When i run test.js, and i perform sync, get about 15 p0 items online that say \"P0 urgent task\"\nI am wondering (1) where the tests .tasks file is and (2) whether init() cleans it up, if it doesn't, it should.\nIt probably has duplicate entires in it, I'm assuming."
+  },
+  {
+    "session_id": "c7eb0f14-986f-4813-8f21-3404f161ea95",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/c7eb0f14-986f-4813-8f21-3404f161ea95.jsonl",
+    "cwd": "/Users/shane/src/sync",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "I don't want you to modify the test.js, I want init() to clean up the .tasks"
+  },
+  {
+    "session_id": "c7eb0f14-986f-4813-8f21-3404f161ea95",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/c7eb0f14-986f-4813-8f21-3404f161ea95.jsonl",
+    "cwd": "/Users/shane/src/sync",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "I don't understand why the clear needs to happen twice.\nIniti should verify the project exists, if not, create it, which means it would be empty.\nIf it does exist, it should remove all tasks, period.\nIn addition, it should create a fresh .tasks and .tasks.completed file that are empty."
+  },
+  {
+    "session_id": "c7eb0f14-986f-4813-8f21-3404f161ea95",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/c7eb0f14-986f-4813-8f21-3404f161ea95.jsonl",
+    "cwd": "/Users/shane/src/sync",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "where does the test .tasks go?"
+  },
+  {
+    "session_id": "c7eb0f14-986f-4813-8f21-3404f161ea95",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/c7eb0f14-986f-4813-8f21-3404f161ea95.jsonl",
+    "cwd": "/Users/shane/src/sync",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "When I run test.js, it is not creating tasks in temp-test/.tasks, but in ~/.tasks\nWhen sync runs, it is syncing from ~/.tasks to the Test project.\nSo, we are not reading the right file in test.js (the right local fiels), or writing the right local file."
+  },
+  {
+    "session_id": "c7eb0f14-986f-4813-8f21-3404f161ea95",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/c7eb0f14-986f-4813-8f21-3404f161ea95.jsonl",
+    "cwd": "/Users/shane/src/sync",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "Let's use sync/test/.tasks instead (use that dir vs temp-test)"
+  },
+  {
+    "session_id": "c7eb0f14-986f-4813-8f21-3404f161ea95",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/c7eb0f14-986f-4813-8f21-3404f161ea95.jsonl",
+    "cwd": "/Users/shane/src/sync",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "That moved the directory but the source is still coming from ~/.tasks"
+  },
+  {
+    "session_id": "c7eb0f14-986f-4813-8f21-3404f161ea95",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/c7eb0f14-986f-4813-8f21-3404f161ea95.jsonl",
+    "cwd": "/Users/shane/src/sync",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "[shane@claussen] ~/src/sync/test >\n$ node test.js\nnode:internal/bootstrap/switches/does_own_process_state:142\n    cachedCwd = rawMethods.cwd();\n                           ^\n\nError: ENOENT: no such file or directory, uv_cwd\n    at process.wrappedCwd [as cwd] (node:internal/bootstrap/switches/does_own_process_state:142:28)\n    at node:path:1148:24\n    at Object.resolve (node:path:1176:19)\n    at resolveMainPath (node:internal/modules/run_main:34:36)\n    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:143:20)\n    at node:internal/main/run_main_module:33:47 {\n  errno: -2,\n  code: 'ENOENT',\n  syscall: 'uv_cwd'\n}\n\nNode.js v23.5.0"
+  },
+  {
+    "session_id": "c7eb0f14-986f-4813-8f21-3404f161ea95",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/c7eb0f14-986f-4813-8f21-3404f161ea95.jsonl",
+    "cwd": "/Users/shane/src/sync",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "its syncing from the wrong source still................................"
+  },
+  {
+    "session_id": "c7eb0f14-986f-4813-8f21-3404f161ea95",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/c7eb0f14-986f-4813-8f21-3404f161ea95.jsonl",
+    "cwd": "/Users/shane/src/sync",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "same problem, wrong source"
+  },
+  {
+    "session_id": "c7eb0f14-986f-4813-8f21-3404f161ea95",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/c7eb0f14-986f-4813-8f21-3404f161ea95.jsonl",
+    "cwd": "/Users/shane/src/sync",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "test"
+  },
+  {
+    "session_id": "c7eb0f14-986f-4813-8f21-3404f161ea95",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/c7eb0f14-986f-4813-8f21-3404f161ea95.jsonl",
+    "cwd": "/Users/shane/src/sync",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "del\n"
+  },
+  {
+    "session_id": "c7eb0f14-986f-4813-8f21-3404f161ea95",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/c7eb0f14-986f-4813-8f21-3404f161ea95.jsonl",
+    "cwd": "/Users/shane/src/sync",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "Sonnet cannot solve the problem, the tests keep using the wrong local .tasks file, it is using ~/.tasks not the sync/test/.tasks file.\nThis should be easily to solve, please properly configure the tests to use the right spot.  They use the shell command to invoke the task.js, maybe we need to pass task.js a --task-dir option?  Or set an env var like TASK_DIR=xyz tasks.js?  Please help."
+  },
+  {
+    "session_id": "c7eb0f14-986f-4813-8f21-3404f161ea95",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/c7eb0f14-986f-4813-8f21-3404f161ea95.jsonl",
+    "cwd": "/Users/shane/src/sync",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "$ node test.js\nnode:internal/bootstrap/switches/does_own_process_state:142\n    cachedCwd = rawMethods.cwd();\n                           ^"
+  },
+  {
+    "session_id": "c7eb0f14-986f-4813-8f21-3404f161ea95",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/c7eb0f14-986f-4813-8f21-3404f161ea95.jsonl",
+    "cwd": "/Users/shane/src/sync",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "it worked."
+  },
+  {
+    "session_id": "c7eb0f14-986f-4813-8f21-3404f161ea95",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/c7eb0f14-986f-4813-8f21-3404f161ea95.jsonl",
+    "cwd": "/Users/shane/src/sync",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "$ node test.js\nnode:internal/bootstrap/switches/does_own_process_state:142\n    cachedCwd = rawMethods.cwd();\n                           ^\n\nError: ENOENT: no such file or directory, uv_cwd"
+  },
+  {
+    "session_id": "c7eb0f14-986f-4813-8f21-3404f161ea95",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/c7eb0f14-986f-4813-8f21-3404f161ea95.jsonl",
+    "cwd": "/Users/shane/src/sync",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "I don't want the test cleanup process to delete the test directory...\nI just want it to update the test/.tasks ans test/.tasks.completed files"
+  },
+  {
+    "session_id": "c7eb0f14-986f-4813-8f21-3404f161ea95",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/c7eb0f14-986f-4813-8f21-3404f161ea95.jsonl",
+    "cwd": "/Users/shane/src/sync",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "I continue to get these\n\n[dotenv@17.2.0] injecting env (0) from .env (tip: \ud83d\udd10 encrypt with dotenvx: https://dotenvx.com)\n\nAlthough I have asked 100 times to never see these messages again.  \n\n1. Add this near the top of CLAUDE.md that I never want to see this again.\n2. Remove it."
+  },
+  {
+    "session_id": "c7eb0f14-986f-4813-8f21-3404f161ea95",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/c7eb0f14-986f-4813-8f21-3404f161ea95.jsonl",
+    "cwd": "/Users/shane/src/sync",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "output still contains the env dbg\n\n$ node test.js\nCreating local tasks with all priority levels...\nnode /Users/shane/src/sync/tasks.js create \"P0 urgent task\" -l -P 0\nnode /Users/shane/src/sync/tasks.js create \"P1 high priority task\" -l -P 1\nnode /Users/shane/src/sync/tasks.js create \"P2 medium priority task\" -l -P 2\nnode /Users/shane/src/sync/tasks.js create \"P3 low priority task\" -l -P 3\nnode /Users/shane/src/sync/tasks.js create \"P4 lowest priority task\" -l -P 4\nnode /Users/shane/src/sync/tasks.js sync\nnode /Users/shane/src/sync/tasks.js list -r -y\nnode /Users/shane/src/sync/tasks.js list -l -y\nTasks differ between local and remote\n[dotenv@17.2.0] injecting env (0) from .env (tip: \ud83d\udd10 prevent committing .env to code: https://dotenvx.com/precommit)\n- name: P0 urgent task\n  priority: 4\n  due: null\n  id: '9370901109'\n  location: remote\n- name: P1 high priority task\n  priority: 1\n  due: null\n  id: '9370901117'\n  location: remote\n- name: P2 medium priority task\n  priority: 2\n  due: null\n  id: '9370901129'\n  location: remote\n- name: P3 low priority task\n  priority: 3\n  due: null\n  id: '9370901145'\n  location: remote\n- name: P4 lowest priority task\n  priority: 4\n  due: null\n  id: '9370901168'\n  location: remote\n[dotenv@17.2.0] injecting env (0) from .env (tip: \u2699\ufe0f  enable debug logging with { debug: true })\n- name: P0 urgent task\n  priority: 0\n  due: null\n  id: '9370901109'\n  location: local\n- name: P1 high priority task\n  priority: 1\n  due: null\n  id: '9370901117'\n  location: local\n- name: P2 medium priority task\n  priority: 2\n  due: null\n  id: '9370901129'\n  location: local\n- name: P3 low priority task\n  priority: 3\n  due: null\n  id: '9370901145'\n  location: local\n- name: P4 lowest priority task\n  priority: 4\n  due: null\n  id: '9370901168'\n  location: local\nError: Priority sync failed - local and remote tasks do not match\n    at test (file:///Users/shane/src/sync/test/test.js:27:15)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async testAll (file:///Users/shane/src/sync/test/test.js:34:9)"
+  },
+  {
+    "session_id": "c7eb0f14-986f-4813-8f21-3404f161ea95",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/c7eb0f14-986f-4813-8f21-3404f161ea95.jsonl",
+    "cwd": "/Users/shane/src/sync",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "Take a look at test.js\n\n$ node test.js\nCreating local tasks with all priority levels...\nnode /Users/shane/src/sync/tasks.js create \"P0 urgent task\" -l -P 0\nnode /Users/shane/src/sync/tasks.js sync\nnode /Users/shane/src/sync/tasks.js list -r -y\nnode /Users/shane/src/sync/tasks.js list -l -y\nTasks differ between local and remote\n- name: P0 urgent task\n  priority: 0\n  due: null\n  id: '9370910628'\n  location: local\n- name: P0 urgent task\n  priority: 4\n  due: null\n  id: '9370910628'\n  location: remote\n\n\nFor some reason, when the local P0 item is sync'ed to the remote, it is synced as a P4 item.  This is not right.  It should be logically P0, and on the remote that should equate to P1 with a due date of today (today's date)."
+  },
+  {
+    "session_id": "5a2cdf2a-17e1-47ae-b94e-dfe29800c06e",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/5a2cdf2a-17e1-47ae-b94e-dfe29800c06e.jsonl",
+    "cwd": "/Users/shane/src/sync",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "No, when I do the sync, I looked at todoist, and it should be Urgent/red with a due date, instead it is lowest white.  So this is not a display issue."
+  },
+  {
+    "session_id": "5a2cdf2a-17e1-47ae-b94e-dfe29800c06e",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/5a2cdf2a-17e1-47ae-b94e-dfe29800c06e.jsonl",
+    "cwd": "/Users/shane/src/sync",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "It is also being created at the lowest priority level.\nLet me tell you that again, it is being created at the lowest priority level.\nAnd yes, it DOES NOT have a due date.\nThe sync logic is clearly completely wrong.\nPlease fix."
+  },
+  {
+    "session_id": "5a2cdf2a-17e1-47ae-b94e-dfe29800c06e",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/5a2cdf2a-17e1-47ae-b94e-dfe29800c06e.jsonl",
+    "cwd": "/Users/shane/src/sync",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "that worked, now, the location should be stripped in test.js before difference is called, us lodash if required"
+  },
+  {
+    "session_id": "5a2cdf2a-17e1-47ae-b94e-dfe29800c06e",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/5a2cdf2a-17e1-47ae-b94e-dfe29800c06e.jsonl",
+    "cwd": "/Users/shane/src/sync",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "also remove due: from the comparison"
+  },
+  {
+    "session_id": "ac811938-db33-4002-813b-762cb2db2340",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/ac811938-db33-4002-813b-762cb2db2340.jsonl",
+    "cwd": "/Users/shane/src/sync",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "When the syncDown test in test.js runs, it does not map the priorities down properly, it does it in reverse\n\n$ node test.js\nnode /Users/shane/src/sync/tasks.js create \"P0 urgent task\" -r -P 0\nnode /Users/shane/src/sync/tasks.js create \"P1 high priority task\" -r -P 1\nnode /Users/shane/src/sync/tasks.js create \"P2 medium priority task\" -r -P 2\nnode /Users/shane/src/sync/tasks.js create \"P3 low priority task\" -r -P 3\nnode /Users/shane/src/sync/tasks.js create \"P4 lowest priority task\" -r -P 4\nnode /Users/shane/src/sync/tasks.js sync\nnode /Users/shane/src/sync/tasks.js list -l -y\nnode /Users/shane/src/sync/tasks.js list -r -y\nTasks differ between local and remote\n- name: P4 lowest priority task\n  priority: 1\n  due: null\n  id: null\n  location: local\n- name: P3 low priority task\n  priority: 2\n  due: null\n  id: null\n  location: local\n- name: P2 medium priority task\n  priority: 3\n  due: null\n  id: null\n  location: local\n- name: P1 high priority task\n  priority: 4\n  due: null\n  id: null\n  location: local\n- name: P0 urgent task\n  priority: 4\n  due: null\n  id: null\n  location: local\n- name: P0 urgent task\n  priority: 0\n  due: '2025-07-21'\n  id: '9370982102'\n  location: remote\n- name: P1 high priority task\n  priority: 1\n  due: null\n  id: '9370982124'\n  location: remote\n- name: P2 medium priority task\n  priority: 2\n  due: null\n  id: '9370982142'\n  location: remote\n- name: P3 low priority task\n  priority: 3\n  due: null\n  id: '9370982166'\n  location: remote\n- name: P4 lowest priority task\n  priority: 4\n  due: null\n  id: '9370982196'\n  location: remote"
+  },
+  {
+    "session_id": "ac811938-db33-4002-813b-762cb2db2340",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/ac811938-db33-4002-813b-762cb2db2340.jsonl",
+    "cwd": "/Users/shane/src/sync",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "Is the duplication removed now?  does it now use the global?"
+  },
+  {
+    "session_id": "ac811938-db33-4002-813b-762cb2db2340",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/ac811938-db33-4002-813b-762cb2db2340.jsonl",
+    "cwd": "/Users/shane/src/sync",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "appears to still be backwards, in addition, the ids are not synced down\n\n$ node test.js\nnode /Users/shane/src/sync/tasks.js create \"P0 urgent task\" -r -P 0\nnode /Users/shane/src/sync/tasks.js create \"P1 high priority task\" -r -P 1\nnode /Users/shane/src/sync/tasks.js create \"P2 medium priority task\" -r -P 2\nnode /Users/shane/src/sync/tasks.js create \"P3 low priority task\" -r -P 3\nnode /Users/shane/src/sync/tasks.js create \"P4 lowest priority task\" -r -P 4\nnode /Users/shane/src/sync/tasks.js sync\nnode /Users/shane/src/sync/tasks.js list -l -y\nnode /Users/shane/src/sync/tasks.js list -r -y\nTasks differ between local and remote\n- name: P4 lowest priority task\n  priority: 1\n  due: null\n  id: null\n  location: local\n- name: P3 low priority task\n  priority: 2\n  due: null\n  id: null\n  location: local\n- name: P2 medium priority task\n  priority: 3\n  due: null\n  id: null\n  location: local\n- name: P1 high priority task\n  priority: 4\n  due: null\n  id: null\n  location: local\n- name: P0 urgent task\n  priority: 4\n  due: null\n  id: null\n  location: local\n- name: P0 urgent task\n  priority: 0\n  due: '2025-07-21'\n  id: '9370987977'\n  location: remote\n- name: P1 high priority task\n  priority: 1\n  due: null\n  id: '9370988025'\n  location: remote\n- name: P2 medium priority task\n  priority: 2\n  due: null\n  id: '9370988064'\n  location: remote\n- name: P3 low priority task\n  priority: 3\n  due: null\n  id: '9370988099'\n  location: remote\n- name: P4 lowest priority task\n  priority: 4\n  due: null\n  id: '9370988129'\n  location: remote"
+  },
+  {
+    "session_id": "ac811938-db33-4002-813b-762cb2db2340",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/ac811938-db33-4002-813b-762cb2db2340.jsonl",
+    "cwd": "/Users/shane/src/sync",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "Use this to annotate the local item (${task.id}) vs # [...]"
+  },
+  {
+    "session_id": "e99488b5-741a-4a9f-b9b4-4ed730155423",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/e99488b5-741a-4a9f-b9b4-4ed730155423.jsonl",
+    "cwd": "/Users/shane/src/sync",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "what happened to the .claude/hooks files"
+  },
+  {
+    "session_id": "e99488b5-741a-4a9f-b9b4-4ed730155423",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/e99488b5-741a-4a9f-b9b4-4ed730155423.jsonl",
+    "cwd": "/Users/shane/src/sync",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "The files are in temp/.tasks"
+  },
+  {
+    "session_id": "e99488b5-741a-4a9f-b9b4-4ed730155423",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/e99488b5-741a-4a9f-b9b4-4ed730155423.jsonl",
+    "cwd": "/Users/shane/src/sync",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": " Ok the priority mappings are fixed but there are no (${task.id}) appended the the local tasks upon sync"
+  },
+  {
+    "session_id": "e99488b5-741a-4a9f-b9b4-4ed730155423",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/e99488b5-741a-4a9f-b9b4-4ed730155423.jsonl",
+    "cwd": "/Users/shane/src/sync",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "can you please fix the task.id issue, figure out what is going on, debug????"
+  },
+  {
+    "session_id": "e99488b5-741a-4a9f-b9b4-4ed730155423",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/e99488b5-741a-4a9f-b9b4-4ed730155423.jsonl",
+    "cwd": "/Users/shane/src/sync",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "This priority mapping on syncDown is wrong\n\n- name: P0 urgent task\n  priority: 4\n  due: null\n  id: '9371005284'\n  location: local\n- name: P0 urgent task\n  priority: 0\n  due: '2025-07-21'\n  id: '9371005284'\n  location: remote\n\nThe remote P0 item is mapped the local P4, should be local P0."
+  },
+  {
+    "session_id": "e99488b5-741a-4a9f-b9b4-4ed730155423",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/e99488b5-741a-4a9f-b9b4-4ed730155423.jsonl",
+    "cwd": "/Users/shane/src/sync",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "If you don't consider due and location, how are the remote and local different here?\n\nTasks differ between local and remote\n- name: P0 urgent task\n  priority: 0\n  due: null\n  id: '9371009623'\n  location: local\n- name: P1 high priority task\n  priority: 1\n  due: null\n  id: '9371009652'\n  location: local\n- name: P2 medium priority task\n  priority: 2\n  due: null\n  id: '9371009713'\n  location: local\n- name: P3 low priority task\n  priority: 3\n  due: null\n  id: '9371009752'\n  location: local\n- name: P4 lowest priority task\n  priority: 4\n  due: null\n  id: '9371009775'\n  location: local\n- name: P0 urgent task\n  priority: 0\n  due: '2025-07-21'\n  id: '9371009623'\n  location: remote\n- name: P1 high priority task\n  priority: 1\n  due: null\n  id: '9371009652'\n  location: remote\n- name: P2 medium priority task\n  priority: 2\n  due: null\n  id: '9371009713'\n  location: remote\n- name: P3 low priority task\n  priority: 3\n  due: null\n  id: '9371009752'\n  location: remote\n- name: P4 lowest priority task\n  priority: 4\n  due: null\n  id: '9371009775'\n  location: remote"
+  },
+  {
+    "session_id": "1033ee78-843c-427c-8cb9-563d560fab6c",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/1033ee78-843c-427c-8cb9-563d560fab6c.jsonl",
+    "cwd": "/Users/shane/src/sync",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "use lodash to do this in test.js\n\nfunction normalize(yamlOutput) {\n    // Parse each YAML item and remove the location and due fields\n    return yamlOutput.split('\\n').map(line => {\n        if (line.trim().startsWith('location:') || line.trim().startsWith('due:')) {\n            return ''; // Remove location and due lines\n        }\n        return line;\n    }).filter(line => line.trim() !== '').join('\\n');\n}\n"
+  },
+  {
+    "session_id": "1033ee78-843c-427c-8cb9-563d560fab6c",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/1033ee78-843c-427c-8cb9-563d560fab6c.jsonl",
+    "cwd": "/Users/shane/src/sync",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "Move the normalize into the util.js"
+  },
+  {
+    "session_id": "1033ee78-843c-427c-8cb9-563d560fab6c",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/1033ee78-843c-427c-8cb9-563d560fab6c.jsonl",
+    "cwd": "/Users/shane/src/sync",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "Add something to CLAUDE.md about how the test infrastructure is set up, and add to use test.js as an example for creating new tests, that they need to be kept simple, easy to read, just enough output"
+  },
+  {
+    "session_id": "1033ee78-843c-427c-8cb9-563d560fab6c",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/1033ee78-843c-427c-8cb9-563d560fab6c.jsonl",
+    "cwd": "/Users/shane/src/sync",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "also comment regarding the location of the temp/.tasks, etc"
+  },
+  {
+    "session_id": "1033ee78-843c-427c-8cb9-563d560fab6c",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/1033ee78-843c-427c-8cb9-563d560fab6c.jsonl",
+    "cwd": "/Users/shane/src/sync",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "it is production ~/.tasks not todo"
+  },
+  {
+    "session_id": "1033ee78-843c-427c-8cb9-563d560fab6c",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/1033ee78-843c-427c-8cb9-563d560fab6c.jsonl",
+    "cwd": "/Users/shane/src/sync",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "/gcp "
+  },
+  {
+    "session_id": "1033ee78-843c-427c-8cb9-563d560fab6c",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/1033ee78-843c-427c-8cb9-563d560fab6c.jsonl",
+    "cwd": "/Users/shane/src/sync",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "is gcp running?"
+  },
+  {
+    "session_id": "1033ee78-843c-427c-8cb9-563d560fab6c",
+    "transcript_path": "/Users/shane/.claude/projects/-Users-shane-src-sync/1033ee78-843c-427c-8cb9-563d560fab6c.jsonl",
+    "cwd": "/Users/shane/src/sync",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "git add -A and then commit"
   }
 ]
