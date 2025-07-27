@@ -6,14 +6,15 @@ This directory contains tests for the tasks.js CLI that use a separate test envi
 
 Tests use environment variables to configure a separate test environment:
 
-- `TODO_DIR`: Points to `test/data` directory instead of your home directory
+- `TODO_DIR`: Points to `test/.tasks` directory instead of your home directory
 - `TODOIST_PROJECT_NAME`: Uses "Test" project instead of "Sync"
 - `TODOIST_API_TOKEN`: Uses your existing token if available for remote tests
 
 ## Test Files
 
-- `data/.tasks` - Sample current tasks for testing
-- `data/.tasks.completed` - Sample completed tasks for testing
+- `.tasks/current.tasks` - Sample current tasks for testing
+- `.tasks/completed` - Sample completed tasks for testing
+- `.tasks/transactions.yaml` - Task transaction log for testing
 - `basic.test.js` - Basic CLI functionality tests
 - `advanced.test.js` - Advanced functionality and edge case tests
 - `index.js` - Test runner that executes all tests

@@ -2,93 +2,36 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Important Development Notes
-
-**NEVER show dotenv debug messages** - The user has explicitly requested that dotenv debug output (like "[dotenv@17.2.0] injecting env (0) from .env") should NEVER be displayed. Always suppress these messages when working with dotenv configuration.
-
 ## Project Overview
 
-This is a bidirectional todo synchronization tool that syncs between a local `~/.tasks` file and Todoist. The application uses JavaScript with ES modules and provides a CLI interface for todo management and sync operations.
+This is a task CLI whose primary goal is to synchronize tasks between a local
+~/.tasks/current.tasks file and a remote Todoist project containing tasks.
+The application uses Node.JS and ES modules.  Local refers to the
+current.tasks on the file system, and the term remote refers to the Todoist
+tasks in the Sync project.
 
-## Development Commands
+## Local tasks
+Local tasks use a priority of 0 through 4, 0 being the highest, 4 being the
+lowest.
 
-### Task Management
-- `npm run tasks` or `npm run tasks -- list` - Show current todos from both local and remote
-- `npm run tasks -- list -l` - Show only local current todos
-- `npm run tasks -- list -r` - Show only remote current todos
-- `npm run tasks -- list -c` - Show completed tasks from both sources
+Local tasks do not have due dates.
 
-### Task Creation
-- `npm run tasks -- create "New task"` - Create task locally (default)
-- `npm run tasks -- create "New task" -r` - Create task on Todoist only
-- `npm run tasks -- create "Urgent task" -p 0` - Create high priority task locally
+There are test and production file locations for local tasks.
 
-### Synchronization
-- `npm run tasks -- sync` - Full bidirectional sync
-- `npm run tasks -- sync -p` - Show sync preview (dry-run)
-- `npm run tasks -- sync -b` - Create backup only
+Production tasks are stored in ~/.tasks/current.tasks.
+Production completed tasks are in  ~/.tasks/completed.
+Production transation log describing local creates, updates,
+completes, and removes in ~/.tasks/transactions.yaml.
 
-### Duplicates Management
-- `npm run tasks -- dups` - Find and remove duplicates from both sources
-- `npm run tasks -- dups -p` - Show duplicates without removing them
-- `npm run tasks -- dups -l` - Process local duplicates only
-- `npm run tasks -- dups -r` - Process remote duplicates only
-
-### Advanced Commands
-- `npm run tasks -- bootstrap` - Bootstrap correlations by matching tasks by content
-- `npm run tasks -- clean-dates` - Clean duplicate completion dates
-
-### Development Tools
-- `npm test` - Run Jest tests  
-- `npm run lint` - Run ESLint on JavaScript files
-
-### Testing
-- Tests use a separate Todoist project called "Test" for isolation from production data
-- The test environment is configured via `test/util.js` with `TODOIST_PROJECT_NAME: 'Test'`
-- Test utilities automatically create/clear the "Test" project to ensure clean test runs
-
-### Test Infrastructure
-- **test/util.js**: Core testing utilities with functions for setup, cleanup, and command execution
-  - `init()`: Sets up clean test environment (creates test project, clears tasks, initializes local files)
-  - `sh()`: Executes CLI commands with test environment variables
-  - `normalize()`: Normalizes YAML output by removing location/due fields for comparison
-  - `diff()`: Compares local vs remote task outputs
-  - `cleanup()`: Cleans up test files and remote project after tests
-- **test/test.js**: Example test implementation showing sync functionality
-  - Use this as a template for creating new tests
-  - Keep tests simple, focused, and easy to read
-  - Provide just enough output to verify functionality (single ✅ success message per test)
-  - Follow the pattern: setup → action → verify → cleanup
-- **Test file isolation**: Tests use `test/temp/` directory for local task files (`.tasks`, `.tasks.completed`)
-  - This prevents interference with production `~/.tasks` files
-  - Test environment automatically redirects `TODO_DIR` to `test/temp/`
-
-## Architecture
-
-### Core Components
-
-- **tasks.js**: Main CLI interface with subcommands for listing, creating, syncing, and duplicates management
-- **lib.js**: Core functionality for reading/writing todos, Todoist API integration, and sync logic
-
-### Sync Architecture
-
-The sync engine uses direct Todoist IDs for correlation:
-- **Todoist IDs**: Tasks correlated using actual Todoist task IDs (e.g., `(12345678)`)
-- **Local Correlation Markers**: Tasks marked with `(todoistId)` for tracking
-- **Conflict Resolution**: Local changes always win over remote changes
-
-### Priority Mapping
-
-Local priorities (0-4) map to Todoist priorities:
-- Priority 0 → Todoist Priority 4 (highest/red) + due date "today" or prior
-- Priority 1 → Todoist Priority 4 (highest/red) without due date or future due date
-- Priority 2 → Todoist Priority 3 (orange)
-- Priority 3 → Todoist Priority 2 (blue)
-- Priority 4 → Todoist Priority 1 (lowest/no flag)
+Test tasks are stored in test/.tasks/current.tasks.
+Test completed tasks are in  test/.tasks/completed.
+Test transation log describing local creates, updates,
+completes, and removes is stored in tet/.tasks/transactions.yaml.
 
 ### Todo File Format
-
-The `~/.tasks` file uses structured sections with optional Todoist ID markers:
+The `~/.tasks/current.tasks` file uses structured sections for each of the 5
+priorities with optional Todoist ID markers on each task if the task has been
+synced:
 ```
 Priority 0
 -------------------------------------------------------------------------------
@@ -97,23 +40,120 @@ another urgent task
 
 Priority 1
 -------------------------------------------------------------------------------
-high priority task (87654321)
+Some P1 task (87654321)
+
+Priority 2
+-------------------------------------------------------------------------------
+Some P2 task
+
+Priority 3
+-------------------------------------------------------------------------------
+Some P3 task
+
+Priority 4
+-------------------------------------------------------------------------------
+Some P4 task
 ```
 
-## Key Implementation Details
+Subtasks are represented like this locally:
 
+Some parent task
+- subtask 1
+- subtask 2
+
+## Remote tasks
+Production remote tasks are all stored in a Todist project named Sync.
+
+Test remote tasks are all stored in a Todist project named Test.
+
+Remote Todoist tasks use a different priority model, 4 to 1, where 4 is the
+highest, and 1 is the lowest
+
+We map local tasks to remote tasks, but we use the 0 to 4 model defined by
+local tasks as our canonical model.
+
+Local tasks that are priority 0 map to remote tasks in Todoist that are
+priority 4, but, they have a due date that is today, or a day prior to today.
+
+## Priority Mapping
+Local priorities (0-4) map to remote Todoist priorities:
+- Priority 0 → Todoist Priority 4 (highest/red) + due date "today" or prior
+- Priority 1 → Todoist Priority 4 (highest/red) without due date or future due date
+- Priority 2 → Todoist Priority 3 (orange)
+- Priority 3 → Todoist Priority 2 (blue)
+- Priority 4 → Todoist Priority 1 (lowest/no flag)
+
+## Testing
+- Tests use a separate Todoist project called "Test" for isolation from production data
+- The test environment is configured via `test/util.js` with `TODOIST_PROJECT_NAME: 'Test'`
+- Test utilities automatically create/clear the "Test" project to ensure clean test runs
+
+## Project Structure
+- `tasks.js`: Main CLI interface and entry point
+- `lib.js`: Core functionality for reading/writing tasks, Todoist API integration, and sync logic
+- `src/commands/`: Command implementations for each CLI subcommand
+  - `create.js`: Task creation functionality
+  - `list.js`: Task listing and display
+  - `sync.js`: Bidirectional synchronization logic
+  - `complete.js`: Task completion handling
+  - `update.js`: Task modification operations
+  - `remove.js`: Task deletion functionality
+  - `dups.js`: Duplicate detection and removal
+- `src/data/`: Data layer for local and remote task management
+  - `local.js`: Local file system task operations
+  - `todoist.js`: Todoist API integration
+  - `index.js`: Unified data access interface
+- `src/display/`: Output formatting and presentation
+  - `console.js`: Console output formatting
+  - `yaml.js`: YAML output formatting
+- `src/config/`: Configuration and utilities
+  - `constants.js`: Application constants and settings
+  - `errorHandler.js`: Error handling utilities
+- `src/models/`: Data models and structures
+  - `Task.js`: Task data model and validation
+- `test/util.js`: Core testing utilities with functions for setup, cleanup, and command execution
+  - `init()`: Sets up clean test environment (creates test project, clears tasks, initializes local files)
+  - `sh()`: Executes CLI commands with test environment variables
+  - `normalize()`: Normalizes YAML output by removing location/due fields for comparison
+  - `diff()`: Compares local vs remote task outputs
+  - `cleanup()`: Cleans up test files and remote project after tests
+  - Add new utilities here
+- `test/test.js`: Example test implementation showing sync functionality
+  - Use this as a template for creating new tests
+  - Keep tests simple, focused, and easy to read
+  - Provide just enough output to verify functionality (single ✅ success message per test)
+- **Test file isolation**: Tests use `test/.tasks/` directory for local
+  - This prevents interference with production `~/.tasks/` files
+  - Test environment automatically redirects `TODO_DIR` to `test/.tasks/`
+
+## Sync Design
+The sync engine uses direct Todoist IDs for correlation:
+- **Todoist IDs**: Tasks correlated using actual Todoist task IDs (e.g., `(12345678)`)
+- **Local Correlation Markers**: Tasks marked with `(todoistId)` for tracking
+- **Conflict Resolution**: Local changes always win over remote changes
+
+## Implementation Details
 - Uses ES modules with `.js` imports in JavaScript files
 - Configuration via environment variables (TODOIST_API_TOKEN, TODOIST_PROJECT_NAME)
-- Completed tasks filtered to last 30 days only
 - Direct Todoist ID correlation for task tracking
 - Dry-run sync preview mode showing what changes would be made
 
-## Code Organization
+## Git Commit Guidelines
+- Please use Conventional Commits formatting for git commits.
+- Please do not mention yourself (Claude) as a co-author when commiting, or
+  include any lines to Claude Code.
 
-- **Function Order**: Organize functions top-down with main/entry functions at the top, followed by helper functions in order of their call hierarchy
-- **Avoid Bottom-Up Organization**: Do not place main functions at the bottom of files
+## Guidance Memories
+- Please ask for clarification upfront, upon the initial prompts, when you
+  need more direction.
 
-## Claude Code Configuration
+## Important Notes
+- **Function Order**: Organize functions top-down with main/entry functions
+  at the top, followed by helper functions in order of their call hierarchy
+- **NEVER show dotenv debug messages** - The user has explicitly requested
+  that dotenv debug output (like "[dotenv@17.2.0] injecting env (0) from
+  .env") should NEVER be displayed. Always suppress these messages when
+  working with dotenv configuration.
 
-ALWAYS use `.claude/settings.json` for project settings (not settings.local.json or settings.yaml).
-This is the official project settings file according to Claude Code documentation.
+- ALWAYS use `.claude/settings.json` for project settings.
+  NEVER use `.claude/settings.local.json`.

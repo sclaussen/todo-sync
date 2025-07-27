@@ -107,8 +107,8 @@ function testYamlOutput() {
     console.log('\n📊 Testing: YAML output format');
     const result = runTasksCLI('list -l -y');
     
-    // Should contain YAML structure
-    if (!result.output.includes('current:') || !result.output.includes('tasks:')) {
+    // Should contain YAML structure (array of tasks)
+    if (!result.output.includes('- name:') || !result.output.includes('priority:')) {
         throw new Error('Expected YAML format output');
     }
     

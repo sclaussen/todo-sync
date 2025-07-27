@@ -1,7 +1,7 @@
 import { Task } from '../models/Task.js';
 import { addTaskToLocal } from '../data/local.js';
 import { createTodoistTask } from '../data/todoist.js';
-import { PRIORITIES, DISPLAY_ICONS } from '../config/constants.js';
+import { PRIORITIES, DISPLAY_ICONS, logTransaction, getCurrentTimestamp } from '../config/constants.js';
 
 export async function execute(content, options) {
     validateOptions(options);
@@ -15,6 +15,14 @@ export async function execute(content, options) {
     if (createLocal) {
         await addTaskToLocal(task, priority);
         console.log(`${DISPLAY_ICONS.SUCCESS} Created local task: "${content}" (Priority ${priority})`);
+        
+        // Log transaction
+        await logTransaction({
+            type: 'create',
+            timestamp: getCurrentTimestamp(),
+            name: content,
+            priority: priority
+        });
     }
 
     if (createRemote) {
@@ -28,6 +36,16 @@ export async function execute(content, options) {
         }
         
         console.log(`${DISPLAY_ICONS.SUCCESS} Created remote task: "${content}" (Priority ${priority}, ID: ${result.id})`);
+        
+        // Log transaction (only if not already logged locally)
+        if (!createLocal) {
+            await logTransaction({
+                type: 'create',
+                timestamp: getCurrentTimestamp(),
+                name: content,
+                priority: priority
+            });
+        }
     }
 }
 

@@ -104,23 +104,6 @@ async function main() {
             await execute(options);
         }));
 
-    // Legacy commands (import from old system)
-    const legacyCommands = [
-        'bootstrap', 'clean-dates'
-    ];
-
-    for (const cmd of legacyCommands) {
-        program
-            .command(`${cmd} [args...]`)
-            .description(`Legacy ${cmd} command`)
-            .allowUnknownOption()
-            .action(withErrorHandler(async(...args) => {
-                // Import and execute from original lib.js for now
-                console.log(`⚠️  Using legacy command: ${cmd}`);
-                const originalTasks = await import('./tasks.js');
-                // This is a placeholder - would need proper legacy handling
-            }));
-    }
 
     // Default to list
     program.action(withErrorHandler(async() => {

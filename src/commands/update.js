@@ -1,7 +1,7 @@
 import { Task } from '../models/Task.js';
 import { getLocalTasks, updateTaskInLocal, removeTaskFromLocal, addTaskToLocal } from '../data/local.js';
 import { getTodoistTasks, updateTodoistTask } from '../data/todoist.js';
-import { PRIORITIES, DISPLAY_ICONS } from '../config/constants.js';
+import { PRIORITIES, DISPLAY_ICONS, logTransaction, getCurrentTimestamp } from '../config/constants.js';
 import { stripCorrelationId, extractCorrelationId } from '../../taskLog.js';
 
 export async function execute(id, content, options) {
@@ -31,7 +31,10 @@ export async function execute(id, content, options) {
 
     // Update local task
     if (updateLocal && localTask) {
+        const originalContent = localTask.content;
+        const originalPriority = localTask.priority;
         const finalContent = content || localTask.content;
+        
         await updateLocalTask(localTask, finalContent, newPriority);
         
         const changes = [];
@@ -39,11 +42,34 @@ export async function execute(id, content, options) {
         if (newPriority !== undefined) changes.push(`priority: ${newPriority}`);
         
         console.log(`${DISPLAY_ICONS.SUCCESS} Updated local task${changes.length > 0 ? ` (${changes.join(', ')})` : ''}`);
+        
+        // Log transactions for changes
+        if (content && content !== originalContent) {
+            await logTransaction({
+                type: 'update-name',
+                timestamp: getCurrentTimestamp(),
+                name: originalContent,
+                newName: finalContent
+            });
+        }
+        
+        if (newPriority !== undefined && newPriority !== originalPriority) {
+            await logTransaction({
+                type: 'update-priority',
+                timestamp: getCurrentTimestamp(),
+                name: finalContent,
+                oldPriority: originalPriority,
+                newPriority: newPriority
+            });
+        }
     }
 
     // Update remote task
     if (updateRemote && remoteTask) {
+        const originalContent = remoteTask.content;
+        const originalPriority = remoteTask.priority;
         const finalContent = content || remoteTask.content;
+        
         await updateRemoteTask(remoteTask, finalContent, newPriority);
         
         const changes = [];
@@ -51,6 +77,28 @@ export async function execute(id, content, options) {
         if (newPriority !== undefined) changes.push(`priority: ${newPriority}`);
         
         console.log(`${DISPLAY_ICONS.SUCCESS} Updated remote task${changes.length > 0 ? ` (${changes.join(', ')})` : ''}`);
+        
+        // Log transactions for changes (only if not already logged locally)
+        if (!updateLocal) {
+            if (content && content !== originalContent) {
+                await logTransaction({
+                    type: 'update-name',
+                    timestamp: getCurrentTimestamp(),
+                    name: originalContent,
+                    newName: finalContent
+                });
+            }
+            
+            if (newPriority !== undefined && newPriority !== originalPriority) {
+                await logTransaction({
+                    type: 'update-priority',
+                    timestamp: getCurrentTimestamp(),
+                    name: finalContent,
+                    oldPriority: originalPriority,
+                    newPriority: newPriority
+                });
+            }
+        }
     }
 }
 

@@ -1,7 +1,6 @@
 import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { join } from 'path';
 import { homedir } from 'os';
-import { createHash } from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
 import yaml from 'js-yaml';
 
@@ -107,18 +106,6 @@ export function getCurrentCorrelations() {
 }
 
 // This function is no longer needed - we use Todoist IDs directly
-// Kept for backward compatibility during migration
-export function generateCorrelationId(content) {
-    console.warn('generateCorrelationId is deprecated - use Todoist ID directly');
-    const fullUuid = uuidv4();
-    const hash = createHash('md5').update(content + fullUuid).digest('hex');
-    return hash.substring(0, 8);
-}
-
-// Calculate checksum for content
-export function calculateChecksum(content) {
-    return createHash('md5').update(content.trim().toLowerCase()).digest('hex').substring(0, 12);
-}
 
 // Find correlation by Todoist ID - simplified to direct lookup
 export function findCorrelationByTodoistId(todoistId) {

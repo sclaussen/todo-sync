@@ -8,6 +8,57 @@ const originalWarn = console.warn;
 const originalError = console.error;
 console.log = () => {};
 console.warn = () => {};
+
+// Transaction logging functionality
+import { promises as fs } from 'fs';
+import { dirname } from 'path';
+
+async function ensureDirectoryExists(filePath) {
+    const dir = dirname(filePath);
+    try {
+        await fs.access(dir);
+    } catch {
+        await fs.mkdir(dir, { recursive: true });
+    }
+}
+
+async function logTransaction(entry) {
+    const filePath = FILE_PATHS.TRANSACTIONS;
+    await ensureDirectoryExists(filePath);
+    
+    try {
+        let content = '';
+        try {
+            content = await fs.readFile(filePath, 'utf8');
+        } catch {
+            // File doesn't exist, create header
+            content = '# Entries are append-only, ordered chronologically\nentries:\n\n';
+        }
+        
+        // Format the entry as YAML
+        const yamlEntry = `  - type: ${entry.type}
+    timestamp: ${entry.timestamp}
+    name: "${entry.name}"${entry.oldPriority !== undefined ? `
+    old-priority: ${entry.oldPriority}` : ''}${entry.newPriority !== undefined ? `
+    new-priority: ${entry.newPriority}` : ''}${entry.newName !== undefined ? `
+    new-name: "${entry.newName}"` : ''}${entry.priority !== undefined ? `
+    priority: ${entry.priority}` : ''}
+    source: cli
+
+`;
+        
+        content += yamlEntry;
+        await fs.writeFile(filePath, content, 'utf8');
+    } catch (error) {
+        console.error('Error logging transaction:', error);
+    }
+}
+
+function getCurrentTimestamp() {
+    return new Date().toISOString().replace('Z', new Date().toTimeString().slice(9, 14));
+}
+
+export { logTransaction, getCurrentTimestamp };
 console.error = () => {};
 dotenv.config();
 console.log = originalLog;
@@ -32,23 +83,27 @@ export const PRIORITY_LABELS = {
 };
 
 export const FILES = {
-    TASK: '.tasks',
-    COMPLETED: '.tasks.completed',
-    LOG: '.tasks.yaml'
-};
+    TASK: 'current.tasks',
+    COMPLETED: 'completed',
+    LOG: '.tasks.yaml',
+    TRANSACTIONS: 'transactions.yaml'
+};;
 
 // Dynamic file paths that respect TODO_DIR environment variable
 export const FILE_PATHS = {
     get TASK() {
-        return join(process.env.TODO_DIR || homedir(), FILES.TASK);
+        return join(process.env.TODO_DIR || join(homedir(), '.tasks'), FILES.TASK);
     },
     get COMPLETED() {
-        return join(process.env.TODO_DIR || homedir(), FILES.COMPLETED);
+        return join(process.env.TODO_DIR || join(homedir(), '.tasks'), FILES.COMPLETED);
     },
     get LOG() {
-        return join(process.env.TODO_DIR || homedir(), FILES.LOG);
+        return join(process.env.TODO_DIR || join(homedir(), '.tasks'), FILES.LOG);
+    },
+    get TRANSACTIONS() {
+        return join(process.env.TODO_DIR || join(homedir(), '.tasks'), FILES.TRANSACTIONS);
     }
-};
+};;
 
 export const TODOIST = {
     API_TOKEN: process.env.TODOIST_API_TOKEN || '',

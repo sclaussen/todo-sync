@@ -28,7 +28,7 @@ console.warn = originalConsoleWarn;
 console.info = originalConsoleInfo;
 
 // Test configuration - use a subdirectory inside test
-const TEST_DIR = join(__dirname, 'temp');
+const TEST_DIR = join(__dirname, '.tasks');
 const TASKS_CLI = join(__dirname, '..', 'tasks.js');
 
 // Test environment
@@ -164,7 +164,7 @@ async function init() {
     // Ensure test directory exists
     mkdirSync(TEST_DIR, { recursive: true });
     
-    // Create empty .tasks file (overwrite existing)
+    // Create empty current.tasks file (overwrite existing)
     const emptyTasksContent = `Priority 0
 -------------------------------------------------------------------------------
 
@@ -182,10 +182,13 @@ Priority 4
 
 `;
     
-    writeFileSync(join(TEST_DIR, '.tasks'), emptyTasksContent);
+    writeFileSync(join(TEST_DIR, 'current.tasks'), emptyTasksContent);
     
-    // Create empty .tasks.completed file (overwrite existing)
-    writeFileSync(join(TEST_DIR, '.tasks.completed'), '');
+    // Create empty completed file (overwrite existing)
+    writeFileSync(join(TEST_DIR, 'completed'), '');
+    
+    // Create empty transactions.yaml file (overwrite existing)
+    writeFileSync(join(TEST_DIR, 'transactions.yaml'), '');
 }
 
 /**
@@ -212,14 +215,18 @@ async function cleanup() {
     await clearTodoistProject();
     
     // Clean up test task files (but keep the directory)
-    const tasksFile = join(TEST_DIR, '.tasks');
-    const completedFile = join(TEST_DIR, '.tasks.completed');
+    const tasksFile = join(TEST_DIR, 'current.tasks');
+    const completedFile = join(TEST_DIR, 'completed');
+    const transactionsFile = join(TEST_DIR, 'transactions.yaml');
     
     if (existsSync(tasksFile)) {
         rmSync(tasksFile);
     }
     if (existsSync(completedFile)) {
         rmSync(completedFile);
+    }
+    if (existsSync(transactionsFile)) {
+        rmSync(transactionsFile);
     }
     
     console.log('🧹 Cleaned up test task files');
