@@ -2,7 +2,7 @@ import { readFileSync, existsSync, writeFileSync, mkdirSync, copyFileSync } from
 import { join, dirname } from 'path';
 import dotenv from 'dotenv';
 import yaml from 'js-yaml';
-import { FILE_PATHS, TODOIST } from './src/config/constants.js';
+import { FILE_PATHS, TODOIST, logTransaction, getCurrentTimestamp } from './src/config/constants.js';
 import {
     extractCorrelationId,
     stripCorrelationId,
@@ -932,6 +932,50 @@ export async function executeSync(changes, showLocal, showRemote) {
         }
 
         results.success = results.errors.length === 0;
+        
+        // Log sync transaction if successful
+        if (results.success && allChanges.length > 0) {
+            // Count changes by type and location
+            const localChangesCount = allChanges.filter(c => c.location === 'local').length;
+            const remoteChangesCount = allChanges.filter(c => c.location === 'remote').length;
+            
+            // Build summary counts
+            const counts = {
+                local: { new: 0, updated: 0, completed: 0 },
+                remote: { new: 0, updated: 0, completed: 0 }
+            };
+            
+            allChanges.forEach(change => {
+                const location = change.location === 'local' ? 'local' : 'remote';
+                const action = change.action.toLowerCase();
+                if (action === 'new') counts[location].new++;
+                else if (action === 'updated') counts[location].updated++;
+                else if (action === 'completed') counts[location].completed++;
+            });
+            
+            // Build summary string
+            const summaryParts = [];
+            if (counts.local.new > 0 || counts.remote.new > 0) {
+                summaryParts.push(`Created: ${counts.local.new} local, ${counts.remote.new} remote`);
+            }
+            if (counts.local.updated > 0 || counts.remote.updated > 0) {
+                summaryParts.push(`Updated: ${counts.local.updated} local, ${counts.remote.updated} remote`);
+            }
+            if (counts.local.completed > 0 || counts.remote.completed > 0) {
+                summaryParts.push(`Completed: ${counts.local.completed} local, ${counts.remote.completed} remote`);
+            }
+            
+            const summary = summaryParts.join(' | ');
+            
+            // Log the sync transaction
+            await logTransaction({
+                type: 'sync',
+                timestamp: getCurrentTimestamp(),
+                summary: summary,
+                local_changes: localChangesCount,
+                remote_changes: remoteChangesCount
+            });
+        }
 
     } catch (error) {
         results.success = false;

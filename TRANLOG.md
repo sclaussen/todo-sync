@@ -8,55 +8,78 @@ The transaction log (`~/.tasks/transactions.yaml`) maintains a chronological rec
 # Entries are append-only, ordered chronologically
 entries:
   - type: create
-    timestamp: 2025-07-22T19:38:24-0700
+    timestamp: 2025-07-22T19:38:24Z
     name: "P0 item"
     priority: 0
     source: task.el
 
   - type: create
-    timestamp: 2025-07-22T19:38:27-0700
+    timestamp: 2025-07-22T19:38:27Z
     name: "P1 item"
     priority: 1
     source: task.el
 
   - type: update-priority
-    timestamp: 2025-07-22T19:38:43-0700
+    timestamp: 2025-07-22T19:38:43Z
     name: "P0 item"
     old-priority: 0
     new-priority: 2
     source: task.el
 
   - type: update-name
-    timestamp: 2025-07-22T19:39:05-0700
+    timestamp: 2025-07-22T19:39:05Z
     name: "P1 item"
     new-name: "P1 item new name"
     source: task.el
 
   - type: complete
-    timestamp: 2025-07-22T19:39:45-0700
+    timestamp: 2025-07-22T19:39:45Z
     name: "P1 item new name"
     source: task.el
 
   - type: create
-    timestamp: 2025-07-22T20:05:30-0700
+    timestamp: 2025-07-22T20:05:30Z
     name: "P3 item"
     priority: 3
     source: task.el
 
   - type: update-name
-    timestamp: 2025-07-22T20:05:35-0700
+    timestamp: 2025-07-22T20:05:35Z
     name: "P3 item"
     new-name: "P3 item edited"
     source: task.el
 
   - type: complete
-    timestamp: 2025-07-22T20:05:37-0700
+    timestamp: 2025-07-22T20:05:37Z
     name: "P3 item edited"
     source: task.el
 
+  - type: sync
+    timestamp: 2025-07-22T19:38:27Z
 ```
 
 ## Entry Types
+
+### sync
+Records synchronization operations between local and remote tasks.
+
+**Properties:**
+- `type`: "sync"
+- `timestamp`: ISO 8601 timestamp with timezone
+- `source`: Source of the operation ("cli")
+- `summary`: Summary of sync results (created, updated, etc.)
+- `local_changes`: Number of changes made to local tasks (optional)
+- `remote_changes`: Number of changes made to remote tasks (optional)
+
+**Example:**
+```yaml
+  - type: sync
+    timestamp: 2025-07-28T10:30:45-0700
+    source: cli
+    summary: "Created: 2 local, 1 remote | Updated: 3 local, 2 remote"
+    local_changes: 5
+    remote_changes: 3
+```
 
 ### create
 Records the creation of a new task.

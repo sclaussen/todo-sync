@@ -36,8 +36,20 @@ async function logTransaction(entry) {
         }
 
         // Format the entry as YAML
-        const yamlEntry = `  - type: ${entry.type}
-    timestamp: ${entry.timestamp}
+        let yamlEntry = `  - type: ${entry.type}
+    timestamp: ${entry.timestamp}`;
+        
+        // Add fields based on entry type
+        if (entry.type === 'sync') {
+            yamlEntry += `
+    source: cli${entry.summary ? `
+    summary: "${entry.summary}"` : ''}${entry.local_changes !== undefined ? `
+    local_changes: ${entry.local_changes}` : ''}${entry.remote_changes !== undefined ? `
+    remote_changes: ${entry.remote_changes}` : ''}
+`;
+        } else {
+            // Handle other entry types (create, update, complete, remove)
+            yamlEntry += `
     name: "${entry.name}"${entry.oldPriority !== undefined ? `
     old-priority: ${entry.oldPriority}` : ''}${entry.newPriority !== undefined ? `
     new-priority: ${entry.newPriority}` : ''}${entry.newName !== undefined ? `
@@ -45,6 +57,7 @@ async function logTransaction(entry) {
     priority: ${entry.priority}` : ''}
     source: cli
 `;
+        }
 
         content += yamlEntry;
         await fs.writeFile(filePath, content, 'utf8');

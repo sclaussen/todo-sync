@@ -150,7 +150,8 @@ function displayChangesForSource(changes, source) {
     if (changes.noneToCurrent.length > 0) {
         console.log(`\n${icon} New Tasks:`);
         changes.noneToCurrent.forEach(task => {
-            console.log(`   • ${task.content}`);
+            const priorityLabel = task.priority !== undefined ? `P${task.priority}` : 'P?';
+            console.log(`   • ${priorityLabel}: ${task.content}`);
         });
     }
 
@@ -158,7 +159,8 @@ function displayChangesForSource(changes, source) {
     if (changes.currentToCompleted.length > 0 || changes.noneToCompleted.length > 0) {
         console.log(`\n${icon} Completed Tasks:`);
         [...changes.currentToCompleted, ...changes.noneToCompleted].forEach(task => {
-            console.log(`   • ${task.content}`);
+            const priorityLabel = task.priority !== undefined ? `P${task.priority}` : 'P?';
+            console.log(`   • ${priorityLabel}: ${task.content}`);
         });
     }
 
@@ -167,9 +169,10 @@ function displayChangesForSource(changes, source) {
         console.log(`\n${icon} Updates:`);
         changes.renames.forEach(change => {
             if (change.changeType === 'priority_update') {
-                console.log(`   • ${change.content} (${change.oldPriority}→${change.newPriority})`);
+                console.log(`   • P${change.newPriority}: ${change.content} (P${change.oldPriority}→P${change.newPriority})`);
             } else {
-                console.log(`   • ${change.oldContent} → ${change.newContent}`);
+                const priorityLabel = change.priority !== undefined ? `P${change.priority}` : 'P?';
+                console.log(`   • ${priorityLabel}: ${change.oldContent} → ${change.newContent}`);
             }
         });
     }

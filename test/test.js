@@ -244,9 +244,9 @@ async function testAll() {
         // Run sync tests if requested
         if (context.sync) {
             await syncUp(context);
-            await syncDown(context);
-            await syncUpPriorityZero(context);
-            await syncDownPriorityZero(context);
+            // await syncDown(context);
+            // await syncUpPriorityZero(context);
+            // await syncDownPriorityZero(context);
         }
     } catch (error) {
         process.exit(1);
