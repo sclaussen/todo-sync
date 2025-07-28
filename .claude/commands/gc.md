@@ -1,13 +1,15 @@
 # Git Commit Command
 
 This command will:
-1. Stage all changes in the repository (`git add -A`)
-2. Create a commit with your provided message
-3. Follow Conventional Commits format (you should provide a properly formatted message)
+1. Analyze all staged and unstaged changes in the repository
+2. Automatically generate an appropriate commit message based on the changes
+3. Stage all changes (`git add -A`)
+4. Create the commit with the generated message
+5. Follow Conventional Commits format
 
-**Usage:** `/gc "feat: add new sync functionality"`
+**Usage:** `/gc` (no parameters needed - the commit message will be generated automatically)
 
-**Conventional Commits Format:**
+**Conventional Commits Format Used:**
 - `feat:` for new features
 - `fix:` for bug fixes  
 - `docs:` for documentation changes
@@ -16,10 +18,16 @@ This command will:
 - `chore:` for maintenance tasks
 
 **Important:** 
+- The commit message will be automatically generated based on the changes
 - Do not mention Claude or Claude Code in commit messages
-- Use clear, descriptive commit messages that explain the "why" not just the "what"
+- Clear, descriptive commit messages that explain the "why" not just the "what"
 
 ---
 
+# Analyze changes and create commit
+git status
+git diff --cached
+git diff
+git log --oneline -5
 git add -A
-git commit -m "$1"
+# Generate and apply commit message based on analysis
