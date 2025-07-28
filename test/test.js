@@ -85,14 +85,14 @@ async function createTasksSync(option = '-l') {
 async function createSync(option = '-l') {
     enter(`createSync ${option}`);
     await init2(option);
-    await simpleSync('create', option, 'new task');
+    await simpleSync('create', option, 'NEW TASK NEW TASK');
     success(`createSync ${option}`);
 }
 
 async function updateNameSync(option = '-l') {
     enter(`updateNameSync ${option}`);
     await init2(option);
-    await tasks('update', option, 'p1', null, 'updated p1');
+    await simpleSync('update-name', option, 'p1', null, 'UPDATED P1 UPDATED P1');
     success(`updateNameSync ${option}`);
 }
 
@@ -915,7 +915,7 @@ async function tasks(operation, option = '-l', taskName = 'p1 task', priority = 
 
     case 'complete':
         sh(`node tasks.js complete ${option} ${taskName}`);
-        
+
         // Verify task is no longer in active list and appears in completed list
         sh(`node tasks.js list ${option} -y`, { echo: false, exp: `!data.some(t => t.name === '${taskName}')`, errmsg: `Task '${taskName}' should not be in active tasks after complete on ${side}` });
         sh(`node tasks.js list ${option} -c -y`, { echo: false, exp: `data.some(t => t.name === '${taskName}')`, errmsg: `Task '${taskName}' should be in completed tasks on ${side}` });
@@ -923,7 +923,7 @@ async function tasks(operation, option = '-l', taskName = 'p1 task', priority = 
 
     case 'remove':
         sh(`node tasks.js remove ${option} ${taskName}`);
-        
+
         // Verify task is no longer in active list
         sh(`node tasks.js list ${option} -y`, { echo: false, exp: `!data.some(t => t.name === '${taskName}')`, errmsg: `Task '${taskName}' should not exist after remove on ${side}` });
         break;
@@ -974,7 +974,7 @@ async function testAll() {
         // await createComplete('-r');
         // await createRemove('-l');
         // await createRemove('-r');
-        // await createUpdateName('-l');
+        await createUpdateName('-l');
         // await createUpdateName('-r');
         // await createUpdatePriority('-l');
         // await createUpdatePriority('-r');
@@ -984,8 +984,12 @@ async function testAll() {
         // await createPriorityZeroSync('-r');
         // await createTasksSync('-l');
         // await createTasksSync('-r');
-        await updatePrioritySync('-l');
+        // await createSync('-l');
         // await createSync('-r');
+        // await updateNameSync('-l');
+        // await updateNameSync('-r');
+        // await updatePrioritySync('-l');
+        // await updatePrioritySync('-r');
 
 
         // // Show which tests are being run
