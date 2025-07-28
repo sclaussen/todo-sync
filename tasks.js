@@ -12,7 +12,8 @@ const commands = {
     complete: () => import('./src/commands/complete.js'),
     remove: () => import('./src/commands/remove.js'),
     dups: () => import('./src/commands/dups.js'),
-    init: () => import('./src/commands/init.js')
+    init: () => import('./src/commands/init.js'),
+    tran: () => import('./src/commands/tran.js')
 };
 
 async function main() {
@@ -114,6 +115,15 @@ async function main() {
             await execute(options);
         }));
 
+    // Tran command (debug - show transaction log)
+    program
+        .command('tran')
+        .description('Display transaction log')
+        .action(withErrorHandler(async(options) => {
+            const { execute } = await commands.tran();
+            await execute(options);
+        }));
+
     // Default to list
     program.action(withErrorHandler(async() => {
         const { execute } = await commands.list();
@@ -134,6 +144,7 @@ Examples:
   tasks sync -p                 # Preview sync changes
   tasks sync                    # Execute full sync
   tasks init                    # Initialize clean test environment (TEST mode only)
+  tasks tran                    # Display transaction log
     `);
 
     program.parse();

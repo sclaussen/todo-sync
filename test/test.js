@@ -164,6 +164,15 @@ async function syncUp(context) {
     sh(`node tasks.js create -l -P2 p2`);
     sh(`node tasks.js create -l -P3 p3`);
     sh(`node tasks.js create -l -P4 p4`);
+    
+    // Check transaction log before sync - should have create entries
+    const transBefore = sh(`node tasks.js tran`);
+    const createCount = (transBefore.match(/type: create/g) || []).length;
+    if (createCount !== 5) {
+        fail(`Transaction log should have 5 create entries, found ${createCount}`);
+        throw new Error();
+    }
+    
     sh(`node tasks.js sync`);
 
     const localTasks = sh(`node tasks.js list -l -y`);
@@ -175,6 +184,15 @@ async function syncUp(context) {
         fail(differences.message);
         console.log(localTasks);
         console.log(remoteTasks);
+        throw new Error();
+    }
+    
+    // Check transaction log after sync - should have sync entry
+    const transAfter = sh(`node tasks.js tran`);
+    if (!transAfter.includes('type: sync')) {
+        fail('Transaction log should have sync entry after sync');
+        console.log('Transaction log contents:');
+        console.log(transAfter);
         throw new Error();
     }
 
@@ -207,6 +225,7 @@ async function syncDown(context) {
 
     success('syncDown');
 }
+
 
 async function testAll() {
     try {
