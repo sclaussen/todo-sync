@@ -44,6 +44,7 @@ claude
 ```bash
 /ide             # Use if running in an IDE window
 /terminal-setup  # Enable Shift-Return for multi-line prompts.
+/model sonnet    # change the default model to sonnet
 /init            # Generates CLAUDE.md, docs project info, any persistent context required
 /config          # Verify/update as required
 ```
@@ -52,42 +53,69 @@ claude
 
 # Context
 
-## Files
+## Implicit Context Management
+
+Each Claude Code session maintains context:
+
+1. Your prompts are added to the context
+2. Tool executions (file reads, searches, edits) and their results become part of the context
+3. Claude Code's responses are included in the ongoing context
+4. System messages and reminders are also part of the context
+
+This accumulating context allows Claude Code to maintain awareness of what
+has been discussed and worked on throughout the session, but it also means
+the context grows larger over time, which eventually reaches token limits,
+and a large context can also confuse the model.
+
+When the context nears the limit, Claude Code auto compacts the context.
+This compaction can result in suboptimal responses.
+
+## Configuring Persistent Context
+
+Claude automatically adds these memory files to the context:
 
 ```bash
-$repo/CLAUDE.md         # Project scoped memory checked in
-$repo/somedir/CLAUDE.md # Directory scoped memory
-$repo/CLAUDE.local.md   # Project scoped memory (not checked in)
-~/.claude/CLAUDE.md     # User scoped memory
+$repo/CLAUDE.md           # Project scoped memory checked in
+$repo/$somedir/CLAUDE.md  # Directory scoped memory
+$repo/CLAUDE.local.md     # Project scoped memory (not checked in)
+~/.claude/CLAUDE.md       # User scoped memory
 ```
 
-## Managing Context
-
-Claude tracks recent interactions as context for smarter responses.
-
-- Use `@filename` to refer to project files.
-- Claude auto-compacts context to stay within token limits.
-- Use `/clear` to wipe session memory.
-- Use `/focus` to spotlight one file or topic.
+The memory files can be explicitly managed with the following commands:
 
 ```bash
-/init
-/memory
+/init        # analyze the code base and create the initial $repo/CLAUDE.md
+/memory      # Edit existing memory files
+```
+
+The following can be added to prompts as well to explicitly manipulate the
+memory files and the current context:
+
+```bash
+# something  # Claude prompts for where to add the memory
+@filename    # Added if referenced in the prompt
 ```
 
 ## /clear
 
-Everytime you're done with a feature or bug fix clear your context with
-/clear.
+The /clear command starts a new session that starts with only the context
+from memory.  To minimize costs, and to keep a focused context, everytime you
+done with a feature, or bug fix, or find Claude Code in a confused state, use
+/clear to clear your context.
+
+## /compact [optional instructions]
+
+Use /compact to explicitly compact the context.  The /compact command can
+optionally take compaction instructions.
+
+## /agents
+
+Another way to optimize how context is used to create independent
+[agents](https://docs.anthropic.com/en/docs/claude-code/sub-agents).
 
 
 
 # Workflow
-
-## Esc-Esc
-
-Anytime you want to pause/halt an prompt response.  You can pick up directly
-from where you paused.
 
 ### Shift+Tab
 
@@ -100,6 +128,23 @@ from where you paused.
 Plan mode will allow you to build up an execution plan with Claude before
 executing the plan.
 
+## Esc-Esc
+
+Anytime you want to pause/halt an prompt response.  You can pick up directly
+from where you paused.
+
+
+
+# Thinking
+
+Including specific phrases in the prompt can control how hard the model
+thinks.
+
+- Ultra (32K tokens): `think harder` or ultrathink, think intensely, think longer, think really hard, think super hard, think very hard
+- Mega (10K tokens): `think hard` or think about it, think a lot, think deeply, think more, megathink
+- Exceeded (4K tokens): `think`
+- Default: anything else
+
 
 
 # Configuration
@@ -110,10 +155,14 @@ Claude uses a hidden directory, `$repo/.claude/`, to store configurations,
 hooks, and reusable custom commands. These are shared with your project and
 can be versioned via Git.
 
-Example custom command:
+## Commands
+
+Custom commands can be added as markdown documents in the
+`$repo/.claude/commands/` directory.  This is a powerful capability enabling
+users to extend Claude to invoke other LLMs or scripts.
 
 ```bash
-# .claude/commands/gc.md
+# $repo/.claude/commands/gc.md
 git add -A
 git commit -m "$1"
 ```

@@ -2,6 +2,7 @@ node_modules/
 dist/
 *.log
 .env
+test/.env
 .DS_Store
 *.swp
 *.swo
@@ -18,3 +19,5 @@ coverage/
 # TypeScript
 *.tsbuildinfo
 *.d.ts.map
+
+test/.tasks/backups/**

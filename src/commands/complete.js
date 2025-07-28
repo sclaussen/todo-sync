@@ -32,18 +32,18 @@ async function findRemoteTask(id) {
     const { tasks } = current;
     
     // Try to find by Todoist ID
-    const task = tasks.find(t => t.id === id || t.id.toString() === id);
+    const task = tasks.find(t => t.id && (t.id === id || t.id.toString() === id));
     if (task) {
         return task;
     }
     
     // Try to find by content match
-    return tasks.find(t => t.content.includes(id));
+    return tasks.find(t => t.content && t.content.includes(id));
 }
 
 async function completeLocalTask(task) {
     // Remove from current tasks
-    await removeTaskFromLocal(task);
+    await removeTaskFromLocal(task.content);
     
     // Add to completed tasks
     await addCompletedTaskToLocal(task);

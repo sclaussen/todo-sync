@@ -5,6 +5,7 @@ import { fileURLToPath } from 'url';
 const taskscli = getTasksCLI();
 
 async function syncUp() {
+    console.log('✅ Running syncUp');
     await init();
 
     // Create tasks with all priority levels locally first
@@ -31,6 +32,7 @@ async function syncUp() {
 }
 
 async function syncDown() {
+    console.log('✅ Running syncDown');
     await init();
 
     // Create tasks with all priority levels locally first

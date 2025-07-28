@@ -1,57 +1,51 @@
 import { DISPLAY_ICONS, PRIORITY_LABELS } from '../config/constants.js';
 
-export function displayTasks(data, source) {
-    const isLocal = source === 'local';
-    const title = isLocal ? `${DISPLAY_ICONS.LOCAL} LOCAL TASKS (.tasks)` : `${DISPLAY_ICONS.REMOTE} TODOIST TASKS`;
-    const separator = isLocal ? '-' : '=';
-
-    console.log(`\n${title}`);
-    console.log(separator.repeat(70));
-
-    if (data.current.error) {
-        console.log(`${DISPLAY_ICONS.ERROR} Error: ${data.current.error}`);
-    } else if (data.current.message) {
-        console.log(`${DISPLAY_ICONS.INFO} ${data.current.message}`);
-    } else if (data.current.tasks.length === 0) {
-        console.log(`${DISPLAY_ICONS.SUCCESS} No current tasks found`);
-    } else {
-        displayTasksByPriority(data.current.tasks, isLocal);
+export function displayTasks(tasks, prefix, showCompleted) {
+    if (tasks.length === 0) {
+        return;
     }
 
-    if (shouldShowCompleted(data)) {
-        displayCompletedTasks(data.completed.tasks, isLocal);
+    if (showCompleted) {
+        displayCompletedTasksList(tasks, prefix);
+    } else {
+        displayTasksByPriority(tasks, prefix);
     }
 }
 
-function displayTasksByPriority(tasks, isLocal) {
+function displayTasksByPriority(tasks, prefix) {
     const groupedByPriority = groupTasksByPriority(tasks);
     const priorities = Object.keys(groupedByPriority).sort((a, b) =>
         a === 'unknown' ? 1 : b === 'unknown' ? -1 : parseInt(a) - parseInt(b)
     );
 
     for (const priority of priorities) {
-        const priorityLabel = PRIORITY_LABELS[priority] || `Priority ${priority}`;
         const priorityTasks = groupedByPriority[priority];
+        const priorityLabel = prefix ? `${prefix} Priority ${priority}:` : `Priority ${priority}:`;
         
-        console.log(`\n  ${priorityLabel} (${priorityTasks.length} tasks):`);
+        console.log(priorityLabel);
         
         const mainTasks = priorityTasks.filter(task => !task.isSubtask);
         mainTasks.forEach((task, index) => {
-            const dueInfo = !isLocal && task.due ? formatDueDate(task.due) : '';
-            console.log(`    ${index + 1}. ${task.content}${dueInfo}`);
+            const idInfo = task.todoistId ? ` (${task.todoistId})` : '';
+            console.log(`${index + 1}. ${task.content}${idInfo}`);
 
             if (task.subtasks && task.subtasks.length > 0) {
                 task.subtasks.forEach((subtask, subIndex) => {
-                    const subDueInfo = !isLocal && subtask.due ? formatDueDate(subtask.due) : '';
-                    console.log(`       ${String.fromCharCode(97 + subIndex)}. ${subtask.content}${subDueInfo}`);
+                    const subIdInfo = subtask.todoistId ? ` (${subtask.todoistId})` : '';
+                    console.log(`   ${String.fromCharCode(97 + subIndex)}. ${subtask.content}${subIdInfo}`);
                 });
             }
         });
+        
+        // Add blank line between priority sections if there are more priorities
+        if (priorities.indexOf(priority) < priorities.length - 1) {
+            console.log('');
+        }
     }
 }
 
 function displayCompletedTasks(tasks, isLocal) {
-    console.log(`\n${DISPLAY_ICONS.SUCCESS} COMPLETED TASKS${isLocal ? ' (.tasks.completed)' : ''}`);
+    console.log(`\n${DISPLAY_ICONS.SUCCESS} COMPLETED TASKS${isLocal ? ' (completed.yaml)' : ''}`);
     console.log('-'.repeat(50));
 
     if (tasks.length === 0) {
@@ -64,6 +58,20 @@ function displayCompletedTasks(tasks, isLocal) {
             console.log(`  ${index + 1}. ${task.content}${completedDate}`);
         });
     }
+}
+
+function displayCompletedTasksList(tasks, prefix) {
+    if (tasks.length === 0) {
+        return;
+    }
+
+    const label = prefix ? `${prefix}:` : 'Completed:';
+    console.log(label);
+    
+    tasks.forEach((task, index) => {
+        const idInfo = task.todoistId ? ` (${task.todoistId})` : '';
+        console.log(`${index + 1}. ${task.content}${idInfo}`);
+    });
 }
 
 function groupTasksByPriority(tasks) {

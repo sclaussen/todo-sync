@@ -11,7 +11,8 @@ const commands = {
     update: () => import('./src/commands/update.js'),
     complete: () => import('./src/commands/complete.js'),
     remove: () => import('./src/commands/remove.js'),
-    dups: () => import('./src/commands/dups.js')
+    dups: () => import('./src/commands/dups.js'),
+    init: () => import('./src/commands/init.js')
 };
 
 async function main() {
@@ -24,14 +25,14 @@ async function main() {
 
     // Create command
     program
-        .command('create <content>')
+        .command('create <content...>')
         .description('Create a new task')
         .option('-l, --local', 'Create task locally only')
         .option('-r, --remote', 'Create task on Todoist only')
         .option('-P, --priority <number>', 'Set priority level (0-4)')
         .action(withErrorHandler(async(content, options) => {
             const { execute } = await commands.create();
-            await execute(content, options);
+            await execute(content.join(' '), options);
         }));
 
     // List command
@@ -104,6 +105,14 @@ async function main() {
             await execute(options);
         }));
 
+    // Init command (test mode only)
+    program
+        .command('init')
+        .description('Initialize clean test environment (TEST mode only)')
+        .action(withErrorHandler(async(options) => {
+            const { execute } = await commands.init();
+            await execute(options);
+        }));
 
     // Default to list
     program.action(withErrorHandler(async() => {
@@ -124,6 +133,7 @@ Examples:
   tasks dups -p                 # Preview duplicate removal
   tasks sync -p                 # Preview sync changes
   tasks sync                    # Execute full sync
+  tasks init                    # Initialize clean test environment (TEST mode only)
     `);
 
     program.parse();

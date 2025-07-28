@@ -622,92 +622,6 @@ function mapRemotePriority(task) {
     return PRIORITY_MAPPING.REMOTE_TO_LOCAL[task.priority] || 4;
 }
 
-export function displayTasks(data, source) {
-    const isLocal = source === 'local';
-    const title = isLocal ? '📁 LOCAL TASKS (.tasks)' : '☁️  TODOIST TASKS';
-    const separator = isLocal ? '-' : '=';
-
-    console.log(`\n${title}`);
-    console.log(separator.repeat(70));
-
-    if (data.current.error) {
-        console.log(`❌ Error: ${data.current.error}`);
-    } else if (data.current.message) {
-        console.log(`ℹ️  ${data.current.message}`);
-    } else if (data.current.tasks.length === 0) {
-        console.log('✅ No current tasks found');
-    } else {
-        // Group by priority
-        const groupedByPriority = data.current.tasks.reduce((groups, task) => {
-            let priority;
-
-            if (isLocal) {
-                priority = task.priority;
-            } else {
-                // Map Remote priorities to 0-4 scale
-                priority = mapRemotePriority(task);
-            }
-
-            if (!groups[priority]) {
-                groups[priority] = [];
-            }
-            groups[priority].push(task);
-            return groups;
-        }, {});
-
-        // Both local and remote now use 0-4 priority system
-        const priorities = Object.keys(groupedByPriority).sort((a, b) =>
-            a === 'unknown' ? 1 : b === 'unknown' ? -1 : parseInt(a) - parseInt(b)
-        );
-        for (const priority of priorities) {
-            const priorityLabel = getPriorityLabel(priority);
-            console.log(`\n  ${priorityLabel} (${groupedByPriority[priority].length} tasks):`);
-            // Filter out subtasks for main display (they'll be shown under their parents)
-            const mainTasks = groupedByPriority[priority].filter(task => !task.isSubtask);
-
-            mainTasks.forEach((task, index) => {
-                const dueInfo = !isLocal && task.due ? ` (due: ${task.due})` : '';
-                console.log(`    ${index + 1}. ${task.content}${dueInfo}`);
-
-                // Display subtasks if they exist
-                if (task.subtasks && task.subtasks.length > 0) {
-                    task.subtasks.forEach((subtask, subIndex) => {
-                        const subDueInfo = !isLocal && subtask.due ? ` (due: ${subtask.due})` : '';
-                        console.log(`       ${String.fromCharCode(97 + subIndex)}. ${subtask.content}${subDueInfo}`);
-                    });
-                }
-            });
-        }
-    }
-
-    // Completed todos - only show if there's actual data or real errors
-    const shouldShowCompleted = data.completed.tasks.length > 0 ||
-                               (data.completed.error && !data.completed.message) ||
-                               (data.completed.message && !data.completed.message.includes('Use --all'));
-
-    if (shouldShowCompleted) {
-        console.log(`\n✅ COMPLETED TASKS${isLocal ? ' (.tasks.completed)' : ''}`);
-        console.log('-'.repeat(50));
-
-        if (data.completed.error) {
-            console.log(`❌ Error: ${data.completed.error}`);
-        } else if (data.completed.message) {
-            console.log(`ℹ️  ${data.completed.message}`);
-        } else if (data.completed.tasks.length === 0) {
-            console.log('📭 No completed tasks found');
-        } else {
-            data.completed.tasks.forEach((task, index) => {
-                if (!isLocal && task.completed) {
-                    const completedDate = new Date(task.completed).toLocaleDateString();
-                    console.log(`  ${index + 1}. ${task.content} (completed: ${completedDate})`);
-                } else {
-                    console.log(`  ${index + 1}. ${task.content}`);
-                }
-            });
-        }
-    }
-
-}
 
 export function displayDuplicates(results, source) {
     const isLocal = source === 'local';
@@ -1685,6 +1599,11 @@ async function backupLocalFiles(backupDir) {
         const yamlContent = yaml.dump(currentData, { indent: 2, lineWidth: 120 });
         writeFileSync(join(backupDir, 'local.current.yaml'), yamlContent);
         console.log('📄 Backed up: local.current.yaml');
+        
+        // Also backup the raw current.tasks file
+        const rawTasksBackupPath = join(backupDir, 'current.tasks');
+        writeFileSync(rawTasksBackupPath, currentContent);
+        console.log('📄 Backed up: current.tasks');
     }
 
     // Backup completed tasks

@@ -8,14 +8,13 @@ export async function execute(content, options) {
 
     const createLocal = options.local || (!options.local && !options.remote);
     const createRemote = options.remote || (!options.local && !options.remote);
-    const priority = options.priority !== undefined ? parseInt(options.priority) : PRIORITIES.LOWEST;
+    const priority = options.priority !== undefined ? parseInt(options.priority) : PRIORITIES.HIGH;
 
     const task = new Task(content, priority);
 
     if (createLocal) {
         await addTaskToLocal(task, priority);
         console.log(`${DISPLAY_ICONS.SUCCESS} Created local task: "${content}" (Priority ${priority})`);
-        
         // Log transaction
         await logTransaction({
             type: 'create',
@@ -24,7 +23,6 @@ export async function execute(content, options) {
             priority: priority
         });
     }
-
     if (createRemote) {
         const result = await createTodoistTask(task);
         task.todoistId = result.id.toString();
@@ -34,9 +32,7 @@ export async function execute(content, options) {
             task.todoistId = result.id.toString();
             // Update the local task to include the Todoist ID
         }
-        
         console.log(`${DISPLAY_ICONS.SUCCESS} Created remote task: "${content}" (Priority ${priority}, ID: ${result.id})`);
-        
         // Log transaction (only if not already logged locally)
         if (!createLocal) {
             await logTransaction({

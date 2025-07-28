@@ -84,7 +84,7 @@ export const PRIORITY_LABELS = {
 
 export const FILES = {
     TASK: 'current.tasks',
-    COMPLETED: 'completed',
+    COMPLETED: 'completed.yaml',
     LOG: '.tasks.yaml',
     TRANSACTIONS: 'transactions.yaml'
 };;
@@ -102,6 +102,9 @@ export const FILE_PATHS = {
     },
     get TRANSACTIONS() {
         return join(process.env.TODO_DIR || join(homedir(), '.tasks'), FILES.TRANSACTIONS);
+    },
+    get BACKUP_BASE() {
+        return join(process.env.TODO_DIR || join(homedir(), '.tasks'), 'backups');
     }
 };;
 

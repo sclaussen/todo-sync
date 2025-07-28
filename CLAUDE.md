@@ -28,6 +28,30 @@ Test completed tasks are in  test/.tasks/completed.
 Test transation log describing local creates, updates,
 completes, and removes is stored in tet/.tasks/transactions.yaml.
 
+### Primary User Interface: tasks.el
+The `tasks.el` file provides an Emacs major mode that serves as the primary user interface for manipulating local tasks. While the `tasks.js` CLI provides programmatic access and sync functionality, `tasks.el` offers the main interactive experience for day-to-day task management.
+
+**Key Features:**
+- **Global Access**: `C-c C-t` opens the default task file (`~/.tasks/current.tasks`)
+- **Vi-like Navigation**: `j/k` for moving between tasks, `n/p` for next/previous
+- **Quick Task Creation**: Number keys `0-4` create tasks at respective priorities
+- **Priority Management**: `C-c 0-4` change task priority, `,/.` raise/lower priority
+- **Task Operations**: `c` complete, `x` delete, `e` edit task name
+- **Edit Modes**: `C-c C-c` toggles between view mode (vi-like) and edit mode (full editing)
+- **Task Movement**: `J/K` move tasks up/down within priority sections
+- **Transaction Logging**: All operations are logged to `transactions.yaml` with timestamps
+
+**File Structure Management:**
+- Automatically maintains the priority section structure
+- Works with both production (`~/.tasks/`) and test (`test/.tasks/`) directories
+- Supports file auto-detection based on current buffer location
+- Logs all changes with source attribution (`source: task.el`)
+
+**Integration with CLI:**
+- Uses the same file formats and transaction logging as the CLI
+- Changes made in tasks.el are immediately available to the sync engine
+- Maintains compatibility with Todoist ID correlation markers
+
 ### Todo File Format
 The `~/.tasks/current.tasks` file uses structured sections for each of the 5
 priorities with optional Todoist ID markers on each task if the task has been
@@ -90,6 +114,7 @@ Local priorities (0-4) map to remote Todoist priorities:
 
 ## Project Structure
 - `tasks.js`: Main CLI interface and entry point
+- `tasks.el`: Emacs major mode providing the primary user interface for local task management
 - `lib.js`: Core functionality for reading/writing tasks, Todoist API integration, and sync logic
 - `src/commands/`: Command implementations for each CLI subcommand
   - `create.js`: Task creation functionality
@@ -131,6 +156,23 @@ The sync engine uses direct Todoist IDs for correlation:
 - **Todoist IDs**: Tasks correlated using actual Todoist task IDs (e.g., `(12345678)`)
 - **Local Correlation Markers**: Tasks marked with `(todoistId)` for tracking
 - **Conflict Resolution**: Local changes always win over remote changes
+
+## Environment Variables
+The following environment variables are required in the `.env` file:
+
+```bash
+# Required - Todoist API Configuration
+TODOIST_API_TOKEN=your_todoist_api_token_here
+TODOIST_PROJECT_NAME=Sync
+
+# Optional - Development/Testing
+TODO_DIR=/path/to/custom/tasks/directory
+```
+
+**Variable Details:**
+- `TODOIST_API_TOKEN` (Required): Your Todoist API token for accessing the Todoist API
+- `TODOIST_PROJECT_NAME` (Required): Name of the Todoist project to sync with (defaults to "Sync")
+- `TODO_DIR` (Optional): Custom directory for task files (defaults to `~/.tasks/`)
 
 ## Implementation Details
 - Uses ES modules with `.js` imports in JavaScript files

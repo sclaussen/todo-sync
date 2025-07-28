@@ -112,7 +112,7 @@ async function clearTodoistProject() {
         // Get the project ID
         const project = await ensureProjectExists(projectName, apiToken);
         
-        // Fetch tasks directly from the Test project using Todoist API
+        // Fetch current tasks directly from the Test project using Todoist API
         const tasksResponse = await fetch(`https://api.todoist.com/rest/v2/tasks?project_id=${project.id}`, {
             headers: {
                 'Authorization': `Bearer ${apiToken}`,
@@ -126,11 +126,7 @@ async function clearTodoistProject() {
         
         const tasks = await tasksResponse.json();
         
-        if (tasks.length === 0) {
-            return;
-        }
-        
-        // Delete all tasks in the project
+        // Delete all current tasks in the project
         for (const task of tasks) {
             try {
                 await fetch(`https://api.todoist.com/rest/v2/tasks/${task.id}`, {
@@ -142,6 +138,37 @@ async function clearTodoistProject() {
                 });
             } catch (error) {
                 // Silent failure - continue with other deletions
+            }
+        }
+        
+        // Fetch and delete completed tasks from the Test project
+        const completedResponse = await fetch(`https://api.todoist.com/sync/v9/completed/get_all?project_id=${project.id}`, {
+            headers: {
+                'Authorization': `Bearer ${apiToken}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (completedResponse.ok) {
+            const completedData = await completedResponse.json();
+            const completedTasks = completedData.items || [];
+            
+            // Delete all completed tasks using the task_id field and REST API v2
+            for (const completedTask of completedTasks) {
+                try {
+                    // Use task_id for REST API v2 deletion
+                    const taskId = completedTask.task_id;
+                    
+                    await fetch(`https://api.todoist.com/rest/v2/tasks/${taskId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Authorization': `Bearer ${apiToken}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                } catch (error) {
+                    // Silent failure - continue with other deletions
+                }
             }
         }
         
@@ -164,6 +191,13 @@ async function init() {
     // Ensure test directory exists
     mkdirSync(TEST_DIR, { recursive: true });
     
+    // Clean up backups directory but keep the directory itself
+    const backupsDir = join(TEST_DIR, 'backups');
+    if (existsSync(backupsDir)) {
+        rmSync(backupsDir, { recursive: true, force: true });
+    }
+    mkdirSync(backupsDir, { recursive: true });
+    
     // Create empty current.tasks file (overwrite existing)
     const emptyTasksContent = `Priority 0
 -------------------------------------------------------------------------------
@@ -184,11 +218,14 @@ Priority 4
     
     writeFileSync(join(TEST_DIR, 'current.tasks'), emptyTasksContent);
     
-    // Create empty completed file (overwrite existing)
-    writeFileSync(join(TEST_DIR, 'completed'), '');
+    // Create empty completed.yaml file (overwrite existing)
+    writeFileSync(join(TEST_DIR, 'completed.yaml'), 'completed: []\n');
     
     // Create empty transactions.yaml file (overwrite existing)
-    writeFileSync(join(TEST_DIR, 'transactions.yaml'), '');
+    const emptyTransactionsContent = `# Entries are append-only, ordered chronologically
+entries:
+`;
+    writeFileSync(join(TEST_DIR, 'transactions.yaml'), emptyTransactionsContent);
 }
 
 /**

@@ -33,19 +33,31 @@ async function handleYamlOutput(showLocal, showRemote, showCompleted) {
 }
 
 async function handleConsoleOutput(showLocal, showRemote, showCompleted) {
+    const showBoth = showLocal && showRemote;
+    
     if (showLocal) {
         const localData = await getLocalTasks();
-        const data = showCompleted 
-            ? { current: { tasks: [] }, completed: localData.completed }
-            : { current: localData.current, completed: { tasks: [] } };
-        displayTasks(data, 'local');
+        if (showCompleted) {
+            displayTasks(localData.completed.tasks, showBoth ? 'Local' : '', true);
+        } else {
+            displayTasks(localData.current.tasks, showBoth ? 'Local' : '', false);
+        }
     }
 
     if (showRemote) {
+        if (showBoth) {
+            console.log(''); // Add blank line between local and remote when showing both
+        }
         const remoteData = await getTodoistTasks();
-        const data = showCompleted
-            ? { current: { tasks: [] }, completed: remoteData.completed }
-            : { current: remoteData.current, completed: { tasks: [] } };
-        displayTasks(data, 'remote');
+        if (showCompleted) {
+            // Show both current and completed tasks separately for remote
+            if (remoteData.current.tasks.length > 0) {
+                displayTasks(remoteData.current.tasks, showBoth ? 'Remote' : '', false);
+                console.log(''); // Add blank line between sections
+            }
+            displayTasks(remoteData.completed.tasks, showBoth ? 'Remote Completed' : 'Completed', true);
+        } else {
+            displayTasks(remoteData.current.tasks, showBoth ? 'Remote' : '', false);
+        }
     }
 }

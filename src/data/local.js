@@ -1,4 +1,5 @@
 import { readFileSync, writeFileSync, existsSync } from 'fs';
+import yaml from 'js-yaml';
 import { FILE_PATHS, PRIORITIES } from '../config/constants.js';
 import { Task } from '../models/Task.js';
 import { extractCorrelationId, stripCorrelationId, addCorrelationId } from '../../taskLog.js';
@@ -17,6 +18,26 @@ function parseLocalFile(filepath) {
 
     try {
         const content = readFileSync(filepath, 'utf8');
+        
+        // Handle YAML completed file format
+        if (filepath.endsWith('.yaml')) {
+            if (!content.trim()) {
+                return { tasks: [] };
+            }
+            const yamlData = yaml.load(content);
+            if (yamlData && yamlData.completed && Array.isArray(yamlData.completed)) {
+                const tasks = yamlData.completed.map(item => {
+                    const task = new Task(item.name, PRIORITIES.LOWEST, null, {
+                        completed: item.date
+                    });
+                    return task;
+                });
+                return { tasks };
+            }
+            return { tasks: [] };
+        }
+        
+        // Handle regular task file format
         const lines = content.split('\n');
         const tasks = [];
         let currentPriority = null;
@@ -105,20 +126,42 @@ export async function addTaskToLocal(task, priority = PRIORITIES.LOWEST) {
 
 export async function addCompletedTaskToLocal(task) {
     const filepath = FILE_PATHS.COMPLETED;
-    let content = existsSync(filepath) ? readFileSync(filepath, 'utf8') : '';
+    
+    // Load existing YAML data or create new structure
+    let yamlData = { completed: [] };
+    if (existsSync(filepath)) {
+        const content = readFileSync(filepath, 'utf8');
+        if (content.trim()) {
+            try {
+                yamlData = yaml.load(content) || { completed: [] };
+            } catch (error) {
+                console.warn(`Warning: Could not parse existing completed file, creating new one`);
+                yamlData = { completed: [] };
+            }
+        }
+    }
+    
+    // Ensure completed array exists
+    if (!yamlData.completed) {
+        yamlData.completed = [];
+    }
     
     const completedDate = task.completed 
-        ? new Date(task.completed).toLocaleDateString()
-        : new Date().toLocaleDateString();
+        ? new Date(task.completed).toISOString().split('T')[0]
+        : new Date().toISOString().split('T')[0];
     
-    const taskContent = task.content.includes('(completed:')
-        ? task.content
-        : `${task.content} (completed: ${completedDate})`;
+    // Clean task content of old completion markers
+    const taskName = task.content.replace(/\s*\(completed:.*?\)$/, '').trim();
+    
+    // Add to completed array
+    yamlData.completed.push({
+        name: taskName,
+        date: completedDate
+    });
 
-    if (content && !content.endsWith('\n')) content += '\n';
-    content += `${taskContent}\n`;
-
-    writeFileSync(filepath, content, 'utf8');
+    // Write YAML file
+    const yamlContent = yaml.dump(yamlData, { indent: 2, lineWidth: 120 });
+    writeFileSync(filepath, yamlContent, 'utf8');
 }
 
 export async function removeTaskFromLocal(taskContent) {

@@ -1,5 +1,5 @@
 {
-    "name": "task-sync",
+    "name": "taskws",
     "version": "1.0.0",
     "description": "Bidirectional CLI with sync between local tasks and Todoist",
     "main": "tasks.js",
@@ -9,16 +9,18 @@
         "usage": "claude-monitor",
         "ccusage": "npx ccusage",
         "test": "node test/test.js",
-        "lint": "eslint *.js"
+        "lint": "eslint *.js",
+        "install-uv": "brew install uv",
+        "install-claude-monitor": "brew install claude-monitor"
     },
     "dependencies": {
-        "@composio/mcp": "^1.0.7",
         "commander": "^11.0.0",
         "dotenv": "^17.2.0",
         "lodash": "^4.17.21",
         "uuid": "^9.0.1"
     },
     "devDependencies": {
-        "eslint": "^8.55.0"
+        "@eslint/js": "^9.32.0",
+        "eslint": "^9.0.0"
     }
 }

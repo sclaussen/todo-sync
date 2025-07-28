@@ -1,7 +1,7 @@
 import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { join } from 'path';
 import { homedir } from 'os';
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as _uuidv4 } from 'uuid';
 import yaml from 'js-yaml';
 
 const TASK_LOG_FILE = join(homedir(), '.tasks.yaml');
@@ -121,7 +121,7 @@ export function findCorrelationByTodoistId(todoistId) {
 }
 
 // Find correlation by content similarity - deprecated with direct IDs
-export function findCorrelationByContent(content, threshold = 0.8) {
+export function findCorrelationByContent(content, _threshold = 0.8) {
     // With direct Todoist IDs, content similarity matching is not needed
     // Tasks are correlated by their explicit Todoist ID
     console.warn('findCorrelationByContent is deprecated with direct Todoist ID system');
@@ -129,7 +129,7 @@ export function findCorrelationByContent(content, threshold = 0.8) {
 }
 
 // Calculate similarity between two strings
-function calculateSimilarity(str1, str2) {
+function _calculateSimilarity(str1, str2) {
     const words1 = new Set(str1.split(/\s+/));
     const words2 = new Set(str2.split(/\s+/));
 
@@ -140,7 +140,7 @@ function calculateSimilarity(str1, str2) {
 }
 
 // Map Todoist priority to local priority
-function mapTodoistPriorityToLocal(todoistPriority) {
+function _mapTodoistPriorityToLocal(todoistPriority) {
     const priorityMap = {
         4: 1, // Todoist Priority 4 (highest) -> Local Priority 1
         3: 2, // Todoist Priority 3 -> Local Priority 2

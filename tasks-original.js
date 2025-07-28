@@ -3,7 +3,7 @@
 import { Command } from 'commander';
 import { getTodos, displayTodos, findDuplicates, displayDuplicates, removeDuplicates, executeSync, createBackup, bootstrapCorrelations, cleanDuplicateCompletionDates, createLocalTask, createRemoteTaskByContent, updateLocalTask, updateRemoteTaskByName, completeLocalTask, completeRemoteTaskByName, cancelLocalTask, cancelRemoteTask } from './lib.js';
 import { loadSyncState, categorizeChanges } from './syncState.js';
-import { logSyncOperation, getCurrentCorrelations } from './todoLog.js';
+import { logSyncOperation as _logSyncOperation, getCurrentCorrelations as _getCurrentCorrelations } from './todoLog.js';
 import yaml from 'js-yaml';
 
 function main() {
