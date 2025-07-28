@@ -21,3 +21,4 @@ coverage/
 *.d.ts.map
 
 test/.tasks/backups/**
+test/.tasks/**
