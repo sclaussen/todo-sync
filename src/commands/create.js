@@ -32,7 +32,16 @@ export async function execute(content, options) {
             task.todoistId = result.id.toString();
             // Update the local task to include the Todoist ID
         }
-        console.log(`Created remote task: "${content}" (P${priority}, ID: ${result.id})`);
+        // Format date for P0 tasks
+        let dateInfo = '';
+        if (priority === 0 && result.due) {
+            const dueDate = result.due.date || result.due.string;
+            if (dueDate) {
+                const date = new Date(dueDate + 'T00:00:00');
+                dateInfo = `, ${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear().toString().slice(-2)}`;
+            }
+        }
+        console.log(`Created remote task: "${content}" (P${priority}${dateInfo}, ID: ${result.id})`);
         // Log transaction (only if not already logged locally)
         if (!createLocal) {
             await logTransaction({

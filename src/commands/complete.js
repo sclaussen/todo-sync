@@ -2,7 +2,7 @@ import { Task } from '../models/Task.js';
 import { getLocalTasks, removeTaskFromLocal, addCompletedTaskToLocal } from '../data/local.js';
 import { getTodoistTasks, completeTodoistTask } from '../data/todoist.js';
 import { DISPLAY_ICONS, logTransaction, getCurrentTimestamp } from '../config/constants.js';
-import { stripCorrelationId, extractCorrelationId } from '../../taskLog.js';
+import { stripCorrelationId, extractCorrelationId } from '../utils/correlationId.js';
 
 async function findLocalTask(id) {
     const { current } = await getLocalTasks();

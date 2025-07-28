@@ -26,12 +26,41 @@ function displayTasksByPriority(tasks, prefix) {
         
         const mainTasks = priorityTasks.filter(task => !task.isSubtask);
         mainTasks.forEach((task, index) => {
-            const idInfo = task.todoistId ? ` (${task.todoistId})` : '';
+            let idInfo = '';
+            if (task.todoistId) {
+                // For remote tasks, show priority and date info
+                if (task.metadata?.source === 'todoist') {
+                    const priorityLabel = `P${task.priority}`;
+                    let dateInfo = '';
+                    if (task.priority === 0 && task.due) {
+                        const dueDate = new Date(task.due + 'T00:00:00');
+                        dateInfo = `, ${dueDate.getMonth() + 1}/${dueDate.getDate()}/${dueDate.getFullYear().toString().slice(-2)}`;
+                    }
+                    idInfo = ` (${priorityLabel}${dateInfo}, ${task.todoistId})`;
+                } else {
+                    // For local tasks, just show the ID
+                    idInfo = ` (${task.todoistId})`;
+                }
+            }
             console.log(`${index + 1}. ${task.content}${idInfo}`);
 
             if (task.subtasks && task.subtasks.length > 0) {
                 task.subtasks.forEach((subtask, subIndex) => {
-                    const subIdInfo = subtask.todoistId ? ` (${subtask.todoistId})` : '';
+                    let subIdInfo = '';
+                    if (subtask.todoistId) {
+                        // Apply same formatting for subtasks
+                        if (subtask.metadata?.source === 'todoist') {
+                            const priorityLabel = `P${subtask.priority}`;
+                            let dateInfo = '';
+                            if (subtask.priority === 0 && subtask.due) {
+                                const dueDate = new Date(subtask.due + 'T00:00:00');
+                                dateInfo = `, ${dueDate.getMonth() + 1}/${dueDate.getDate()}/${dueDate.getFullYear().toString().slice(-2)}`;
+                            }
+                            subIdInfo = ` (${priorityLabel}${dateInfo}, ${subtask.todoistId})`;
+                        } else {
+                            subIdInfo = ` (${subtask.todoistId})`;
+                        }
+                    }
                     console.log(`   ${String.fromCharCode(97 + subIndex)}. ${subtask.content}${subIdInfo}`);
                 });
             }

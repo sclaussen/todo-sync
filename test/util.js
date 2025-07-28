@@ -35,7 +35,7 @@ const TASKS_CLI = join(__dirname, '..', 'tasks.js');
 // Test environment
 const testEnv = {
     ...process.env,
-    TODO_DIR: TEST_DIR,
+    TASKS_DIR: TEST_DIR,
     TODOIST_PROJECT_NAME: 'Test',
     TODOIST_API_TOKEN: process.env.TODOIST_API_TOKEN,
     DOTENV_CONFIG_SILENT: 'true'  // Suppress dotenv output

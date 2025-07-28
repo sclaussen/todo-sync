@@ -133,6 +133,19 @@ executing the plan.
 Anytime you want to pause/halt an prompt response.  You can pick up directly
 from where you paused.
 
+## Ctrl-c
+
+Clears the current prompt.
+
+## Ctrl-c Ctrl-c
+
+If done quickly back to back exits claude code.  To restart and continue the
+prior session:
+
+```bash
+claude --continue
+```
+
 
 
 # Thinking

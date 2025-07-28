@@ -10,7 +10,7 @@ Tests use isolated environments to prevent interference with production data:
 - **Environment variables**: Automatically set during test execution
 
 ### Environment Variables
-- `TODO_DIR`: Points to `test/.tasks` directory instead of your home directory
+- `TASKS_DIR`: Points to `test/.tasks` directory instead of your home directory
 - `TODOIST_PROJECT_NAME`: Uses "Test" project instead of "Sync"
 - `TODOIST_API_TOKEN`: Uses your existing token if available for remote tests
 
@@ -61,7 +61,7 @@ describe('Feature Tests', () => {
 node test/test.js
 
 # Run tests with custom environment
-TODO_DIR=/tmp/test node test/test.js
+TASKS_DIR=/tmp/test node test/test.js
 ```
 
 ## Test Coverage Areas

@@ -88,22 +88,22 @@ export const FILES = {
     TRANSACTIONS: 'transactions.yaml'
 };;
 
-// Dynamic file paths that respect TODO_DIR environment variable
+// Dynamic file paths that respect TASKS_DIR environment variable
 export const FILE_PATHS = {
     get TASK() {
-        return join(process.env.TODO_DIR || join(homedir(), '.tasks'), FILES.TASK);
+        return join(process.env.TASKS_DIR || join(homedir(), '.tasks'), FILES.TASK);
     },
     get COMPLETED() {
-        return join(process.env.TODO_DIR || join(homedir(), '.tasks'), FILES.COMPLETED);
+        return join(process.env.TASKS_DIR || join(homedir(), '.tasks'), FILES.COMPLETED);
     },
     get LOG() {
-        return join(process.env.TODO_DIR || join(homedir(), '.tasks'), FILES.LOG);
+        return join(process.env.TASKS_DIR || join(homedir(), '.tasks'), FILES.LOG);
     },
     get TRANSACTIONS() {
-        return join(process.env.TODO_DIR || join(homedir(), '.tasks'), FILES.TRANSACTIONS);
+        return join(process.env.TASKS_DIR || join(homedir(), '.tasks'), FILES.TRANSACTIONS);
     },
     get BACKUP_BASE() {
-        return join(process.env.TODO_DIR || join(homedir(), '.tasks'), 'backups');
+        return join(process.env.TASKS_DIR || join(homedir(), '.tasks'), 'backups');
     }
 };;
 

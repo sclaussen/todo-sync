@@ -1,0 +1,33 @@
+sections:
+  - priority: '1'
+    tasks:
+      - P4 lowest priority task (9388467435)
+  - priority: '2'
+    tasks:
+      - P3 low priority task (9388467405)
+  - priority: '3'
+    tasks:
+      - P2 medium priority task (9388467377)
+  - priority: '4'
+    tasks:
+      - P0 urgent priority task (9388467328)
+      - P1 high priority task (9388467358)
+raw: |-
+  Priority 1
+  -------------------------------------------------------------------------------
+  P4 lowest priority task (9388467435)
+
+  Priority 2
+  -------------------------------------------------------------------------------
+  P3 low priority task (9388467405)
+
+  Priority 3
+  -------------------------------------------------------------------------------
+  P2 medium priority task (9388467377)
+
+  Priority 4
+  -------------------------------------------------------------------------------
+  P0 urgent priority task (9388467328)
+  P1 high priority task (9388467358)
+totalTasks: 5
+source: todoist

@@ -149,7 +149,7 @@ Local priorities (0-4) map to remote Todoist priorities:
   - Provide just enough output to verify functionality (single ✅ success message per test)
 - **Test file isolation**: Tests use `test/.tasks/` directory for local
   - This prevents interference with production `~/.tasks/` files
-  - Test environment automatically redirects `TODO_DIR` to `test/.tasks/`
+  - Test environment automatically redirects `TASKS_DIR` to `test/.tasks/`
 
 ## Sync Design
 The sync engine uses direct Todoist IDs for correlation:
@@ -166,13 +166,13 @@ TODOIST_API_TOKEN=your_todoist_api_token_here
 TODOIST_PROJECT_NAME=Sync
 
 # Optional - Development/Testing
-TODO_DIR=/path/to/custom/tasks/directory
+TASKS_DIR=/path/to/custom/tasks/directory
 ```
 
 **Variable Details:**
 - `TODOIST_API_TOKEN` (Required): Your Todoist API token for accessing the Todoist API
 - `TODOIST_PROJECT_NAME` (Required): Name of the Todoist project to sync with (defaults to "Sync")
-- `TODO_DIR` (Optional): Custom directory for task files (defaults to `~/.tasks/`)
+- `TASKS_DIR` (Optional): Custom directory for task files (defaults to `~/.tasks/`)
 
 ## Implementation Details
 - Uses ES modules with `.js` imports in JavaScript files

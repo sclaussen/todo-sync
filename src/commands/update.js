@@ -2,7 +2,7 @@ import { Task } from '../models/Task.js';
 import { getLocalTasks, updateTaskInLocal, removeTaskFromLocal, addTaskToLocal } from '../data/local.js';
 import { getTodoistTasks, updateTodoistTask } from '../data/todoist.js';
 import { PRIORITIES, DISPLAY_ICONS, logTransaction, getCurrentTimestamp } from '../config/constants.js';
-import { stripCorrelationId, extractCorrelationId } from '../../taskLog.js';
+import { stripCorrelationId, extractCorrelationId } from '../utils/correlationId.js';
 
 export async function execute(id, content, options) {
     validateOptions(options, content);
@@ -172,7 +172,7 @@ async function updateRemoteTask(task, newContent, newPriority) {
             updates.due_string = 'today';
         } else if (task.priority === 0 && newPriority !== 0) {
             // Remove due date when moving away from priority 0
-            updates.due_string = null;
+            updates.due_string = 'no date';
         }
     }
 

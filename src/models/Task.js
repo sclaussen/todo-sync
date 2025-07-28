@@ -1,5 +1,5 @@
 import { PRIORITIES, LOCAL_PRIORITY_MAP, TODOIST_PRIORITY_MAP } from '../config/constants.js';
-import { extractCorrelationId, stripCorrelationId } from '../../taskLog.js';
+import { extractCorrelationId, stripCorrelationId } from '../utils/correlationId.js';
 
 export class Task {
     constructor(content, priority = PRIORITIES.LOWEST, todoistId = null, options = {}) {

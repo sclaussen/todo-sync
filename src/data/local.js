@@ -1,8 +1,8 @@
-import { readFileSync, writeFileSync, existsSync } from 'fs';
 import yaml from 'js-yaml';
+import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { FILE_PATHS, PRIORITIES } from '../config/constants.js';
 import { Task } from '../models/Task.js';
-import { extractCorrelationId, stripCorrelationId, addCorrelationId } from '../../taskLog.js';
+import { extractCorrelationId, stripCorrelationId, addCorrelationId } from '../utils/correlationId.js';
 
 /**
  * Retrieves all local tasks from both the current tasks file and completed tasks file
@@ -103,6 +103,16 @@ function parseLocalFile(filepath) {
  * Cleans task content by removing date prefixes and comment suffixes
  * @param {string} content - Raw task content
  * @returns {string} Cleaned task content
+ * @example
+ *
+ * // Input: "12/25 Buy Christmas gifts (comment: for family)"
+ * // Output: "Buy Christmas gifts"
+ *
+ * // Input: "01/30 Schedule dentist appointment (comments: check insurance first)"
+ * // Output: "Schedule dentist appointment"
+ *
+ * // Input: "Review project proposal"
+ * // Output: "Review project proposal"
  */
 function cleanTaskContent(content) {
     // Remove date prefixes and comment suffixes

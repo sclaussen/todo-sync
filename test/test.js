@@ -8,13 +8,17 @@ const program = new Command();
 program
     .name('test')
     .description('Run task synchronization tests')
-    .option('-l, --local', 'Run tests with local only operations')
-    .option('-r, --remote', 'Run tests with remote only operations')
+    .option('-l, --local', 'Run local-only tests')
+    .option('-r, --remote', 'Run remote-only tests')
+    .option('-s, --sync', 'Run sync tests (syncUp and syncDown)')
     .parse(process.argv);
 const options = program.opts();
+// If no options specified, run all tests
+const runAll = !options.local && !options.remote && !options.sync;
 const context = {
-    local: options.local || (!options.local && !options.remote),
-    remote: options.remote || (!options.local && !options.remote)
+    local: options.local || runAll,
+    remote: options.remote || runAll,
+    sync: options.sync || runAll
 };
 
 async function complete(context, option = '-l') {
@@ -42,7 +46,35 @@ async function remove(context, option = '-l') {
     success(`remove ${option}`);
 }
 
-async function priority(context, initialPriority = null, option = '-l') {
+async function priorityZero(context) {
+    enter(`priority zero`);
+    await init('-r');
+
+    // Create P0 task and verify it has a due date set (should be today)
+    sh(`node tasks.js create -r -P0 p0`);
+    sh(`node tasks.js list -r -y`, {
+        exp: `data.some(t => t.name === 'p0' && t.priority === 0 && t.due !== null)`,
+        errmsg: `P0 task should have a due date set`
+    });
+
+    // Update to P1 and verify due date is removed
+    sh(`node tasks.js update -r -P1 p0`);
+    sh(`node tasks.js list -r -y`, {
+        exp: `data.some(t => t.name === 'p0' && t.priority === 1 && t.due === null)`,
+        errmsg: `P1 task should have no due date`
+    });
+
+    // Update back to P0 and verify due date is set again
+    sh(`node tasks.js update -r -P0 p0`);
+    sh(`node tasks.js list -r -y`, {
+        exp: `data.some(t => t.name === 'p0' && t.priority === 0 && t.due !== null)`,
+        errmsg: `P0 task should have a due date set again`
+    });
+
+    success(`priority zero`);
+}
+
+async function priority(context, option = '-l', initialPriority = null) {
     enter(`priority ${initialPriority !== null ? initialPriority : 'default'} ${option || 'both'}`);
     await init(option);
 
@@ -65,15 +97,73 @@ async function priority(context, initialPriority = null, option = '-l') {
     success(`priority ${initialPriority !== null ? initialPriority : 'default'} ${option || 'both'}`);
 }
 
+async function syncUpPriorityZero(context) {
+    enter('syncUpPriorityZero');
+    await init();
+
+    // Create local P0 task
+    sh(`node tasks.js create -l -P0 p0`);
+    sh(`node tasks.js list -l -y`, {
+        exp: `data.some(t => t.name === 'p0' && t.priority === 0)`,
+        errmsg: `Local P0 task should exist`
+    });
+
+    // Sync to remote
+    sh(`node tasks.js sync`);
+
+    // Verify remote task has P0 with due date
+    sh(`node tasks.js list -r -y`, {
+        exp: `data.some(t => t.name === 'p0' && t.priority === 0 && t.due !== null)`,
+        errmsg: `Remote P0 task should have a due date after sync`
+    });
+
+    // Verify local task still has P0 priority and now has correlation ID
+    sh(`node tasks.js list -l -y`, {
+        exp: `data.some(t => t.name === 'p0' && t.priority === 0 && t.id !== null)`,
+        errmsg: `Local P0 task should have correlation ID after sync`
+    });
+
+    success('syncUpPriorityZero');
+}
+
+async function syncDownPriorityZero(context) {
+    enter('syncDownPriorityZero');
+    await init();
+
+    // Create remote P0 task with due date
+    sh(`node tasks.js create -r -P0 p0`);
+    sh(`node tasks.js list -r -y`, {
+        exp: `data.some(t => t.name === 'p0' && t.priority === 0 && t.due !== null)`,
+        errmsg: `Remote P0 task should have a due date`
+    });
+
+    // Sync to local
+    sh(`node tasks.js sync`);
+
+    // Verify local task has P0 priority with correlation ID
+    sh(`node tasks.js list -l -y`, {
+        exp: `data.some(t => t.name === 'p0' && t.priority === 0 && t.id !== null)`,
+        errmsg: `Local P0 task should exist with correlation ID after sync`
+    });
+
+    // Verify remote task still has P0 with due date
+    sh(`node tasks.js list -r -y`, {
+        exp: `data.some(t => t.name === 'p0' && t.priority === 0 && t.due !== null)`,
+        errmsg: `Remote P0 task should still have due date after sync`
+    });
+
+    success('syncDownPriorityZero');
+}
+
 async function syncUp(context) {
     enter('syncUp');
     await init();
 
-    sh(`node tasks.js create -l -P 0 P0 urgent priority task`);
-    sh(`node tasks.js create -l -P 1 P1 high priority task`);
-    sh(`node tasks.js create -l -P 2 P2 medium priority task`);
-    sh(`node tasks.js create -l -P 3 P3 low priority task`);
-    sh(`node tasks.js create -l -P 4 P4 lowest priority task`);
+    sh(`node tasks.js create -l -P0 p0`);
+    sh(`node tasks.js create -l -P1 p1`);
+    sh(`node tasks.js create -l -P2 p2`);
+    sh(`node tasks.js create -l -P3 p3`);
+    sh(`node tasks.js create -l -P4 p4`);
     sh(`node tasks.js sync`);
 
     const localTasks = sh(`node tasks.js list -l -y`);
@@ -96,11 +186,11 @@ async function syncDown(context) {
     await init();
 
     // Create tasks with all priority levels locally first
-    sh(`node tasks.js create -r -P 0 P0 urgent priority task`);
-    sh(`node tasks.js create -r -P 1 P1 high priority task`);
-    sh(`node tasks.js create -r -P 2 P2 medium priority task`);
-    sh(`node tasks.js create -r -P 3 P3 low priority task`);
-    sh(`node tasks.js create -r -P 4 P4 lowest priority task`);
+    sh(`node tasks.js create -r -P0 p0`);
+    sh(`node tasks.js create -r -P1 p1`);
+    sh(`node tasks.js create -r -P2 p2`);
+    sh(`node tasks.js create -r -P3 p3`);
+    sh(`node tasks.js create -r -P4 p4`);
     sh(`node tasks.js sync`);
 
     const localTasks = sh(`node tasks.js list -l -y`);
@@ -120,29 +210,44 @@ async function syncDown(context) {
 
 async function testAll() {
     try {
-        // if (context.local) {
-        //     await complete(context, '-l');
-        //     await remove(context, '-l');
-        //     await priority(context, null, '-l');
-        //     await priority(context, 0, '-l');
-        //     await priority(context, 1, '-l');
-        //     await priority(context, 2, '-l');
-        //     await priority(context, 3, '-l');
-        //     await priority(context, 4, '-l');
-        // } else if (context.remote) {
-        //     await complete(context, '-r');
-        //     await remove(context, '-r');
-        //     await priority(context, null, '-r');
-        //     await priority(context, 0, '-r');
-        //     await priority(context, 1, '-r');
-        //     await priority(context, 2, '-r');
-        //     await priority(context, 3, '-r');
-        //     await priority(context, 4, '-r');
-        //     await syncUp(context);
-        //     await syncDown(context);
-        // }
-        await syncUp(context);
-        await syncDown(context);
+        // Show which tests are being run
+        const testSuites = [];
+        if (context.local) testSuites.push('local');
+        if (context.remote) testSuites.push('remote');
+        if (context.sync) testSuites.push('sync');
+        console.log(`Running test suites: ${testSuites.join(', ')}\n`);
+
+        // Run local tests if requested
+        if (context.local) {
+            await complete(context, '-l');
+            await remove(context, '-l');
+            await priority(context, '-l', 0);
+            await priority(context, '-l', null);
+            await priority(context, '-l', 1);
+            await priority(context, '-l', 2);
+            await priority(context, '-l', 3);
+            await priority(context, '-l', 4);
+        }
+
+        // Run remote tests if requested
+        if (context.remote) {
+            await complete(context, '-r');
+            await remove(context, '-r');
+            await priorityZero(context);
+            await priority(context, '-r', null);
+            await priority(context, '-r', 1);
+            await priority(context, '-r', 2);
+            await priority(context, '-r', 3);
+            await priority(context, '-r', 4);
+        }
+
+        // Run sync tests if requested
+        if (context.sync) {
+            await syncUp(context);
+            await syncDown(context);
+            await syncUpPriorityZero(context);
+            await syncDownPriorityZero(context);
+        }
     } catch (error) {
         process.exit(1);
     }
