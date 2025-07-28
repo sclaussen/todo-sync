@@ -25,32 +25,24 @@ export async function execute(options) {
 }
 
 async function handleBackup() {
-    console.log(`${DISPLAY_ICONS.BACKUP} Creating backup...`);
     // Import and use backup functionality from lib.js
     const { createBackup } = await import('../../lib.js');
     const result = await createBackup();
     
-    if (result.success) {
-        console.log(`${DISPLAY_ICONS.SUCCESS} Backup created: ${result.backupDir}`);
-    } else {
+    if (!result.success) {
         throw new Error(result.error);
     }
+    
+    return result;
 }
 
 async function executeSyncChanges(changes) {
-    console.log(`${DISPLAY_ICONS.SYNC} Executing synchronization...`);
-    
     // Create backup first
     await handleBackup();
     
     const results = await executeSync(changes);
     
-    if (results.success) {
-        console.log(`\n${DISPLAY_ICONS.SUCCESS} Synchronization completed!`);
-        if (results.summary) {
-            console.log(`\n${DISPLAY_ICONS.INFO} Summary: ${results.summary}`);
-        }
-    } else {
+    if (!results.success) {
         throw new Error(results.error || results.errors.join(', '));
     }
 }

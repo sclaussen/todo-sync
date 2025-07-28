@@ -41,7 +41,7 @@ export async function execute(id, content, options) {
         if (content) changes.push(`content: "${finalContent}"`);
         if (newPriority !== undefined) changes.push(`priority: ${newPriority}`);
         
-        console.log(`${DISPLAY_ICONS.SUCCESS} Updated local task${changes.length > 0 ? ` (${changes.join(', ')})` : ''}`);
+        console.log(`Updated local task${changes.length > 0 ? ` (${changes.join(', ')})` : ''}`);
         
         // Log transactions for changes
         if (content && content !== originalContent) {
@@ -76,7 +76,7 @@ export async function execute(id, content, options) {
         if (content) changes.push(`content: "${finalContent}"`);
         if (newPriority !== undefined) changes.push(`priority: ${newPriority}`);
         
-        console.log(`${DISPLAY_ICONS.SUCCESS} Updated remote task${changes.length > 0 ? ` (${changes.join(', ')})` : ''}`);
+        console.log(`Updated remote task${changes.length > 0 ? ` (${changes.join(', ')})` : ''}`);
         
         // Log transactions for changes (only if not already logged locally)
         if (!updateLocal) {

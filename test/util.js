@@ -8,6 +8,7 @@ import { dirname } from 'path';
 import { ensureProjectExists, getTasks } from '../lib.js';
 import dotenv from 'dotenv';
 import _ from 'lodash';
+import yaml from 'js-yaml';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -44,14 +45,17 @@ const testEnv = {
  * Test utility - sh() function for running CLI commands
  */
 function sh(command, options = {}) {
-    const { echo = false, rc = null } = options;
+    const { echo = true, output = true, rc = 0, exp = null, errmsg = null } = options;
     
     try {
+        // Replace 'node tasks.js' with the full path to tasks.js
+        const processedCommand = command.replace(/node tasks\.js/g, `node ${TASKS_CLI}`);
+        
         if (echo) {
-            console.log(command);
+            console.log(`$ ${processedCommand}`);
         }
         
-        const result = execSync(command, { 
+        const result = execSync(processedCommand, { 
             env: testEnv, 
             encoding: 'utf8',
             stdio: 'pipe',
@@ -59,17 +63,55 @@ function sh(command, options = {}) {
         });
         
         // Check expected return code if specified
-        if (rc !== null && rc !== 0) {
+        if (rc !== 0) {
             throw new Error(`Expected non-zero return code ${rc}, but command succeeded`);
         }
         
-        return result.trim();
+        const commandOutput = result.trim();
+        
+        // Print command output if enabled
+        if (output && commandOutput) {
+            console.log(commandOutput);
+        }
+        
+        // Validate YAML output if expression provided
+        if (exp) {
+            let data;
+            try {
+                data = yaml.load(commandOutput) || [];
+            } catch (yamlError) {
+                throw new Error(`Failed to parse YAML output: ${yamlError.message}`);
+            }
+            
+            // Create evaluation context
+            const count = Array.isArray(data) ? data.length : (data ? 1 : 0);
+            const length = count;  // alias for count
+            
+            // Evaluate the validation expression
+            let isValid;
+            try {
+                // Create a safe evaluation context
+                const evalContext = { count, length, data };
+                const func = new Function('count', 'length', 'data', `return ${exp}`);
+                isValid = func(count, length, data);
+            } catch (evalError) {
+                throw new Error(`Invalid validation expression "${exp}": ${evalError.message}`);
+            }
+            
+            if (!isValid) {
+                const defaultMsg = `Validation failed: ${exp} (count=${count})`;
+                throw new Error(errmsg || defaultMsg);
+            }
+        }
+        
+        return commandOutput;
     } catch (error) {
-        if (rc !== null && rc !== 0) {
+        if (rc !== 0) {
             // Expected failure - silent
             return error.stdout ? error.stdout.trim() : '';
         } else {
-            console.error(`❌ Command failed: ${command}`);
+            const processedCommand = command.replace(/node tasks\.js/g, `node ${TASKS_CLI}`);
+            console.error(`❌ Command failed: ${processedCommand}`);
             console.error(`Error: ${error.message}`);
             if (error.stdout) console.error(`STDOUT: ${error.stdout}`);
             if (error.stderr) console.error(`STDERR: ${error.stderr}`);
@@ -181,25 +223,31 @@ async function clearTodoistProject() {
  * Test utility - init function to set up clean test environment
  * Creates test project if needed, clears all tasks, and sets up local files
  */
-async function init() {
-    // Ensure test project exists (create if needed)
-    await setupTestProject();
+async function init(option = null) {
+    const initLocal = !option || option === '-l';
+    const initRemote = !option || option === '-r';
     
-    // Clear all tasks from the test project if it exists
-    await clearTodoistProject();
-    
-    // Ensure test directory exists
-    mkdirSync(TEST_DIR, { recursive: true });
-    
-    // Clean up backups directory but keep the directory itself
-    const backupsDir = join(TEST_DIR, 'backups');
-    if (existsSync(backupsDir)) {
-        rmSync(backupsDir, { recursive: true, force: true });
+    if (initRemote) {
+        // Ensure test project exists (create if needed)
+        await setupTestProject();
+        
+        // Clear all tasks from the test project if it exists
+        await clearTodoistProject();
     }
-    mkdirSync(backupsDir, { recursive: true });
     
-    // Create empty current.tasks file (overwrite existing)
-    const emptyTasksContent = `Priority 0
+    if (initLocal) {
+        // Ensure test directory exists
+        mkdirSync(TEST_DIR, { recursive: true });
+        
+        // Clean up backups directory but keep the directory itself
+        const backupsDir = join(TEST_DIR, 'backups');
+        if (existsSync(backupsDir)) {
+            rmSync(backupsDir, { recursive: true, force: true });
+        }
+        mkdirSync(backupsDir, { recursive: true });
+        
+        // Create empty current.tasks file (overwrite existing)
+        const emptyTasksContent = `Priority 0
 -------------------------------------------------------------------------------
 
 Priority 1
@@ -215,17 +263,18 @@ Priority 4
 -------------------------------------------------------------------------------
 
 `;
-    
-    writeFileSync(join(TEST_DIR, 'current.tasks'), emptyTasksContent);
-    
-    // Create empty completed.yaml file (overwrite existing)
-    writeFileSync(join(TEST_DIR, 'completed.yaml'), 'completed: []\n');
-    
-    // Create empty transactions.yaml file (overwrite existing)
-    const emptyTransactionsContent = `# Entries are append-only, ordered chronologically
+        
+        writeFileSync(join(TEST_DIR, 'current.tasks'), emptyTasksContent);
+        
+        // Create empty completed.yaml file (overwrite existing)
+        writeFileSync(join(TEST_DIR, 'completed.yaml'), 'completed: []\n');
+        
+        // Create empty transactions.yaml file (overwrite existing)
+        const emptyTransactionsContent = `# Entries are append-only, ordered chronologically
 entries:
 `;
-    writeFileSync(join(TEST_DIR, 'transactions.yaml'), emptyTransactionsContent);
+        writeFileSync(join(TEST_DIR, 'transactions.yaml'), emptyTransactionsContent);
+    }
 }
 
 /**
@@ -297,6 +346,20 @@ function normalize(yamlOutput) {
         .join('\n');
 }
 
+function enter(message) {
+    console.log(`ℹ️  ${message}`);
+}
+
+function success(message) {
+    console.log(`✅ ${message}`);
+    console.log();
+}
+
+function fail(message) {
+    console.log(`❌ ${message}`);
+    console.log();
+}
+
 export { 
     sh, 
     init, 
@@ -307,6 +370,9 @@ export {
     setupTestProject,
     clearTodoistProject,
     normalize,
+    enter,
+    success,
+    fail,
     TEST_DIR, 
     TASKS_CLI 
 };

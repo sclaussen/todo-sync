@@ -32,7 +32,7 @@ async function findRemoteTask(id) {
     const { tasks } = current;
     
     // Try to find by Todoist ID
-    const task = tasks.find(t => t.id === id || t.id.toString() === id);
+    const task = tasks.find(t => t.todoistId && (t.todoistId === id || t.todoistId.toString() === id));
     if (task) {
         return task;
     }
@@ -72,8 +72,8 @@ export async function execute(id, options) {
     // Remove local task
     if (removeLocal && localTask) {
         const taskName = stripCorrelationId(localTask.content);
-        await removeTaskFromLocal(localTask);
-        console.log(`${DISPLAY_ICONS.SUCCESS} Removed local task: "${taskName}"`);
+        await removeTaskFromLocal(localTask.content);
+        console.log(`Removed local task: "${taskName}"`);
         
         // Log transaction
         await logTransaction({
@@ -85,8 +85,8 @@ export async function execute(id, options) {
     
     // Remove remote task
     if (removeRemote && remoteTask) {
-        await deleteTodoistTask(remoteTask.id);
-        console.log(`${DISPLAY_ICONS.SUCCESS} Removed remote task: "${remoteTask.content}" (ID: ${remoteTask.id})`);
+        await deleteTodoistTask(remoteTask.todoistId);
+        console.log(`Removed remote task: "${remoteTask.content}" (ID: ${remoteTask.todoistId})`);
         
         // Log transaction (only if not already logged locally)
         if (!removeLocal) {

@@ -32,7 +32,7 @@ async function findRemoteTask(id) {
     const { tasks } = current;
     
     // Try to find by Todoist ID
-    const task = tasks.find(t => t.id && (t.id === id || t.id.toString() === id));
+    const task = tasks.find(t => t.todoistId && (t.todoistId === id || t.todoistId.toString() === id));
     if (task) {
         return task;
     }
@@ -50,7 +50,7 @@ async function completeLocalTask(task) {
 }
 
 async function completeRemoteTask(task) {
-    await completeTodoistTask(task.id);
+    await completeTodoistTask(task.todoistId);
 }
 
 function validateOptions(options) {
@@ -85,7 +85,7 @@ export async function execute(id, options) {
     if (completeLocal && localTask) {
         const taskName = stripCorrelationId(localTask.content);
         await completeLocalTask(localTask);
-        console.log(`${DISPLAY_ICONS.SUCCESS} Completed local task: "${taskName}"`);
+        console.log(`Completed local task: "${taskName}"`);
         
         // Log transaction
         await logTransaction({
@@ -98,7 +98,7 @@ export async function execute(id, options) {
     // Complete remote task
     if (completeRemote && remoteTask) {
         await completeRemoteTask(remoteTask);
-        console.log(`${DISPLAY_ICONS.SUCCESS} Completed remote task: "${remoteTask.content}" (ID: ${remoteTask.id})`);
+        console.log(`Completed remote task: "${remoteTask.content}" (ID: ${remoteTask.todoistId})`);
         
         // Log transaction (only if not already logged locally)
         if (!completeLocal) {

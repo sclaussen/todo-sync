@@ -10,6 +10,11 @@
         "ccusage": "npx ccusage",
         "test": "node test/test.js",
         "lint": "eslint *.js",
+        "loc": "node scripts/loc.js",
+        "loc:simple": "find . -name '*.js' -o -name '*.json' -o -name '*.yaml' | grep -v node_modules | xargs wc -l | tail -1",
+        "loc:detailed": "find . -name '*.js' -o -name '*.json' -o -name '*.yaml' | grep -v node_modules | xargs wc -l",
+        "loc:cloc": "cloc . --exclude-dir=node_modules,logs,test/.tasks --exclude-ext=lock",
+        "loc:git": "git ls-files | xargs wc -l | tail -1",
         "install-uv": "brew install uv",
         "install-claude-monitor": "brew install claude-monitor"
     },

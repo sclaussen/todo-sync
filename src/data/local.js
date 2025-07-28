@@ -4,6 +4,10 @@ import { FILE_PATHS, PRIORITIES } from '../config/constants.js';
 import { Task } from '../models/Task.js';
 import { extractCorrelationId, stripCorrelationId, addCorrelationId } from '../../taskLog.js';
 
+/**
+ * Retrieves all local tasks from both the current tasks file and completed tasks file
+ * @returns {Promise<{current: {tasks: Array, error?: string}, completed: {tasks: Array, error?: string}}>}
+ */
 export async function getLocalTasks() {
     return {
         current: parseLocalFile(FILE_PATHS.TASK),
@@ -11,6 +15,11 @@ export async function getLocalTasks() {
     };
 }
 
+/**
+ * Parses a local task file (either .tasks format or .yaml format)
+ * @param {string} filepath - Path to the file to parse
+ * @returns {{tasks: Array<Task>, error?: string}} Parsed tasks and any error
+ */
 function parseLocalFile(filepath) {
     if (!existsSync(filepath)) {
         return { tasks: [], error: `File ${filepath} does not exist` };
@@ -18,7 +27,7 @@ function parseLocalFile(filepath) {
 
     try {
         const content = readFileSync(filepath, 'utf8');
-        
+
         // Handle YAML completed file format
         if (filepath.endsWith('.yaml')) {
             if (!content.trim()) {
@@ -36,7 +45,7 @@ function parseLocalFile(filepath) {
             }
             return { tasks: [] };
         }
-        
+
         // Handle regular task file format
         const lines = content.split('\n');
         const tasks = [];
@@ -70,7 +79,7 @@ function parseLocalFile(filepath) {
                     isSubtask: true,
                     parentContent: currentParentTask?.content
                 });
-                
+
                 if (currentParentTask) {
                     if (!currentParentTask.subtasks) currentParentTask.subtasks = [];
                     currentParentTask.subtasks.push(task);
@@ -90,6 +99,11 @@ function parseLocalFile(filepath) {
     }
 }
 
+/**
+ * Cleans task content by removing date prefixes and comment suffixes
+ * @param {string} content - Raw task content
+ * @returns {string} Cleaned task content
+ */
 function cleanTaskContent(content) {
     // Remove date prefixes and comment suffixes
     return content
@@ -98,14 +112,19 @@ function cleanTaskContent(content) {
         .trim();
 }
 
+/**
+ * Adds a new task to the local tasks file under the specified priority section
+ * @param {Task} task - Task object to add
+ * @param {number} priority - Priority level (0-4, default is 4)
+ */
 export async function addTaskToLocal(task, priority = PRIORITIES.LOWEST) {
     const filepath = FILE_PATHS.TASK;
     let content = existsSync(filepath) ? readFileSync(filepath, 'utf8') : '';
-    
-    const taskContent = task.hasCorrelation() 
-        ? addCorrelationId(task.content, task.todoistId)
-        : task.content;
-    
+
+    const taskContent = task.hasCorrelation()
+          ? addCorrelationId(task.content, task.todoistId)
+          : task.content;
+
     const priorityHeader = `Priority ${priority}`;
     const separator = '-------------------------------------------------------------------------------';
 
@@ -124,9 +143,13 @@ export async function addTaskToLocal(task, priority = PRIORITIES.LOWEST) {
     writeFileSync(filepath, content, 'utf8');
 }
 
+/**
+ * Adds a task to the completed tasks YAML file
+ * @param {Task} task - Task object to mark as completed
+ */
 export async function addCompletedTaskToLocal(task) {
     const filepath = FILE_PATHS.COMPLETED;
-    
+
     // Load existing YAML data or create new structure
     let yamlData = { completed: [] };
     if (existsSync(filepath)) {
@@ -140,19 +163,19 @@ export async function addCompletedTaskToLocal(task) {
             }
         }
     }
-    
+
     // Ensure completed array exists
     if (!yamlData.completed) {
         yamlData.completed = [];
     }
-    
-    const completedDate = task.completed 
-        ? new Date(task.completed).toISOString().split('T')[0]
-        : new Date().toISOString().split('T')[0];
-    
+
+    const completedDate = task.completed
+          ? new Date(task.completed).toISOString().split('T')[0]
+          : new Date().toISOString().split('T')[0];
+
     // Clean task content of old completion markers
     const taskName = task.content.replace(/\s*\(completed:.*?\)$/, '').trim();
-    
+
     // Add to completed array
     yamlData.completed.push({
         name: taskName,
@@ -164,13 +187,18 @@ export async function addCompletedTaskToLocal(task) {
     writeFileSync(filepath, yamlContent, 'utf8');
 }
 
+/**
+ * Removes a task from the local tasks file by matching content
+ * @param {string} taskContent - Content of the task to remove
+ * @returns {Promise<boolean>} True if successful
+ */
 export async function removeTaskFromLocal(taskContent) {
     const filepath = FILE_PATHS.TASK;
     if (!existsSync(filepath)) return false;
 
     const content = readFileSync(filepath, 'utf8');
     const lines = content.split('\n');
-    
+
     const filteredLines = lines.filter(line => {
         const cleanLine = stripCorrelationId(line.trim()).toLowerCase();
         return !cleanLine.includes(taskContent.toLowerCase().trim());
@@ -180,21 +208,27 @@ export async function removeTaskFromLocal(taskContent) {
     return true;
 }
 
+/**
+ * Updates an existing task in the local tasks file
+ * @param {string} oldContent - Original task content to find
+ * @param {Task} newTask - Updated task object
+ * @returns {Promise<boolean>} True if successful
+ */
 export async function updateTaskInLocal(oldContent, newTask) {
     const filepath = FILE_PATHS.TASK;
     if (!existsSync(filepath)) return false;
 
     const content = readFileSync(filepath, 'utf8');
     const lines = content.split('\n');
-    
+
     for (let i = 0; i < lines.length; i++) {
         const line = lines[i].trim();
         const cleanLine = stripCorrelationId(line).toLowerCase();
-        
+
         if (cleanLine.includes(oldContent.toLowerCase())) {
             const updatedContent = newTask.hasCorrelation()
-                ? addCorrelationId(newTask.content, newTask.todoistId)
-                : newTask.content;
+                  ? addCorrelationId(newTask.content, newTask.todoistId)
+                  : newTask.content;
             lines[i] = lines[i].replace(line, updatedContent);
             break;
         }
@@ -204,9 +238,15 @@ export async function updateTaskInLocal(oldContent, newTask) {
     return true;
 }
 
+/**
+ * Finds the correct line index to insert a new task within a priority section
+ * @param {Array<string>} lines - Array of file lines
+ * @param {number} priority - Priority level to find
+ * @returns {number} Line index for insertion
+ */
 function findInsertionPoint(lines, priority) {
     const priorityHeader = `Priority ${priority}`;
-    
+
     for (let i = 0; i < lines.length; i++) {
         if (lines[i] === priorityHeader) {
             // Find the separator and return the line after it

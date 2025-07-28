@@ -1,6 +1,10 @@
 import { TODOIST } from '../config/constants.js';
 import { Task } from '../models/Task.js';
 
+/**
+ * Retrieves all tasks from Todoist for the configured project
+ * @returns {Promise<{current: {tasks: Array<Task>, error?: string}, completed: {tasks: Array<Task>, error?: string}}>}
+ */
 export async function getTodoistTasks() {
     if (!TODOIST.API_TOKEN) {
         return {
@@ -32,6 +36,10 @@ export async function getTodoistTasks() {
     }
 }
 
+/**
+ * Gets the Todoist project ID for the configured project name
+ * @returns {Promise<string|null>} Project ID or null if not found
+ */
 async function getProjectId() {
     const response = await fetch(`${TODOIST.BASE_URL}/projects`, {
         headers: { Authorization: `Bearer ${TODOIST.API_TOKEN}` }
@@ -46,6 +54,11 @@ async function getProjectId() {
     return syncProject?.id || null;
 }
 
+/**
+ * Fetches all active (non-completed) tasks from a Todoist project
+ * @param {string} projectId - Todoist project ID
+ * @returns {Promise<Array>} Array of formatted task objects
+ */
 async function fetchActiveTasks(projectId) {
     const response = await fetch(`${TODOIST.BASE_URL}/tasks?project_id=${projectId}`, {
         headers: { Authorization: `Bearer ${TODOIST.API_TOKEN}` }
@@ -59,6 +72,11 @@ async function fetchActiveTasks(projectId) {
     return formatTasks(tasks);
 }
 
+/**
+ * Fetches completed tasks from the last 30 days for a Todoist project
+ * @param {string} projectId - Todoist project ID
+ * @returns {Promise<Array>} Array of completed task objects
+ */
 async function fetchCompletedTasks(projectId) {
     const response = await fetch(`${TODOIST.SYNC_URL}/completed/get_all`, {
         method: 'POST',
@@ -86,6 +104,11 @@ async function fetchCompletedTasks(projectId) {
     return removeDuplicates(recentTasks);
 }
 
+/**
+ * Formats raw Todoist tasks and builds parent-subtask relationships
+ * @param {Array} tasks - Raw tasks from Todoist API
+ * @returns {Array} Formatted task objects with subtask hierarchy
+ */
 function formatTasks(tasks) {
     const taskMap = new Map();
     
@@ -121,6 +144,11 @@ function formatTasks(tasks) {
     return Array.from(taskMap.values());
 }
 
+/**
+ * Removes duplicate tasks based on content (case-insensitive)
+ * @param {Array} tasks - Array of task objects
+ * @returns {Array} Filtered array without duplicates
+ */
 function removeDuplicates(tasks) {
     const seen = new Set();
     return tasks.filter(task => {
@@ -131,6 +159,12 @@ function removeDuplicates(tasks) {
     });
 }
 
+/**
+ * Creates a new task in Todoist
+ * @param {Task} task - Task object to create
+ * @param {string} projectId - Optional project ID (will fetch if not provided)
+ * @returns {Promise<Object>} Created task response from Todoist API
+ */
 export async function createTodoistTask(task, projectId) {
     if (!projectId) {
         projectId = await getProjectId();
@@ -158,6 +192,12 @@ export async function createTodoistTask(task, projectId) {
     return await response.json();
 }
 
+/**
+ * Updates an existing Todoist task
+ * @param {string} todoistId - Todoist task ID
+ * @param {Object} updates - Object with fields to update (content, priority, due_string, etc.)
+ * @returns {Promise<boolean>} True if successful
+ */
 export async function updateTodoistTask(todoistId, updates) {
     const response = await fetch(`${TODOIST.BASE_URL}/tasks/${todoistId}`, {
         method: 'POST',
@@ -175,6 +215,11 @@ export async function updateTodoistTask(todoistId, updates) {
     return response.ok;
 }
 
+/**
+ * Marks a Todoist task as completed
+ * @param {string} todoistId - Todoist task ID
+ * @returns {Promise<boolean>} True if successful
+ */
 export async function completeTodoistTask(todoistId) {
     const response = await fetch(`${TODOIST.BASE_URL}/tasks/${todoistId}/close`, {
         method: 'POST',
@@ -184,6 +229,11 @@ export async function completeTodoistTask(todoistId) {
     return response.ok;
 }
 
+/**
+ * Deletes a task from Todoist
+ * @param {string} todoistId - Todoist task ID
+ * @returns {Promise<boolean>} True if successful
+ */
 export async function deleteTodoistTask(todoistId) {
     const response = await fetch(`${TODOIST.BASE_URL}/tasks/${todoistId}`, {
         method: 'DELETE',

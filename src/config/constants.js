@@ -25,7 +25,7 @@ async function ensureDirectoryExists(filePath) {
 async function logTransaction(entry) {
     const filePath = FILE_PATHS.TRANSACTIONS;
     await ensureDirectoryExists(filePath);
-    
+
     try {
         let content = '';
         try {
@@ -34,7 +34,7 @@ async function logTransaction(entry) {
             // File doesn't exist, create header
             content = '# Entries are append-only, ordered chronologically\nentries:\n\n';
         }
-        
+
         // Format the entry as YAML
         const yamlEntry = `  - type: ${entry.type}
     timestamp: ${entry.timestamp}
@@ -44,9 +44,8 @@ async function logTransaction(entry) {
     new-name: "${entry.newName}"` : ''}${entry.priority !== undefined ? `
     priority: ${entry.priority}` : ''}
     source: cli
-
 `;
-        
+
         content += yamlEntry;
         await fs.writeFile(filePath, content, 'utf8');
     } catch (error) {
@@ -67,7 +66,7 @@ console.error = originalError;
 
 export const PRIORITIES = {
     HIGHEST: 0,
-    HIGH: 1, 
+    HIGH: 1,
     MEDIUM: 2,
     LOW: 3,
     LOWEST: 4
@@ -75,7 +74,7 @@ export const PRIORITIES = {
 
 export const PRIORITY_LABELS = {
     0: 'Priority 0',
-    1: 'Priority 1', 
+    1: 'Priority 1',
     2: 'Priority 2',
     3: 'Priority 3',
     4: 'Priority 4',
@@ -118,7 +117,7 @@ export const TODOIST = {
 export const TODOIST_PRIORITY_MAP = {
     // Local to Todoist
     0: 4, // Priority 0 → Todoist Priority 4 (highest/red)
-    1: 4, // Priority 1 → Todoist Priority 4 (highest/red) 
+    1: 4, // Priority 1 → Todoist Priority 4 (highest/red)
     2: 3, // Priority 2 → Todoist Priority 3 (orange)
     3: 2, // Priority 3 → Todoist Priority 2 (blue)
     4: 1  // Priority 4 → Todoist Priority 1 (lowest/no flag)

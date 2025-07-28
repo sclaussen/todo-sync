@@ -1,2 +1,27 @@
 # Entries are append-only, ordered chronologically
 entries:
+  - type: create
+    timestamp: 2025-07-28T03:24:49.013GMT-0
+    name: "P0 urgent priority task"
+    priority: 0
+    source: cli
+  - type: create
+    timestamp: 2025-07-28T03:24:50.014GMT-0
+    name: "P1 high priority task"
+    priority: 1
+    source: cli
+  - type: create
+    timestamp: 2025-07-28T03:24:51.164GMT-0
+    name: "P2 medium priority task"
+    priority: 2
+    source: cli
+  - type: create
+    timestamp: 2025-07-28T03:24:52.348GMT-0
+    name: "P3 low priority task"
+    priority: 3
+    source: cli
+  - type: create
+    timestamp: 2025-07-28T03:24:53.666GMT-0
+    name: "P4 lowest priority task"
+    priority: 4
+    source: cli

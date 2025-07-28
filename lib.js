@@ -904,14 +904,13 @@ export async function executeSync(changes, showLocal, showRemote) {
         errors: []
     };
 
-    let localChanges = 0;
-    let todoistChanges = 0;
-
     try {
+        // Collect all changes for organized output
+        const allChanges = [];
+        
         // Execute local changes (from Remote to local)
         if (showLocal || (!showLocal && !showRemote)) {
-            const localResults = await executeLocalChanges(changes.local);
-            localChanges = localResults.totalChanges;
+            const localResults = await executeLocalChanges(changes.local, allChanges);
             if (localResults.errors.length > 0) {
                 results.errors.push(...localResults.errors);
             }
@@ -919,37 +918,20 @@ export async function executeSync(changes, showLocal, showRemote) {
 
         // Execute Remote changes (from local to Remote)
         if (showRemote || (!showLocal && !showRemote)) {
-            const todoistResults = await executeRemoteChanges(changes.todoist);
-            todoistChanges = todoistResults.totalChanges;
-            if (todoistResults.errors.length > 0) {
-                results.errors.push(...todoistResults.errors);
+            const remoteResults = await executeRemoteChanges(changes.todoist, allChanges);
+            if (remoteResults.errors.length > 0) {
+                results.errors.push(...remoteResults.errors);
             }
         }
+
+        // Display organized output
+        displaySyncResults(allChanges);
 
         // Check for conflicts
         if (changes.conflicts.length > 0) {
             results.errors.push(`${changes.conflicts.length} conflicts require manual resolution`);
-            console.log('\n⚠️  Conflicts detected that require manual resolution:');
-            changes.conflicts.forEach((conflict, index) => {
-                console.log(`  ${index + 1}. Correlation ID: ${conflict.corrId}`);
-                console.log(`     Local:   "${conflict.localTask.content}"`);
-                console.log(`     Remote: "${conflict.todoistTask.content}"`);
-            });
         }
 
-        // Summary
-        const summary = [];
-        if (localChanges > 0) {
-            summary.push(`${localChanges} local changes applied`);
-        }
-        if (todoistChanges > 0) {
-            summary.push(`${todoistChanges} Remote changes applied`);
-        }
-        if (summary.length === 0) {
-            summary.push('No changes needed - everything is in sync');
-        }
-
-        results.summary = summary.join(', ');
         results.success = results.errors.length === 0;
 
     } catch (error) {
@@ -960,51 +942,109 @@ export async function executeSync(changes, showLocal, showRemote) {
     return results;
 }
 
-async function executeLocalChanges(localChanges) {
+function displaySyncResults(allChanges) {
+    if (allChanges.length === 0) return;
+    
+    // Sort changes: Local first, then Remote; New, Updated, Completed, Removed; by priority then task name
+    const sortedChanges = allChanges.sort((a, b) => {
+        // Sort by location (local first)
+        if (a.location !== b.location) {
+            return a.location === 'local' ? -1 : 1;
+        }
+        
+        // Sort by action type
+        const actionOrder = { 'New': 0, 'Updated': 1, 'Completed': 2, 'Removed': 3 };
+        if (a.action !== b.action) {
+            return actionOrder[a.action] - actionOrder[b.action];
+        }
+        
+        // Sort by priority
+        if (a.priority !== b.priority) {
+            return a.priority - b.priority;
+        }
+        
+        // Sort by task name
+        return a.taskName.localeCompare(b.taskName);
+    });
+    
+    // Display sorted changes
+    sortedChanges.forEach(change => {
+        const location = change.location === 'local' ? 'local' : 'remote';
+        const priority = `P${change.metadata?.priority !== undefined ? change.metadata.priority : change.priority}`;
+        const idInfo = change.todoistId ? `, ${change.todoistId}` : '';
+        const priorityAndId = `(${priority}${idInfo})`;
+        
+        if (change.action === 'Updated' && change.oldPriority !== undefined) {
+            console.log(`Updated ${location} task: ${change.taskName} ${priorityAndId} -> old priority P${change.oldPriority}`);
+        } else if (change.action === 'Updated' && change.updateType === 'id-added') {
+            console.log(`Updated ${location} task with ID: ${change.taskName} ${priorityAndId}`);
+        } else {
+            console.log(`${change.action} ${location} task: ${change.taskName} ${priorityAndId}`);
+        }
+    });
+}
+
+async function executeLocalChanges(localChanges, allChanges = []) {
     const results = {
         totalChanges: 0,
         errors: []
     };
 
-    const allChanges = [
+    const localChangeList = [
         ...localChanges.noneToCurrent,
         ...localChanges.noneToCompleted,
         ...localChanges.currentToCompleted,
         ...localChanges.renames
     ];
 
-    if (allChanges.length === 0) {
+    if (localChangeList.length === 0) {
         return results;
     }
-
-    console.log(`\n📝 Applying ${allChanges.length} local changes...`);
 
     try {
         // Apply new current tasks from Remote
         for (const change of localChanges.noneToCurrent) {
             await addTaskToLocalFile(change);
-            // Log the new sync operation
             logSyncOperation('create', 'local', {
-                todoistId: change.id,
-                content: change.content, // Should already be clean
+                todoistId: change.todoistId,
+                content: change.content,
                 priority: change.metadata?.priority,
                 source: 'todoist'
             });
-            console.log(`  ✓ Added new task: ${change.content}`);
+            const localPriority = change.metadata?.priority !== undefined ? change.metadata.priority : 4;
+            allChanges.push({
+                action: 'New',
+                location: 'local',
+                taskName: change.content,
+                priority: localPriority,
+                todoistId: change.todoistId
+            });
             results.totalChanges++;
         }
 
         // Apply new completed tasks from Remote
         for (const change of localChanges.noneToCompleted) {
             await addCompletedTaskToLocalFile(change);
-            console.log(`  ✓ Added completed task: ${change.content}`);
+            allChanges.push({
+                action: 'Completed',
+                location: 'local',
+                taskName: change.content,
+                priority: change.metadata?.priority !== undefined ? change.metadata.priority : 4,
+                todoistId: change.todoistId
+            });
             results.totalChanges++;
         }
 
         // Mark current tasks as completed
         for (const change of localChanges.currentToCompleted) {
             await markTaskCompletedInLocalFile(change);
-            console.log(`  ✓ Marked completed: ${change.content}`);
+            allChanges.push({
+                action: 'Completed',
+                location: 'local',
+                taskName: change.content,
+                priority: change.metadata?.priority !== undefined ? change.metadata.priority : 4,
+                todoistId: change.todoistId
+            });
             results.totalChanges++;
         }
 
@@ -1012,9 +1052,22 @@ async function executeLocalChanges(localChanges) {
         for (const change of localChanges.renames) {
             await updateTaskInLocalFile(change);
             if (change.changeType === 'priority_update') {
-                console.log(`  ✓ Updated priority: ${change.content} (${change.oldPriority}→${change.newPriority})`);
+                allChanges.push({
+                    action: 'Updated',
+                    location: 'local',
+                    taskName: change.content,
+                    priority: change.newPriority,
+                    oldPriority: change.oldPriority,
+                    todoistId: change.todoistId
+                });
             } else {
-                console.log(`  ✓ Renamed task: ${change.oldContent} → ${change.newContent}`);
+                allChanges.push({
+                    action: 'Updated',
+                    location: 'local',
+                    taskName: change.newContent,
+                    priority: change.metadata?.priority !== undefined ? change.metadata.priority : 4,
+                    todoistId: change.todoistId
+                });
             }
             results.totalChanges++;
         }
@@ -1026,7 +1079,7 @@ async function executeLocalChanges(localChanges) {
     return results;
 }
 
-async function executeRemoteChanges(todoistChanges) {
+async function executeRemoteChanges(todoistChanges, allChanges = []) {
     const results = {
         totalChanges: 0,
         errors: []
@@ -1037,18 +1090,16 @@ async function executeRemoteChanges(todoistChanges) {
         return results;
     }
 
-    const allChanges = [
+    const remoteChangeList = [
         ...todoistChanges.noneToCurrent,
         ...todoistChanges.noneToCompleted,
         ...todoistChanges.currentToCompleted,
         ...todoistChanges.renames
     ];
 
-    if (allChanges.length === 0) {
+    if (remoteChangeList.length === 0) {
         return results;
     }
-
-    console.log(`\n☁️  Applying ${allChanges.length} Remote changes...`);
 
     try {
         // Get project ID first
@@ -1062,18 +1113,31 @@ async function executeRemoteChanges(todoistChanges) {
         for (const change of todoistChanges.noneToCurrent) {
             const result = await createRemoteTask(change, projectId);
             if (result) {
-                // Log the new sync operation
                 logSyncOperation('create', 'todoist', {
                     todoistId: result.taskId,
-                    content: change.content, // Should already be clean
+                    content: change.content,
                     priority: change.metadata?.priority,
                     source: 'local'
                 });
 
-                // Add Todoist ID to the local task file
                 await updateLocalTaskWithCorrelationId(change.content, result.taskId);
 
-                console.log(`  ✓ Created task: ${change.content}`);
+                allChanges.push({
+                    action: 'Updated',
+                    location: 'local',
+                    taskName: change.content,
+                    priority: change.metadata?.priority !== undefined ? change.metadata.priority : 4,
+                    todoistId: result.taskId,
+                    updateType: 'id-added'
+                });
+
+                allChanges.push({
+                    action: 'New',
+                    location: 'remote',
+                    taskName: change.content,
+                    priority: change.metadata?.priority !== undefined ? change.metadata.priority : 4,
+                    todoistId: result.taskId
+                });
                 results.totalChanges++;
             } else {
                 results.errors.push(`Failed to create task: ${change.content}`);
@@ -1084,7 +1148,13 @@ async function executeRemoteChanges(todoistChanges) {
         for (const change of todoistChanges.noneToCompleted) {
             const result = await createRemoteTask(change, projectId, true);
             if (result) {
-                console.log(`  ✓ Created completed task: ${change.content}`);
+                allChanges.push({
+                    action: 'Completed',
+                    location: 'remote',
+                    taskName: change.content,
+                    priority: change.metadata?.priority !== undefined ? change.metadata.priority : 4,
+                    todoistId: result.taskId
+                });
                 results.totalChanges++;
             } else {
                 results.errors.push(`Failed to create completed task: ${change.content}`);
@@ -1095,7 +1165,13 @@ async function executeRemoteChanges(todoistChanges) {
         for (const change of todoistChanges.currentToCompleted) {
             const success = await completeRemoteTask(change.metadata?.todoistId);
             if (success) {
-                console.log(`  ✓ Marked completed: ${change.content}`);
+                allChanges.push({
+                    action: 'Completed',
+                    location: 'remote',
+                    taskName: change.content,
+                    priority: change.metadata?.priority !== undefined ? change.metadata.priority : 4,
+                    todoistId: change.metadata?.todoistId
+                });
                 results.totalChanges++;
             } else {
                 results.errors.push(`Failed to complete task: ${change.content}`);
@@ -1106,7 +1182,6 @@ async function executeRemoteChanges(todoistChanges) {
         for (const change of todoistChanges.renames) {
             const success = await updateRemoteTask(change);
             if (success) {
-                // Log the update
                 if (change.changeType === 'priority_update') {
                     logSyncOperation('update', 'todoist', {
                         todoistId: change.todoistId,
@@ -1115,7 +1190,14 @@ async function executeRemoteChanges(todoistChanges) {
                         oldPriority: change.oldPriority,
                         source: 'local'
                     });
-                    console.log(`  ✓ Updated priority: ${change.content} (${change.oldPriority}→${change.newPriority})`);
+                    allChanges.push({
+                        action: 'Updated',
+                        location: 'remote',
+                        taskName: change.content,
+                        priority: change.newPriority,
+                        oldPriority: change.oldPriority,
+                        todoistId: change.todoistId
+                    });
                 } else {
                     logSyncOperation('update', 'todoist', {
                         todoistId: change.todoistId,
@@ -1123,7 +1205,13 @@ async function executeRemoteChanges(todoistChanges) {
                         content: change.newContent,
                         source: 'local'
                     });
-                    console.log(`  ✓ Renamed task: ${change.oldContent} → ${change.newContent}`);
+                    allChanges.push({
+                        action: 'Updated',
+                        location: 'remote',
+                        taskName: change.newContent,
+                        priority: change.metadata?.priority !== undefined ? change.metadata.priority : 4,
+                        todoistId: change.todoistId
+                    });
                 }
                 results.totalChanges++;
             } else {
@@ -1182,7 +1270,6 @@ async function updateLocalTaskWithCorrelationId(taskContent, todoistId) {
 
             // Write the updated content back to the file
             writeFileSync(filepath, lines.join('\n'), 'utf8');
-            console.log(`  📎 Added Todoist ID (${todoistId}) to local task: ${cleanTaskContent}`);
         } else {
             console.warn(`  ⚠️  Could not find local task to update with Todoist ID: ${cleanTaskContent}`);
         }
@@ -1199,7 +1286,6 @@ async function createRemoteTask(task, projectId, isCompleted = false) {
         const cleanContent = task.content; // Should already be clean
 
         // Debug logging
-        console.log(`DEBUG: createRemoteTask - content: "${cleanContent}", localPriority: ${localPriority}, todoistPriority: ${priority}`);
         const taskData = {
             content: cleanContent,
             project_id: projectId,
@@ -1271,13 +1357,10 @@ async function updateRemoteTask(change) {
                 // Remove due date when moving from Priority 0 to any other priority
                 updateData.due_string = 'no date';
             }
-            console.log(`🔧 Updating task ${change.todoistId}: priority ${change.oldPriority} → ${change.newPriority} (Remote: ${updateData.priority})`);
         } else if (change.newContent) {
             updateData.content = change.newContent;
-            console.log(`🔧 Updating task ${change.todoistId}: content "${change.oldContent}" → "${change.newContent}"`);
         }
 
-        console.log(`🚀 API Call: PUT /tasks/${change.todoistId}`, JSON.stringify(updateData));
 
         const response = await fetch(`https://api.todoist.com/rest/v2/tasks/${change.todoistId}`, {
             method: 'POST',
@@ -1578,7 +1661,7 @@ export async function createBackup() {
         // Backup remote data
         await backupRemoteData(backupDir);
 
-        console.log(`\n💾 Backup created at: ${backupDir}`);
+        console.log(`Created backup ${backupDir.split('/').slice(-2).join('/')}`);
         return { success: true, backupDir, timestamp };
 
     } catch (error) {
@@ -1598,12 +1681,10 @@ async function backupLocalFiles(backupDir) {
         const currentData = parseLocalTaskContent(currentContent);
         const yamlContent = yaml.dump(currentData, { indent: 2, lineWidth: 120 });
         writeFileSync(join(backupDir, 'local.current.yaml'), yamlContent);
-        console.log('📄 Backed up: local.current.yaml');
         
         // Also backup the raw current.tasks file
         const rawTasksBackupPath = join(backupDir, 'current.tasks');
         writeFileSync(rawTasksBackupPath, currentContent);
-        console.log('📄 Backed up: current.tasks');
     }
 
     // Backup completed tasks
@@ -1613,7 +1694,6 @@ async function backupLocalFiles(backupDir) {
         const completedData = parseLocalTaskContent(completedContent);
         const yamlContent = yaml.dump(completedData, { indent: 2, lineWidth: 120 });
         writeFileSync(join(backupDir, 'local.completed.yaml'), yamlContent);
-        console.log('📄 Backed up: local.completed.yaml');
     }
 
 }
@@ -1688,7 +1768,6 @@ async function backupRemoteData(backupDir) {
             const todoFormatData = convertRemoteToTaskFormat(tasks);
             const yamlContent = yaml.dump(todoFormatData, { indent: 2, lineWidth: 120 });
             writeFileSync(join(backupDir, 'remote.current.yaml'), yamlContent);
-            console.log(`☁️  Backed up ${tasks.length} current tasks`);
         }
 
         // Backup completed tasks
@@ -1705,7 +1784,6 @@ async function backupRemoteData(backupDir) {
             const completedData = await completedResponse.json();
             const completedYaml = yaml.dump(completedData, { indent: 2, lineWidth: 120 });
             writeFileSync(join(backupDir, 'remote.completed.yaml'), completedYaml);
-            console.log(`☁️  Backed up ${completedData.items?.length || 0} completed tasks`);
         }
 
     } catch (error) {

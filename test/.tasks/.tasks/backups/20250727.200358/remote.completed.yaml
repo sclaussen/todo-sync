@@ -1,0 +1,857 @@
+items:
+  - completed_at: '2025-07-28T03:02:34.000000Z'
+    content: P1 item new name
+    id: '8535890236'
+    item_object: null
+    meta_data: null
+    note_count: 0
+    notes: []
+    project_id: '2356463476'
+    section_id: null
+    task_id: '9388412990'
+    user_id: '16778938'
+    v2_project_id: 6cJGJj3Wgj8q45hM
+    v2_section_id: null
+    v2_task_id: 6cVGjrgXmVC38RXM
+  - completed_at: '2025-07-28T03:02:33.000000Z'
+    content: P3 item edited
+    id: '8535890201'
+    item_object: null
+    meta_data: null
+    note_count: 0
+    notes: []
+    project_id: '2356463476'
+    section_id: null
+    task_id: '9388412957'
+    user_id: '16778938'
+    v2_project_id: 6cJGJj3Wgj8q45hM
+    v2_section_id: null
+    v2_task_id: 6cVGjrX9hqpPQrPM
+  - completed_at: '2025-07-21T03:20:56.000000Z'
+    content: 'Pay for workouts # [e8fc3b9c] (completed: 7/20/2025)'
+    id: '8517187292'
+    item_object: null
+    meta_data: null
+    note_count: 0
+    notes: []
+    project_id: '2356463476'
+    section_id: null
+    task_id: '9366984527'
+    user_id: '16778938'
+    v2_project_id: 6cJGJj3Wgj8q45hM
+    v2_section_id: null
+    v2_task_id: 6cQgMFRWJx2Cfcfv
+  - completed_at: '2025-07-21T02:38:57.000000Z'
+    content: 'Climbs, Half Dome, Whitney, ... (completed: 7/20/2025)'
+    id: '8517132418'
+    item_object: null
+    meta_data: null
+    note_count: 0
+    notes: []
+    project_id: '2356463476'
+    section_id: null
+    task_id: '9366929296'
+    user_id: '16778938'
+    v2_project_id: 6cJGJj3Wgj8q45hM
+    v2_section_id: null
+    v2_task_id: 6cQg8Fj4h7vV935M
+  - completed_at: '2025-07-21T02:38:56.000000Z'
+    content: 'describes what is in (completed: 7/20/2025)'
+    id: '8517132389'
+    item_object: null
+    meta_data: null
+    note_count: 0
+    notes: []
+    project_id: '2356463476'
+    section_id: null
+    task_id: '9366929278'
+    user_id: '16778938'
+    v2_project_id: 6cJGJj3Wgj8q45hM
+    v2_section_id: null
+    v2_task_id: 6cQg8FhF6QXX63gv
+  - completed_at: '2025-07-21T02:38:54.000000Z'
+    content: 'Health (completed: 7/20/2025)'
+    id: '8517132364'
+    item_object: null
+    meta_data: null
+    note_count: 0
+    notes: []
+    project_id: '2356463476'
+    section_id: null
+    task_id: '9366928657'
+    user_id: '16778938'
+    v2_project_id: 6cJGJj3Wgj8q45hM
+    v2_section_id: null
+    v2_task_id: 6cQg8FQhQ8rGCMmv
+  - completed_at: '2025-07-21T02:38:53.000000Z'
+    content: 'Summary of options (completed: 7/20/2025)'
+    id: '8517132340'
+    item_object: null
+    meta_data: null
+    note_count: 0
+    notes: []
+    project_id: '2356463476'
+    section_id: null
+    task_id: '9366928624'
+    user_id: '16778938'
+    v2_project_id: 6cJGJj3Wgj8q45hM
+    v2_section_id: null
+    v2_task_id: 6cQg8FMQ5mFv7rcv
+  - completed_at: '2025-07-21T02:36:50.000000Z'
+    content: 'Allow for sub tasks in todo (completed: 7/8/2025)'
+    id: '8517129639'
+    item_object: null
+    meta_data: null
+    note_count: 0
+    notes: []
+    project_id: '2356463476'
+    section_id: null
+    task_id: '9366925283'
+    user_id: '16778938'
+    v2_project_id: 6cJGJj3Wgj8q45hM
+    v2_section_id: null
+    v2_task_id: 6cQg7wQ5F2QVmFwv
+  - completed_at: '2025-07-21T02:36:49.000000Z'
+    content: 'Claude - system settings dictation enable (completed: 7/8/2025)'
+    id: '8517129609'
+    item_object: null
+    meta_data: null
+    note_count: 0
+    notes: []
+    project_id: '2356463476'
+    section_id: null
+    task_id: '9366925262'
+    user_id: '16778938'
+    v2_project_id: 6cJGJj3Wgj8q45hM
+    v2_section_id: null
+    v2_task_id: 6cQg7wHwccMf2GVv
+  - completed_at: '2025-07-21T02:36:48.000000Z'
+    content: 'Claude / commands (completed: 7/8/2025)'
+    id: '8517129584'
+    item_object: null
+    meta_data: null
+    note_count: 0
+    notes: []
+    project_id: '2356463476'
+    section_id: null
+    task_id: '9366925225'
+    user_id: '16778938'
+    v2_project_id: 6cJGJj3Wgj8q45hM
+    v2_section_id: null
+    v2_task_id: 6cQg7wCvFH9xpxcv
+  - completed_at: '2025-07-21T02:36:46.000000Z'
+    content: 'Ctrl r shows more output (completed: 7/15/2025)'
+    id: '8517129556'
+    item_object: null
+    meta_data: null
+    note_count: 0
+    notes: []
+    project_id: '2356463476'
+    section_id: null
+    task_id: '9366925206'
+    user_id: '16778938'
+    v2_project_id: 6cJGJj3Wgj8q45hM
+    v2_section_id: null
+    v2_task_id: 6cQg7w7FrFPwqhFv
+  - completed_at: '2025-07-21T02:36:45.000000Z'
+    content: 'Esc esc for history (completed: 7/15/2025)'
+    id: '8517129530'
+    item_object: null
+    meta_data: null
+    note_count: 0
+    notes: []
+    project_id: '2356463476'
+    section_id: null
+    task_id: '9366925192'
+    user_id: '16778938'
+    v2_project_id: 6cJGJj3Wgj8q45hM
+    v2_section_id: null
+    v2_task_id: 6cQg7w59P5PHXvVv
+  - completed_at: '2025-07-21T02:36:44.000000Z'
+    content: 'Figure out how to use workout mode on Garmin (completed: 7/15/2025)'
+    id: '8517129506'
+    item_object: null
+    meta_data: null
+    note_count: 0
+    notes: []
+    project_id: '2356463476'
+    section_id: null
+    task_id: '9366925175'
+    user_id: '16778938'
+    v2_project_id: 6cJGJj3Wgj8q45hM
+    v2_section_id: null
+    v2_task_id: 6cQg7vvmmjxpQ22v
+  - completed_at: '2025-07-21T02:36:43.000000Z'
+    content: '- Climbs, Half Dome, Whitney, ... (completed: 7/20/2025)'
+    id: '8517129480'
+    item_object: null
+    meta_data: null
+    note_count: 0
+    notes: []
+    project_id: '2356463476'
+    section_id: null
+    task_id: '9366925154'
+    user_id: '16778938'
+    v2_project_id: 6cJGJj3Wgj8q45hM
+    v2_section_id: null
+    v2_task_id: 6cQg7vq9x5m7H5Mv
+  - completed_at: '2025-07-21T02:36:42.000000Z'
+    content: '- describes what is in (completed: 7/20/2025)'
+    id: '8517129449'
+    item_object: null
+    meta_data: null
+    note_count: 0
+    notes: []
+    project_id: '2356463476'
+    section_id: null
+    task_id: '9366925131'
+    user_id: '16778938'
+    v2_project_id: 6cJGJj3Wgj8q45hM
+    v2_section_id: null
+    v2_task_id: 6cQg7vp6V5gqHV3M
+  - completed_at: '2025-07-21T02:36:40.000000Z'
+    content: '- Health (completed: 7/20/2025)'
+    id: '8517129428'
+    item_object: null
+    meta_data: null
+    note_count: 0
+    notes: []
+    project_id: '2356463476'
+    section_id: null
+    task_id: '9366925110'
+    user_id: '16778938'
+    v2_project_id: 6cJGJj3Wgj8q45hM
+    v2_section_id: null
+    v2_task_id: 6cQg7vWQq7MqCgrM
+  - completed_at: '2025-07-21T02:36:39.000000Z'
+    content: '- Summary of options (completed: 7/20/2025)'
+    id: '8517129403'
+    item_object: null
+    meta_data: null
+    note_count: 0
+    notes: []
+    project_id: '2356463476'
+    section_id: null
+    task_id: '9366925081'
+    user_id: '16778938'
+    v2_project_id: 6cJGJj3Wgj8q45hM
+    v2_section_id: null
+    v2_task_id: 6cQg7vVXVXFCjm4v
+  - completed_at: '2025-07-20T22:42:23.000000Z'
+    content: '- Summary of options'
+    id: '8516813151'
+    item_object: null
+    meta_data: null
+    note_count: 0
+    notes: []
+    project_id: '2356463476'
+    section_id: null
+    task_id: '9324555190'
+    user_id: '16778938'
+    v2_project_id: 6cJGJj3Wgj8q45hM
+    v2_section_id: null
+    v2_task_id: 6cJJXxm84CmCxFpv
+  - completed_at: '2025-07-20T22:42:22.000000Z'
+    content: '- Health'
+    id: '8516813126'
+    item_object: null
+    meta_data: null
+    note_count: 0
+    notes: []
+    project_id: '2356463476'
+    section_id: null
+    task_id: '9324555197'
+    user_id: '16778938'
+    v2_project_id: 6cJGJj3Wgj8q45hM
+    v2_section_id: null
+    v2_task_id: 6cJJXxrP4PR83vmM
+  - completed_at: '2025-07-20T22:42:21.000000Z'
+    content: '- describes what is in'
+    id: '8516813096'
+    item_object: null
+    meta_data: null
+    note_count: 0
+    notes: []
+    project_id: '2356463476'
+    section_id: null
+    task_id: '9324555184'
+    user_id: '16778938'
+    v2_project_id: 6cJGJj3Wgj8q45hM
+    v2_section_id: null
+    v2_task_id: 6cJJXxphH244cfcv
+  - completed_at: '2025-07-20T22:42:19.000000Z'
+    content: '- Climbs, Half Dome, Whitney, ...'
+    id: '8516813078'
+    item_object: null
+    meta_data: null
+    note_count: 0
+    notes: []
+    project_id: '2356463476'
+    section_id: null
+    task_id: '9324555145'
+    user_id: '16778938'
+    v2_project_id: 6cJGJj3Wgj8q45hM
+    v2_section_id: null
+    v2_task_id: 6cJJXxWq4VQfq7wM
+  - completed_at: '2025-07-20T21:16:36.000000Z'
+    content: '-------------------------------------------------------------------------------'
+    id: '8516679298'
+    item_object: null
+    meta_data: null
+    note_count: 0
+    notes: []
+    project_id: '2356463476'
+    section_id: null
+    task_id: '9324555177'
+    user_id: '16778938'
+    v2_project_id: 6cJGJj3Wgj8q45hM
+    v2_section_id: null
+    v2_task_id: 6cJJXxj6jRGr42xM
+  - completed_at: '2025-07-20T21:16:34.000000Z'
+    content: '-------------------------------------------------------------------------------'
+    id: '8516679266'
+    item_object: null
+    meta_data: null
+    note_count: 0
+    notes: []
+    project_id: '2356463476'
+    section_id: null
+    task_id: '9324555169'
+    user_id: '16778938'
+    v2_project_id: 6cJGJj3Wgj8q45hM
+    v2_section_id: null
+    v2_task_id: 6cJJXxgWwc4v65Vv
+  - completed_at: '2025-07-20T21:16:33.000000Z'
+    content: '-------------------------------------------------------------------------------'
+    id: '8516679230'
+    item_object: null
+    meta_data: null
+    note_count: 0
+    notes: []
+    project_id: '2356463476'
+    section_id: null
+    task_id: '9324555152'
+    user_id: '16778938'
+    v2_project_id: 6cJGJj3Wgj8q45hM
+    v2_section_id: null
+    v2_task_id: 6cJJXxcH2cfgxVPM
+  - completed_at: '2025-07-16T00:36:12.000000Z'
+    content: Figure out how to use workout mode on Garmin
+    id: '8504467758'
+    item_object: null
+    meta_data: null
+    note_count: 0
+    notes: []
+    project_id: '2356463476'
+    section_id: null
+    task_id: '9331015290'
+    user_id: '16778938'
+    v2_project_id: 6cJGJj3Wgj8q45hM
+    v2_section_id: null
+    v2_task_id: 6cJmFX2FVV8J4mcv
+  - completed_at: '2025-07-16T00:36:11.000000Z'
+    content: Figure out how to use workout mode on Garmin
+    id: '8504467718'
+    item_object: null
+    meta_data: null
+    note_count: 0
+    notes: []
+    project_id: '2356463476'
+    section_id: null
+    task_id: '9324421732'
+    user_id: '16778938'
+    v2_project_id: 6cJGJj3Wgj8q45hM
+    v2_section_id: null
+    v2_task_id: 6cJJ8g8x2c2Vjmrv
+  - completed_at: '2025-07-16T00:36:08.000000Z'
+    content: Esc esc for history
+    id: '8504467650'
+    item_object: null
+    meta_data: null
+    note_count: 0
+    notes: []
+    project_id: '2356463476'
+    section_id: null
+    task_id: '9331026109'
+    user_id: '16778938'
+    v2_project_id: 6cJGJj3Wgj8q45hM
+    v2_section_id: null
+    v2_task_id: 6cJmG9J6fwVhj7JM
+  - completed_at: '2025-07-16T00:36:06.000000Z'
+    content: Esc esc for history
+    id: '8504467614'
+    item_object: null
+    meta_data: null
+    note_count: 0
+    notes: []
+    project_id: '2356463476'
+    section_id: null
+    task_id: '9331023815'
+    user_id: '16778938'
+    v2_project_id: 6cJGJj3Wgj8q45hM
+    v2_section_id: null
+    v2_task_id: 6cJmG5775Rr4qF3M
+  - completed_at: '2025-07-16T00:36:05.000000Z'
+    content: Esc esc for history
+    id: '8504467588'
+    item_object: null
+    meta_data: null
+    note_count: 0
+    notes: []
+    project_id: '2356463476'
+    section_id: null
+    task_id: '9331015961'
+    user_id: '16778938'
+    v2_project_id: 6cJGJj3Wgj8q45hM
+    v2_section_id: null
+    v2_task_id: 6cJmFcHQ9Jmg2Vjv
+  - completed_at: '2025-07-16T00:36:04.000000Z'
+    content: Esc esc for history
+    id: '8504467569'
+    item_object: null
+    meta_data: null
+    note_count: 0
+    notes: []
+    project_id: '2356463476'
+    section_id: null
+    task_id: '9324442465'
+    user_id: '16778938'
+    v2_project_id: 6cJGJj3Wgj8q45hM
+    v2_section_id: null
+    v2_task_id: 6cJJFG3fxg3cwVjv
+  - completed_at: '2025-07-16T00:35:56.000000Z'
+    content: Ctrl r shows more output
+    id: '8504467357'
+    item_object: null
+    meta_data: null
+    note_count: 0
+    notes: []
+    project_id: '2356463476'
+    section_id: null
+    task_id: '9331026078'
+    user_id: '16778938'
+    v2_project_id: 6cJGJj3Wgj8q45hM
+    v2_section_id: null
+    v2_task_id: 6cJmG9Cxx47mr57M
+  - completed_at: '2025-07-16T00:35:52.000000Z'
+    content: Ctrl r shows more output
+    id: '8504467248'
+    item_object: null
+    meta_data: null
+    note_count: 0
+    notes: []
+    project_id: '2356463476'
+    section_id: null
+    task_id: '9331023778'
+    user_id: '16778938'
+    v2_project_id: 6cJGJj3Wgj8q45hM
+    v2_section_id: null
+    v2_task_id: 6cJmG56Xj5GHcCwv
+  - completed_at: '2025-07-16T00:35:50.000000Z'
+    content: Ctrl r shows more output
+    id: '8504467214'
+    item_object: null
+    meta_data: null
+    note_count: 0
+    notes: []
+    project_id: '2356463476'
+    section_id: null
+    task_id: '9331015921'
+    user_id: '16778938'
+    v2_project_id: 6cJGJj3Wgj8q45hM
+    v2_section_id: null
+    v2_task_id: 6cJmFcCCqjCM9gQv
+  - completed_at: '2025-07-16T00:35:49.000000Z'
+    content: Ctrl r shows more output
+    id: '8504467189'
+    item_object: null
+    meta_data: null
+    note_count: 0
+    notes: []
+    project_id: '2356463476'
+    section_id: null
+    task_id: '9324442308'
+    user_id: '16778938'
+    v2_project_id: 6cJGJj3Wgj8q45hM
+    v2_section_id: null
+    v2_task_id: 6cJJFFGGvFF39CCv
+  - completed_at: '2025-07-09T01:59:41.000000Z'
+    content: Claude / commands
+    id: '8485604671'
+    item_object: null
+    meta_data: null
+    note_count: 0
+    notes: []
+    project_id: '2356463476'
+    section_id: null
+    task_id: '9331028010'
+    user_id: '16778938'
+    v2_project_id: 6cJGJj3Wgj8q45hM
+    v2_section_id: null
+    v2_task_id: 6cJmGHc96cxfqqfM
+  - completed_at: '2025-07-09T01:59:40.000000Z'
+    content: Claude / commands
+    id: '8485604634'
+    item_object: null
+    meta_data: null
+    note_count: 0
+    notes: []
+    project_id: '2356463476'
+    section_id: null
+    task_id: '9331025584'
+    user_id: '16778938'
+    v2_project_id: 6cJGJj3Wgj8q45hM
+    v2_section_id: null
+    v2_task_id: 6cJmG8w8h94rrwXv
+  - completed_at: '2025-07-09T01:59:39.000000Z'
+    content: Claude / commands
+    id: '8485604622'
+    item_object: null
+    meta_data: null
+    note_count: 0
+    notes: []
+    project_id: '2356463476'
+    section_id: null
+    task_id: '9331023549'
+    user_id: '16778938'
+    v2_project_id: 6cJGJj3Wgj8q45hM
+    v2_section_id: null
+    v2_task_id: 6cJmG4f5GFVwj94M
+  - completed_at: '2025-07-09T01:59:37.000000Z'
+    content: Claude / commands
+    id: '8485604576'
+    item_object: null
+    meta_data: null
+    note_count: 0
+    notes: []
+    project_id: '2356463476'
+    section_id: null
+    task_id: '9331015673'
+    user_id: '16778938'
+    v2_project_id: 6cJGJj3Wgj8q45hM
+    v2_section_id: null
+    v2_task_id: 6cJmFXpHxmjJ7Gxv
+  - completed_at: '2025-07-09T01:59:36.000000Z'
+    content: Claude - system settings dictation enable
+    id: '8485604538'
+    item_object: null
+    meta_data: null
+    note_count: 0
+    notes: []
+    project_id: '2356463476'
+    section_id: null
+    task_id: '9331026473'
+    user_id: '16778938'
+    v2_project_id: 6cJGJj3Wgj8q45hM
+    v2_section_id: null
+    v2_task_id: 6cJmGC6wjq584G9M
+  - completed_at: '2025-07-09T01:59:35.000000Z'
+    content: Claude - system settings dictation enable
+    id: '8485604512'
+    item_object: null
+    meta_data: null
+    note_count: 0
+    notes: []
+    project_id: '2356463476'
+    section_id: null
+    task_id: '9331016546'
+    user_id: '16778938'
+    v2_project_id: 6cJGJj3Wgj8q45hM
+    v2_section_id: null
+    v2_task_id: 6cJmFf627C78RX7v
+  - completed_at: '2025-07-09T01:59:33.000000Z'
+    content: Claude - system settings dictation enable
+    id: '8485604471'
+    item_object: null
+    meta_data: null
+    note_count: 0
+    notes: []
+    project_id: '2356463476'
+    section_id: null
+    task_id: '9331015221'
+    user_id: '16778938'
+    v2_project_id: 6cJGJj3Wgj8q45hM
+    v2_section_id: null
+    v2_task_id: 6cJmFWqRcXGqrWPv
+  - completed_at: '2025-07-09T01:59:32.000000Z'
+    content: Claude - system settings dictation enable
+    id: '8485604443'
+    item_object: null
+    meta_data: null
+    note_count: 0
+    notes: []
+    project_id: '2356463476'
+    section_id: null
+    task_id: '9331011595'
+    user_id: '16778938'
+    v2_project_id: 6cJGJj3Wgj8q45hM
+    v2_section_id: null
+    v2_task_id: 6cJmFHx2FxgJ2FCM
+  - completed_at: '2025-07-09T01:59:31.000000Z'
+    content: Claude - system settings dictation enable
+    id: '8485604424'
+    item_object: null
+    meta_data: null
+    note_count: 0
+    notes: []
+    project_id: '2356463476'
+    section_id: null
+    task_id: '9331011147'
+    user_id: '16778938'
+    v2_project_id: 6cJGJj3Wgj8q45hM
+    v2_section_id: null
+    v2_task_id: 6cJmFGqW6jmqfxCM
+  - completed_at: '2025-07-09T01:59:29.000000Z'
+    content: Claude - system settings dictation enable
+    id: '8485604390'
+    item_object: null
+    meta_data: null
+    note_count: 0
+    notes: []
+    project_id: '2356463476'
+    section_id: null
+    task_id: '9324993916'
+    user_id: '16778938'
+    v2_project_id: 6cJGJj3Wgj8q45hM
+    v2_section_id: null
+    v2_task_id: 6cJMhmm8XvfwH8fM
+  - completed_at: '2025-07-09T01:59:25.000000Z'
+    content: Allow for sub tasks in todo
+    id: '8485604271'
+    item_object: null
+    meta_data: null
+    note_count: 0
+    notes: []
+    project_id: '2356463476'
+    section_id: null
+    task_id: '9331025313'
+    user_id: '16778938'
+    v2_project_id: 6cJGJj3Wgj8q45hM
+    v2_section_id: null
+    v2_task_id: 6cJmG89rrxmppqrM
+  - completed_at: '2025-07-09T01:59:23.000000Z'
+    content: Allow for sub tasks in todo
+    id: '8485604247'
+    item_object: null
+    meta_data: null
+    note_count: 0
+    notes: []
+    project_id: '2356463476'
+    section_id: null
+    task_id: '9331023249'
+    user_id: '16778938'
+    v2_project_id: 6cJGJj3Wgj8q45hM
+    v2_section_id: null
+    v2_task_id: 6cJmG49HPGQvXPGM
+  - completed_at: '2025-07-09T01:59:22.000000Z'
+    content: Allow for sub tasks in todo
+    id: '8485604200'
+    item_object: null
+    meta_data: null
+    note_count: 0
+    notes: []
+    project_id: '2356463476'
+    section_id: null
+    task_id: '9331014929'
+    user_id: '16778938'
+    v2_project_id: 6cJGJj3Wgj8q45hM
+    v2_section_id: null
+    v2_task_id: 6cJmFWH7HjXppQmM
+  - completed_at: '2025-07-09T01:59:20.000000Z'
+    content: Allow for sub tasks in todo
+    id: '8485604155'
+    item_object: null
+    meta_data: null
+    note_count: 0
+    notes: []
+    project_id: '2356463476'
+    section_id: null
+    task_id: '9331014847'
+    user_id: '16778938'
+    v2_project_id: 6cJGJj3Wgj8q45hM
+    v2_section_id: null
+    v2_task_id: 6cJmFW7q3h34fJhM
+  - completed_at: '2025-07-09T01:59:19.000000Z'
+    content: Allow for sub tasks in todo
+    id: '8485604120'
+    item_object: null
+    meta_data: null
+    note_count: 0
+    notes: []
+    project_id: '2356463476'
+    section_id: null
+    task_id: '9331010765'
+    user_id: '16778938'
+    v2_project_id: 6cJGJj3Wgj8q45hM
+    v2_section_id: null
+    v2_task_id: 6cJmFG5FpMg66prM
+  - completed_at: '2025-07-09T01:59:17.000000Z'
+    content: Allow for sub tasks in todo
+    id: '8485604085'
+    item_object: null
+    meta_data: null
+    note_count: 0
+    notes: []
+    project_id: '2356463476'
+    section_id: null
+    task_id: '9324993832'
+    user_id: '16778938'
+    v2_project_id: 6cJGJj3Wgj8q45hM
+    v2_section_id: null
+    v2_task_id: 6cJMhmMf577cW35M
+  - completed_at: '2025-07-09T01:59:16.000000Z'
+    content: Allow for sub tasks in todo
+    id: '8485604062'
+    item_object: null
+    meta_data: null
+    note_count: 0
+    notes: []
+    project_id: '2356463476'
+    section_id: null
+    task_id: '9324381979'
+    user_id: '16778938'
+    v2_project_id: 6cJGJj3Wgj8q45hM
+    v2_section_id: null
+    v2_task_id: 6cJJ3v89cpg729wv
+  - completed_at: '2025-07-06T22:42:52.000000Z'
+    content: '- Summary of options'
+    id: '8478851797'
+    item_object: null
+    meta_data: null
+    note_count: 0
+    notes: []
+    project_id: '2356463476'
+    section_id: null
+    task_id: '9323777016'
+    user_id: '16778938'
+    v2_project_id: 6cJGJj3Wgj8q45hM
+    v2_section_id: null
+    v2_task_id: 6cJGJwPMxrxWQXPv
+  - completed_at: '2025-07-06T22:42:51.000000Z'
+    content: '- Climbs, Half Dome, Whitney, ...'
+    id: '8478851769'
+    item_object: null
+    meta_data: null
+    note_count: 0
+    notes: []
+    project_id: '2356463476'
+    section_id: null
+    task_id: '9323775520'
+    user_id: '16778938'
+    v2_project_id: 6cJGJj3Wgj8q45hM
+    v2_section_id: null
+    v2_task_id: 6cJGJpXC432Qf5Qv
+  - completed_at: '2025-07-06T22:42:50.000000Z'
+    content: '- Health'
+    id: '8478851743'
+    item_object: null
+    meta_data: null
+    note_count: 0
+    notes: []
+    project_id: '2356463476'
+    section_id: null
+    task_id: '9323777030'
+    user_id: '16778938'
+    v2_project_id: 6cJGJj3Wgj8q45hM
+    v2_section_id: null
+    v2_task_id: 6cJGJwVFFw5RF4jv
+  - completed_at: '2025-07-06T22:42:36.000000Z'
+    content: '- describes what is in'
+    id: '8478851439'
+    item_object: null
+    meta_data: null
+    note_count: 0
+    notes: []
+    project_id: '2356463476'
+    section_id: null
+    task_id: '9323777003'
+    user_id: '16778938'
+    v2_project_id: 6cJGJj3Wgj8q45hM
+    v2_section_id: null
+    v2_task_id: 6cJGJwFpMvC7jG4M
+  - completed_at: '2025-07-06T22:42:25.000000Z'
+    content: '-------------------------------------------------------------------------------'
+    id: '8478851214'
+    item_object: null
+    meta_data: null
+    note_count: 0
+    notes: []
+    project_id: '2356463476'
+    section_id: null
+    task_id: '9323776150'
+    user_id: '16778938'
+    v2_project_id: 6cJGJj3Wgj8q45hM
+    v2_section_id: null
+    v2_task_id: 6cJGJqvhGJxR796M
+  - completed_at: '2025-07-06T22:42:24.000000Z'
+    content: '-------------------------------------------------------------------------------'
+    id: '8478851189'
+    item_object: null
+    meta_data: null
+    note_count: 0
+    notes: []
+    project_id: '2356463476'
+    section_id: null
+    task_id: '9323775839'
+    user_id: '16778938'
+    v2_project_id: 6cJGJj3Wgj8q45hM
+    v2_section_id: null
+    v2_task_id: 6cJGJqFw6JrrFCpM
+  - completed_at: '2025-07-06T22:42:21.000000Z'
+    content: '-------------------------------------------------------------------------------'
+    id: '8478851112'
+    item_object: null
+    meta_data: null
+    note_count: 0
+    notes: []
+    project_id: '2356463476'
+    section_id: null
+    task_id: '9323775589'
+    user_id: '16778938'
+    v2_project_id: 6cJGJj3Wgj8q45hM
+    v2_section_id: null
+    v2_task_id: 6cJGJpp9HrjR44Vv
+  - completed_at: '2025-07-06T22:27:12.000000Z'
+    content: Enhance bm.js to auto replace bookmarks using cursor
+    id: '8478829130'
+    item_object: null
+    meta_data: null
+    note_count: 0
+    notes: []
+    project_id: '2356463476'
+    section_id: null
+    task_id: '9323774680'
+    user_id: '16778938'
+    v2_project_id: 6cJGJj3Wgj8q45hM
+    v2_section_id: null
+    v2_task_id: 6cJGJmGfcXjXgq3v
+  - completed_at: '2025-07-06T22:27:02.000000Z'
+    content: What is our insurance company?  credentials?
+    id: '8478828919'
+    item_object: null
+    meta_data: null
+    note_count: 0
+    notes: []
+    project_id: '2356463476'
+    section_id: null
+    task_id: '9323774604'
+    user_id: '16778938'
+    v2_project_id: 6cJGJj3Wgj8q45hM
+    v2_section_id: null
+    v2_task_id: 6cJGJm97g8MPgpWv
+  - completed_at: '2025-07-06T22:24:10.000000Z'
+    content: Pay for workouts
+    id: '8478824655'
+    item_object: null
+    meta_data: null
+    note_count: 0
+    notes: []
+    project_id: '2356463476'
+    section_id: null
+    task_id: '9323773476'
+    user_id: '16778938'
+    v2_project_id: 6cJGJj3Wgj8q45hM
+    v2_section_id: null
+    v2_task_id: 6cJGJj8mCc2HVHfv
+projects: {}
+sections: {}

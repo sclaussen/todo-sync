@@ -7,7 +7,7 @@ function validateOptions(options) {
 export async function execute(options) {
     validateOptions(options);
     
-    console.log(`${DISPLAY_ICONS.SUCCESS} Duplicates command not yet implemented`);
+    console.log(`Duplicates command not yet implemented`);
     console.log('This command will find and remove duplicate tasks');
     
     // TODO: Implement duplicate detection and removal
