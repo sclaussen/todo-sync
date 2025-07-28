@@ -164,7 +164,7 @@ async function syncUp(context) {
     sh(`node tasks.js create -l -P2 p2`);
     sh(`node tasks.js create -l -P3 p3`);
     sh(`node tasks.js create -l -P4 p4`);
-    
+
     // Check transaction log before sync - should have create entries
     const transBefore = sh(`node tasks.js tran`);
     const createCount = (transBefore.match(/type: create/g) || []).length;
@@ -172,7 +172,7 @@ async function syncUp(context) {
         fail(`Transaction log should have 5 create entries, found ${createCount}`);
         throw new Error();
     }
-    
+
     sh(`node tasks.js sync`);
 
     const localTasks = sh(`node tasks.js list -l -y`);
@@ -186,7 +186,7 @@ async function syncUp(context) {
         console.log(remoteTasks);
         throw new Error();
     }
-    
+
     // Check transaction log after sync - should have sync entry
     const transAfter = sh(`node tasks.js tran`);
     if (!transAfter.includes('type: sync')) {
@@ -227,6 +227,143 @@ async function syncDown(context) {
 }
 
 
+// Helper function to create initial synced state with tasks at different priorities
+async function syncedState() {
+    sh(`node tasks.js create -l -P0 p0`);
+    sh(`node tasks.js create -l -P1 p1`);
+    sh(`node tasks.js create -l -P2 p2`);
+    sh(`node tasks.js create -l -P3 p3`);
+    sh(`node tasks.js create -l -P4 p4`);
+    
+    sh(`node tasks.js sync`);
+    
+    const localTasks = sh(`node tasks.js list -l -y`);
+    const remoteTasks = sh(`node tasks.js list -r -y`);
+    const localTasksNormalized = normalize(localTasks);
+    const remoteTasksNormalized = normalize(remoteTasks);
+    const differences = diff(localTasksNormalized, remoteTasksNormalized);
+    if (differences) {
+        fail('Initial sync failed: ' + differences.message);
+        throw new Error();
+    }
+}
+
+// Test 1: Create task local → sync → verify created remote
+async function test1CreateLocal() {
+    enter('Test 1: Create local → sync → verify remote');
+    await init();
+
+    // Create task locally
+    sh(`node tasks.js create -l test task`);
+
+    // Verify task exists locally
+    sh(`node tasks.js list -l -y`, {
+        exp: `data.some(t => t.name === 'test task')`,
+        errmsg: 'Task should exist locally'
+    });
+
+    // Sync
+    sh(`node tasks.js sync`);
+
+    // Verify task exists remotely
+    sh(`node tasks.js list -r -y`, {
+        exp: `data.some(t => t.name === 'test task')`,
+        errmsg: 'Task should exist remotely after sync'
+    });
+
+    // Verify local task now has correlation ID
+    sh(`node tasks.js list -l -y`, {
+        exp: `data.some(t => t.name === 'test task' && t.id !== null)`,
+        errmsg: 'Local task should have correlation ID after sync'
+    });
+
+    success('Test 1: Create local → sync → verify remote');
+}
+
+// Test 2: Update name local → sync → verify updated remote
+async function test2UpdateNameLocal() {
+    enter('Test 2: Update name local → sync → verify remote');
+    await init();
+    await syncedState();
+    
+    sh(`node tasks.js update -l "p1" "updated task name"`);
+    sh(`node tasks.js list -l -y`, { 
+        exp: `data.some(t => t.name === 'updated task name')`, 
+        errmsg: 'Task should have updated name locally' 
+    });
+    sh(`node tasks.js sync`);
+    sh(`node tasks.js list -r -y`, { 
+        exp: `data.some(t => t.name === 'updated task name')`, 
+        errmsg: 'Task should have updated name remotely after sync' 
+    });
+    
+    success('Test 2: Update name local → sync → verify remote');
+}
+
+// Test 3: Update priority local → sync → verify priority updated remote
+async function test3UpdatePriorityLocal() {
+    enter('Test 3: Update priority local → sync → verify remote');
+    await init();
+    await syncedState();
+    
+    sh(`node tasks.js update -l -P2 "p1"`);
+    sh(`node tasks.js list -l -y`, { 
+        exp: `data.some(t => t.name === 'p1' && t.priority === 2)`, 
+        errmsg: 'Task should have updated priority locally' 
+    });
+    sh(`node tasks.js sync`);
+    sh(`node tasks.js list -r -y`, { 
+        exp: `data.some(t => t.name === 'p1' && t.priority === 2)`, 
+        errmsg: 'Task should have updated priority remotely after sync' 
+    });
+    
+    success('Test 3: Update priority local → sync → verify remote');
+}
+
+// Test 4: Complete task local → sync → verify completed remote
+async function test4CompleteLocal() {
+    enter('Test 4: Complete local → sync → verify remote');
+    await init();
+    await syncedState();
+    
+    sh(`node tasks.js complete -l "p1"`);
+    sh(`node tasks.js list -l -y`, { 
+        exp: `!data.some(t => t.name === 'p1')`, 
+        errmsg: 'Task should be removed from active tasks locally' 
+    });
+    sh(`node tasks.js list -l -c -y`, { 
+        exp: `data.some(t => t.name === 'p1')`, 
+        errmsg: 'Task should appear in completed tasks locally' 
+    });
+    sh(`node tasks.js sync`);
+    sh(`node tasks.js list -r -y`, { 
+        exp: `!data.some(t => t.name === 'p1')`, 
+        errmsg: 'Task should be removed from active tasks remotely after sync' 
+    });
+    
+    success('Test 4: Complete local → sync → verify remote');
+}
+
+// Test 5: Remove task local → sync → verify deleted remote
+async function test5RemoveLocal() {
+    enter('Test 5: Remove local → sync → verify remote');
+    await init();
+    await syncedState();
+    
+    sh(`node tasks.js remove -l "p1"`);
+    sh(`node tasks.js list -l -y`, { 
+        exp: `!data.some(t => t.name === 'p1')`, 
+        errmsg: 'Task should be removed locally' 
+    });
+    sh(`node tasks.js sync`);
+    sh(`node tasks.js list -r -y`, { 
+        exp: `!data.some(t => t.name === 'p1')`, 
+        errmsg: 'Task should be removed remotely after sync' 
+    });
+    
+    success('Test 5: Remove local → sync → verify remote');
+}
+
 async function testAll() {
     try {
         // Show which tests are being run
@@ -235,6 +372,13 @@ async function testAll() {
         if (context.remote) testSuites.push('remote');
         if (context.sync) testSuites.push('sync');
         console.log(`Running test suites: ${testSuites.join(', ')}\n`);
+
+        // Run sync.md tests
+        await test1CreateLocal();
+        await test2UpdateNameLocal();
+        await test3UpdatePriorityLocal();
+        await test4CompleteLocal();
+        await test5RemoveLocal();
 
         // Run local tests if requested
         if (context.local) {
