@@ -16,15 +16,27 @@ try:
     data = json.load(sys.stdin)
     event_name = data.get('hook_event_name', '')
 
-    messages = {
-        'Notification': 'Ready',
-        'Stop': 'Done',
-        'SubagentStop': 'Subtask Done',
-        'PreCompact': 'Compacting'
+    # Voice messages (commented out, replaced with system sounds)
+    # messages = {
+    #     'Notification': 'Ready',
+    #     'Stop': 'Done',
+    #     'SubagentStop': 'Subtask Done',
+    #     'PreCompact': 'Compacting'
+    # }
+    # message = messages.get(event_name, 'Unknown Event')
+    # subprocess.run(['say', message])
+    
+    # System sound mappings
+    # Available sounds: Glass, Ping, Pop, Purr, Submarine
+    sounds = {
+        'Notification': 'Submarine',  # Change this to your preferred sound
+        'Stop': 'Pop',
+        'SubagentStop': 'Ping',
+        'PreCompact': 'Purr'
     }
-
-    message = messages.get(event_name, 'Unknown Event')
-    subprocess.run(['say', message])
+    
+    sound = sounds.get(event_name, 'Glass')
+    subprocess.run(['afplay', f'/System/Library/Sounds/{sound}.aiff'])
 
 except (json.JSONDecodeError, KeyError, Exception):
     # Fallback for invalid JSON or other errors
