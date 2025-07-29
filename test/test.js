@@ -65,7 +65,7 @@ async function createUpdatePriorityZero(option = '-l') {
 async function createPriorityZeroSync(option = '-l') {
     enter(`createPriorityZeroSync ${option}`);
     await init();
-    await simpleSync('create', option, 'p0', 0);
+    await sync('create', option, 'p0', 0);
     success(`createPriorityZeroSync ${option}`);
 }
 
@@ -85,21 +85,21 @@ async function createTasksSync(option = '-l') {
 async function createSync(option = '-l') {
     enter(`createSync ${option}`);
     await init2(option);
-    await simpleSync('create', option, 'NEW TASK NEW TASK');
+    await sync('create', option, 'NEW TASK NEW TASK');
     success(`createSync ${option}`);
 }
 
 async function updateNameSync(option = '-l') {
     enter(`updateNameSync ${option}`);
     await init2(option);
-    await simpleSync('update-name', option, 'p1', null, 'UPDATED P1 UPDATED P1');
+    await sync('update-name', option, 'p1', null, 'UPDATED P1 UPDATED P1');
     success(`updateNameSync ${option}`);
 }
 
 async function updatePrioritySync(option = '-l') {
     enter(`updatePrioritySync ${option}`);
     await init2(option);
-    await simpleSync('update-priority', option, 'p1', 2);
+    await sync('update-priority', option, 'p1', 2);
     success(`updatePrioritySync ${option}`);
 }
 
@@ -691,51 +691,62 @@ async function test40CorruptedCorrelationId() {
     success('Test 40: Corrupted correlation ID → sync');
 }
 
-// Parameterized test functions for reusable patterns
-
-// Simple sync operation pattern (used by tests 1-5 and their remote equivalents)
-async function simpleSync(operation, option = '-l', taskName = 'test task', priority = null, newName = null) {
+async function sync(operation, option = '-l', taskName = 'p1', priority = null, newName = null) {
     const side = option === '-l' ? 'local' : 'remote';
     const otherSide = option === '-l' ? 'remote' : 'local';
     const otherOption = option === '-l' ? '-r' : '-l';
 
-    // Setup: Create initial task only for 'create' operations
-    // For other operations, we expect the task to already exist (e.g., from init2())
-
-
-    // Action: Perform operation using tasks() function
     let finalTaskName = taskName;
-    if (operation === 'update-name') {
-        const updatedName = newName || `updated ${taskName}`;
-        await tasks('update-name', option, taskName, null, updatedName);
-        finalTaskName = updatedName;
-    } else if (operation === 'update-priority') {
-        const targetPriority = priority !== null ? priority : 2;
-        await tasks('update-priority', option, taskName, targetPriority);
-    } else {
-        await tasks(operation, option, taskName, priority, newName);
+    switch (operation) {
+        case 'update-name':
+            const updatedName = newName || `updated ${taskName}`;
+            await tasks('update-name', option, taskName, null, updatedName);
+            finalTaskName = updatedName;
+            break;
+        case 'update-priority':
+            const targetPriority = priority !== null ? priority : 2;
+            await tasks('update-priority', option, taskName, targetPriority);
+            break;
+        default:
+            await tasks(operation, option, taskName, priority, newName);
+            break;
     }
 
     // Sync
     sh(`node tasks.js sync`);
 
-    // Verify: Check state propagated to other side
+    // Verify: Check state propagated to other side and get both task lists
+    let otherSideTasks;
     switch(operation) {
     case 'create':
     case 'update-name':
     case 'update-priority':
-        sh(`node tasks.js list ${otherOption} -y`, {
-            exp: `data.some(t => t.name === '${finalTaskName}')`,
-            errmsg: `Task should exist on ${otherSide} after sync`
-        });
+        otherSideTasks = sh(`node tasks.js list ${otherOption} -y`, { echo: false, output: false, exp: `data.some(t => t.name === '${finalTaskName}')`, errmsg: `Task should exist on ${otherSide} after sync` });
         break;
     case 'complete':
     case 'remove':
-        sh(`node tasks.js list ${otherOption} -y`, {
-            exp: `!data.some(t => t.name === '${finalTaskName}')`,
-            errmsg: `Task should not exist on ${otherSide} after sync`
-        });
+        otherSideTasks = sh(`node tasks.js list ${otherOption} -y`, { echo: false, output: false, exp: `!data.some(t => t.name === '${finalTaskName}')`, errmsg: `Task should not exist on ${otherSide} after sync` });
         break;
+    }
+
+    // Get the current side's task list
+    const currentSideTasks = sh(`node tasks.js list ${option} -y`, { echo: false, output: false });
+
+    // Assign to local and remote based on option
+    const localTasks = option === '-l' ? currentSideTasks : otherSideTasks;
+    const remoteTasks = option === '-l' ? otherSideTasks : currentSideTasks;
+
+    // Compare local and remote task lists for consistency
+    const localTasksNormalized = normalize(localTasks);
+    const remoteTasksNormalized = normalize(remoteTasks);
+    const differences = diff(localTasksNormalized, remoteTasksNormalized);
+    if (differences) {
+        fail(differences.message);
+        console.log('Local tasks:');
+        console.log(localTasks);
+        console.log('Remote tasks:');
+        console.log(remoteTasks);
+        throw new Error();
     }
 }
 
@@ -866,64 +877,58 @@ async function conflictSync(localChange, remoteChange, expectedResolution, taskN
     success(`Conflict ${localChange.type} vs ${remoteChange.type} (parameterized)`);
 }
 
-// Reusable function for CRUD operations with verification
 async function tasks(operation, option = '-l', taskName = 'p1', priority = null, newName = null) {
     const side = option === '-l' ? 'local' : 'remote';
 
     switch (operation) {
+
     case 'create':
         const priorityFlag = priority !== null ? `-P${priority}` : '';
         sh(`node tasks.js create ${option} ${priorityFlag} ${taskName}`);
-
-        // Verify creation - always check for the specific task that was created
         if (priority !== null) {
             if (option === '-r' && priority === 0) {
                 sh(`node tasks.js list ${option} -y`, { echo: false, output: false, exp: `data.some(t => t.name === '${taskName}' && t.priority === ${priority} && t.due !== null)`, errmsg: `P${priority} task should be created with due date on ${side}` });
-            } else {
-                sh(`node tasks.js list ${option} -y`, { echo: false, output: false, exp: `data.some(t => t.name === '${taskName}' && t.priority === ${priority})`, errmsg: `P${priority} task should be created on ${side}` });
+                return;
             }
-        } else {
-            // Just verify the task exists by name
-            sh(`node tasks.js list ${option} -y`, { echo: false, output: false, exp: `data.some(t => t.name === '${taskName}')`, errmsg: `Task '${taskName}' should be created on ${side}` });
+
+            sh(`node tasks.js list ${option} -y`, { echo: false, output: false, exp: `data.some(t => t.name === '${taskName}' && t.priority === ${priority})`, errmsg: `P${priority} task should be created on ${side}` });
+            return;
         }
-        break;
+        sh(`node tasks.js list ${option} -y`, { echo: false, output: false, exp: `data.some(t => t.name === '${taskName}')`, errmsg: `Task '${taskName}' should be created on ${side}` });
+        return;
 
     case 'update-name':
         sh(`node tasks.js update ${option} "${taskName}" "${newName}"`);
         sh(`node tasks.js list ${option} -y`, { echo: false, output: false, exp: `data.some(t => t.name === '${newName}')`, errmsg: `Task should be renamed to '${newName}' on ${side}` });
-        break;
+        return;
 
     case 'update-priority':
         sh(`node tasks.js update ${option} -P${priority} "${taskName}"`);
-
-        // Verify priority update
         if (option === '-r' && priority === 0) {
             sh(`node tasks.js list ${option} -y`, { echo: false, output: false, exp: `data.some(t => t.name === '${taskName}' && t.priority === ${priority} && t.due !== null)`, errmsg: `Task should be updated to P${priority} with due date on ${side}` });
-        } else if (option === '-r' && priority !== 0) {
-            sh(`node tasks.js list ${option} -y`, { echo: false, output: false, exp: `data.some(t => t.name === '${taskName}' && t.priority === ${priority} && t.due === null)`, errmsg: `Task should be updated to P${priority} without due date on ${side}` });
-        } else {
-            sh(`node tasks.js list ${option} -y`, { echo: false, output: false, exp: `data.some(t => t.name === '${taskName}' && t.priority === ${priority})`, errmsg: `Task should be updated to P${priority} on ${side}` });
+            return;
         }
-        break;
+        if (option === '-r' && priority !== 0) {
+            sh(`node tasks.js list ${option} -y`, { echo: false, output: false, exp: `data.some(t => t.name === '${taskName}' && t.priority === ${priority} && t.due === null)`, errmsg: `Task should be updated to P${priority} without due date on ${side}` });
+            return;
+        }
+        sh(`node tasks.js list ${option} -y`, { echo: false, output: false, exp: `data.some(t => t.name === '${taskName}' && t.priority === ${priority})`, errmsg: `Task should be updated to P${priority} on ${side}` });
+        return;
 
     case 'complete':
         sh(`node tasks.js complete ${option} ${taskName}`);
-
-        // Verify task is no longer in active list and appears in completed list
         sh(`node tasks.js list ${option} -y`, { echo: false, output: false, exp: `!data.some(t => t.name === '${taskName}')`, errmsg: `Task '${taskName}' should not be in active tasks after complete on ${side}` });
         sh(`node tasks.js list ${option} -c -y`, { echo: false, output: false, exp: `data.some(t => t.name === '${taskName}')`, errmsg: `Task '${taskName}' should be in completed tasks on ${side}` });
-        break;
+        return;
 
     case 'remove':
         sh(`node tasks.js remove ${option} ${taskName}`);
-
-        // Verify task is no longer in active list
         sh(`node tasks.js list ${option} -y`, { echo: false, output: false, exp: `!data.some(t => t.name === '${taskName}')`, errmsg: `Task '${taskName}' should not exist after remove on ${side}` });
-        break;
+        return;
 
     case 'sync':
         sh(`node tasks.js sync`);
-        break;
+        return;
 
     default:
         throw new Error(`Unknown operation: ${operation}`);
@@ -969,12 +974,13 @@ async function testAll() {
         // await createRemove('-r');
         // await createUpdateName('-l');
         // await createUpdateName('-r');
-        await createUpdatePriority('-l');
-        await createUpdatePriority('-r');
+        // await createUpdatePriority('-l');
+        // await createUpdatePriority('-r');
         // await createUpdatePriorityZero('-l');
         // await createUpdatePriorityZero('-r');
-        // await createPriorityZeroSync('-l');
-        // await createPriorityZeroSync('-r');
+
+        await createPriorityZeroSync('-l');
+        await createPriorityZeroSync('-r');
         // await createTasksSync('-l');
         // await createTasksSync('-r');
         // await createSync('-l');
@@ -1030,8 +1036,8 @@ async function testAll() {
 
         // // Demonstrate parameterized test functions
         // // Simple operations using parameterized function
-        // await simpleSync('create', '-l', 'param test local');
-        // await simpleSync('create', '-r', 'param test remote');
+        // await sync('create', '-l', 'param test local');
+        // await sync('create', '-r', 'param test remote');
 
         // // Example compound operation using parameterized function
         // await compoundSync([

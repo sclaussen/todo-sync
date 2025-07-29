@@ -196,7 +196,7 @@ export async function createTodoistTask(task, projectId) {
  * Updates an existing Todoist task
  * @param {string} todoistId - Todoist task ID
  * @param {Object} updates - Object with fields to update (content, priority, due_string, etc.)
- * @returns {Promise<boolean>} True if successful
+ * @returns {Promise<Object>} The updated task object
  */
 export async function updateTodoistTask(todoistId, updates) {
     const response = await fetch(`${TODOIST.BASE_URL}/tasks/${todoistId}`, {
@@ -212,7 +212,9 @@ export async function updateTodoistTask(todoistId, updates) {
         throw new Error(`Failed to update task: ${response.status} ${response.statusText}`);
     }
 
-    return response.ok;
+    // Return the updated task data
+    const updatedTask = await response.json();
+    return updatedTask;
 }
 
 /**

@@ -73,7 +73,7 @@ export async function execute(id, content, options) {
         const originalPriority = remoteTask.priority;
         const finalContent = content || remoteTask.content;
         
-        await updateRemoteTask(remoteTask, finalContent, newPriority);
+        const updatedTask = await updateRemoteTask(remoteTask, finalContent, newPriority);
         
         const changes = [];
         if (content) changes.push(`content: "${finalContent}"`);
@@ -81,7 +81,19 @@ export async function execute(id, content, options) {
         
         // Format output similar to create command
         const todoistId = remoteTask.todoistId || remoteTask.id;
-        console.log(`Updated remote task: ${finalContent} (P${newPriority !== undefined ? newPriority : remoteTask.priority}, ID: ${todoistId})`);
+        const finalPriority = newPriority !== undefined ? newPriority : remoteTask.priority;
+        
+        // Format date for P0 tasks (similar to create command)
+        let dateInfo = '';
+        if (finalPriority === 0 && updatedTask && updatedTask.due) {
+            const dueDate = updatedTask.due.date || updatedTask.due.string;
+            if (dueDate) {
+                const date = new Date(dueDate + 'T00:00:00');
+                dateInfo = `, ${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear().toString().slice(-2)}`;
+            }
+        }
+        
+        console.log(`Updated remote task: ${finalContent} (P${finalPriority}${dateInfo}, ID: ${todoistId})`);
         
         // Log transactions for changes (only if not already logged locally)
         if (!updateLocal) {
@@ -182,7 +194,8 @@ async function updateRemoteTask(task, newContent, newPriority) {
     }
 
     const todoistId = task.todoistId || task.id;
-    await updateTodoistTask(todoistId, updates);
+    const updatedTask = await updateTodoistTask(todoistId, updates);
+    return updatedTask;
 }
 
 function mapLocalPriorityToTodoist(localPriority) {
