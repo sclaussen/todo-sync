@@ -41,7 +41,10 @@ export async function execute(id, content, options) {
         if (content) changes.push(`content: "${finalContent}"`);
         if (newPriority !== undefined) changes.push(`priority: ${newPriority}`);
         
-        console.log(`Updated local task${changes.length > 0 ? ` (${changes.join(', ')})` : ''}`);
+        // Format output similar to create command
+        const todoistId = extractCorrelationId(finalContent);
+        const idInfo = todoistId ? `, ID: ${todoistId}` : '';
+        console.log(`Updated local task: ${finalContent} (P${newPriority !== undefined ? newPriority : localTask.priority}${idInfo})`);
         
         // Log transactions for changes
         if (content && content !== originalContent) {
@@ -76,7 +79,9 @@ export async function execute(id, content, options) {
         if (content) changes.push(`content: "${finalContent}"`);
         if (newPriority !== undefined) changes.push(`priority: ${newPriority}`);
         
-        console.log(`Updated remote task${changes.length > 0 ? ` (${changes.join(', ')})` : ''}`);
+        // Format output similar to create command
+        const todoistId = remoteTask.todoistId || remoteTask.id;
+        console.log(`Updated remote task: ${finalContent} (P${newPriority !== undefined ? newPriority : remoteTask.priority}, ID: ${todoistId})`);
         
         // Log transactions for changes (only if not already logged locally)
         if (!updateLocal) {

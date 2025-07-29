@@ -40,16 +40,16 @@ async function createRemove(option = '-l') {
 async function createUpdateName(option = '-l') {
     enter(`createUpdateName ${option}`);
     await init(option);
-    await tasks('create', option, 'p1 task');
-    await tasks('update-name', option, 'p1 task', null, 'updated task name');
+    await tasks('create', option, 'p1');
+    await tasks('update-name', option, 'p1', null, 'updated task name');
     success(`createUpdateName ${option}`);
 }
 
 async function createUpdatePriority(option = '-l', newPriority = 2) {
     enter(`createUpdatePriority ${option} P${newPriority}`);
     await init(option);
-    await tasks('create', option, 'p1 task');
-    await tasks('update-priority', option, 'p1 task', newPriority);
+    await tasks('create', option, 'p1');
+    await tasks('update-priority', option, 'p1', newPriority);
     success(`createUpdatePriority ${option} P${newPriority}`);
 }
 
@@ -701,7 +701,7 @@ async function simpleSync(operation, option = '-l', taskName = 'test task', prio
 
     // Setup: Create initial task only for 'create' operations
     // For other operations, we expect the task to already exist (e.g., from init2())
-   
+
 
     // Action: Perform operation using tasks() function
     let finalTaskName = taskName;
@@ -867,7 +867,7 @@ async function conflictSync(localChange, remoteChange, expectedResolution, taskN
 }
 
 // Reusable function for CRUD operations with verification
-async function tasks(operation, option = '-l', taskName = 'p1 task', priority = null, newName = null) {
+async function tasks(operation, option = '-l', taskName = 'p1', priority = null, newName = null) {
     const side = option === '-l' ? 'local' : 'remote';
 
     switch (operation) {
@@ -878,19 +878,19 @@ async function tasks(operation, option = '-l', taskName = 'p1 task', priority = 
         // Verify creation - always check for the specific task that was created
         if (priority !== null) {
             if (option === '-r' && priority === 0) {
-                sh(`node tasks.js list ${option} -y`, { echo: false, exp: `data.some(t => t.name === '${taskName}' && t.priority === ${priority} && t.due !== null)`, errmsg: `P${priority} task should be created with due date on ${side}` });
+                sh(`node tasks.js list ${option} -y`, { echo: false, output: false, exp: `data.some(t => t.name === '${taskName}' && t.priority === ${priority} && t.due !== null)`, errmsg: `P${priority} task should be created with due date on ${side}` });
             } else {
-                sh(`node tasks.js list ${option} -y`, { echo: false, exp: `data.some(t => t.name === '${taskName}' && t.priority === ${priority})`, errmsg: `P${priority} task should be created on ${side}` });
+                sh(`node tasks.js list ${option} -y`, { echo: false, output: false, exp: `data.some(t => t.name === '${taskName}' && t.priority === ${priority})`, errmsg: `P${priority} task should be created on ${side}` });
             }
         } else {
             // Just verify the task exists by name
-            sh(`node tasks.js list ${option} -y`, { echo: false, exp: `data.some(t => t.name === '${taskName}')`, errmsg: `Task '${taskName}' should be created on ${side}` });
+            sh(`node tasks.js list ${option} -y`, { echo: false, output: false, exp: `data.some(t => t.name === '${taskName}')`, errmsg: `Task '${taskName}' should be created on ${side}` });
         }
         break;
 
     case 'update-name':
         sh(`node tasks.js update ${option} "${taskName}" "${newName}"`);
-        sh(`node tasks.js list ${option} -y`, { echo: false, exp: `data.some(t => t.name === '${newName}')`, errmsg: `Task should be renamed to '${newName}' on ${side}` });
+        sh(`node tasks.js list ${option} -y`, { echo: false, output: false, exp: `data.some(t => t.name === '${newName}')`, errmsg: `Task should be renamed to '${newName}' on ${side}` });
         break;
 
     case 'update-priority':
@@ -898,11 +898,11 @@ async function tasks(operation, option = '-l', taskName = 'p1 task', priority = 
 
         // Verify priority update
         if (option === '-r' && priority === 0) {
-            sh(`node tasks.js list ${option} -y`, { echo: false, exp: `data.some(t => t.name === '${taskName}' && t.priority === ${priority} && t.due !== null)`, errmsg: `Task should be updated to P${priority} with due date on ${side}` });
+            sh(`node tasks.js list ${option} -y`, { echo: false, output: false, exp: `data.some(t => t.name === '${taskName}' && t.priority === ${priority} && t.due !== null)`, errmsg: `Task should be updated to P${priority} with due date on ${side}` });
         } else if (option === '-r' && priority !== 0) {
-            sh(`node tasks.js list ${option} -y`, { echo: false, exp: `data.some(t => t.name === '${taskName}' && t.priority === ${priority} && t.due === null)`, errmsg: `Task should be updated to P${priority} without due date on ${side}` });
+            sh(`node tasks.js list ${option} -y`, { echo: false, output: false, exp: `data.some(t => t.name === '${taskName}' && t.priority === ${priority} && t.due === null)`, errmsg: `Task should be updated to P${priority} without due date on ${side}` });
         } else {
-            sh(`node tasks.js list ${option} -y`, { echo: false, exp: `data.some(t => t.name === '${taskName}' && t.priority === ${priority})`, errmsg: `Task should be updated to P${priority} on ${side}` });
+            sh(`node tasks.js list ${option} -y`, { echo: false, output: false, exp: `data.some(t => t.name === '${taskName}' && t.priority === ${priority})`, errmsg: `Task should be updated to P${priority} on ${side}` });
         }
         break;
 
@@ -910,15 +910,15 @@ async function tasks(operation, option = '-l', taskName = 'p1 task', priority = 
         sh(`node tasks.js complete ${option} ${taskName}`);
 
         // Verify task is no longer in active list and appears in completed list
-        sh(`node tasks.js list ${option} -y`, { echo: false, exp: `!data.some(t => t.name === '${taskName}')`, errmsg: `Task '${taskName}' should not be in active tasks after complete on ${side}` });
-        sh(`node tasks.js list ${option} -c -y`, { echo: false, exp: `data.some(t => t.name === '${taskName}')`, errmsg: `Task '${taskName}' should be in completed tasks on ${side}` });
+        sh(`node tasks.js list ${option} -y`, { echo: false, output: false, exp: `!data.some(t => t.name === '${taskName}')`, errmsg: `Task '${taskName}' should not be in active tasks after complete on ${side}` });
+        sh(`node tasks.js list ${option} -c -y`, { echo: false, output: false, exp: `data.some(t => t.name === '${taskName}')`, errmsg: `Task '${taskName}' should be in completed tasks on ${side}` });
         break;
 
     case 'remove':
         sh(`node tasks.js remove ${option} ${taskName}`);
 
         // Verify task is no longer in active list
-        sh(`node tasks.js list ${option} -y`, { echo: false, exp: `!data.some(t => t.name === '${taskName}')`, errmsg: `Task '${taskName}' should not exist after remove on ${side}` });
+        sh(`node tasks.js list ${option} -y`, { echo: false, output: false, exp: `!data.some(t => t.name === '${taskName}')`, errmsg: `Task '${taskName}' should not exist after remove on ${side}` });
         break;
 
     case 'sync':
@@ -969,8 +969,8 @@ async function testAll() {
         // await createRemove('-r');
         // await createUpdateName('-l');
         // await createUpdateName('-r');
-        // await createUpdatePriority('-l');
-        // await createUpdatePriority('-r');
+        await createUpdatePriority('-l');
+        await createUpdatePriority('-r');
         // await createUpdatePriorityZero('-l');
         // await createUpdatePriorityZero('-r');
         // await createPriorityZeroSync('-l');
@@ -979,7 +979,7 @@ async function testAll() {
         // await createTasksSync('-r');
         // await createSync('-l');
         // await createSync('-r');
-        await updateNameSync('-l'); // adds new vs updates
+        // await updateNameSync('-l'); // adds new vs updates
         // await updateNameSync('-r');
         // await updatePrioritySync('-l');
         // await updatePrioritySync('-r');

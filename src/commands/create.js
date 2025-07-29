@@ -14,7 +14,7 @@ export async function execute(content, options) {
 
     if (createLocal) {
         await addTaskToLocal(task, priority);
-        console.log(`Created local task: "${content}" (P${priority})`);
+        console.log(`Created local task: ${content} (P${priority})`);
         // Log transaction
         await logTransaction({
             type: 'create',
@@ -30,7 +30,7 @@ export async function execute(content, options) {
         // If also creating locally, update with Todoist ID
         if (createLocal) {
             task.todoistId = result.id.toString();
-            // Update the local task to include the Todoist ID
+            // TODO: Update the local task to include the Todoist ID in the file
         }
         // Format date for P0 tasks
         let dateInfo = '';
@@ -41,7 +41,7 @@ export async function execute(content, options) {
                 dateInfo = `, ${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear().toString().slice(-2)}`;
             }
         }
-        console.log(`Created remote task: "${content}" (P${priority}${dateInfo}, ID: ${result.id})`);
+        console.log(`Created remote task: ${content} (P${priority}${dateInfo}, ID: ${result.id})`);
         // Log transaction (only if not already logged locally)
         if (!createLocal) {
             await logTransaction({
