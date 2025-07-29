@@ -99,8 +99,7 @@ async function updateNameSync(option = '-l') {
 async function updatePrioritySync(option = '-l') {
     enter(`updatePrioritySync ${option}`);
     await init2(option);
-    await tasks('update-priority', option, 'p1', 2);
-    await tasks('sync');
+    await simpleSync('update-priority', option, 'p1', 2);
     success(`updatePrioritySync ${option}`);
 }
 
@@ -700,15 +699,9 @@ async function simpleSync(operation, option = '-l', taskName = 'test task', prio
     const otherSide = option === '-l' ? 'remote' : 'local';
     const otherOption = option === '-l' ? '-r' : '-l';
 
-    // Setup: Create initial task if needed
-    if (operation !== 'create') {
-        await tasks('create', option, taskName, priority);
-        if (operation === 'update-name' || operation === 'update-priority' ||
-            operation === 'complete' || operation === 'remove') {
-            // For update/complete/remove operations, sync first to have correlated tasks
-            sh(`node tasks.js sync`);
-        }
-    }
+    // Setup: Create initial task only for 'create' operations
+    // For other operations, we expect the task to already exist (e.g., from init2())
+   
 
     // Action: Perform operation using tasks() function
     let finalTaskName = taskName;
@@ -974,7 +967,7 @@ async function testAll() {
         // await createComplete('-r');
         // await createRemove('-l');
         // await createRemove('-r');
-        await createUpdateName('-l');
+        // await createUpdateName('-l');
         // await createUpdateName('-r');
         // await createUpdatePriority('-l');
         // await createUpdatePriority('-r');
@@ -986,7 +979,7 @@ async function testAll() {
         // await createTasksSync('-r');
         // await createSync('-l');
         // await createSync('-r');
-        // await updateNameSync('-l');
+        await updateNameSync('-l'); // adds new vs updates
         // await updateNameSync('-r');
         // await updatePrioritySync('-l');
         // await updatePrioritySync('-r');

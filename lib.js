@@ -206,7 +206,7 @@ function createMainTask(line, content, currentPriority, filename, lineNumber) {
     const taskName = stripCorrelationId(cleanContent);
 
     return {
-        content: taskName,
+        content: cleanContent, // Store full content with correlation ID so extractCorrelationId works
         todoistId: todoistId,
         priority: currentPriority !== null ? currentPriority : 'unknown',
         lineNumber: lineNumber,
@@ -1444,7 +1444,6 @@ async function updateRemoteTask(change) {
 
         if (verifyResponse.ok) {
             const updatedTask = await verifyResponse.json();
-            console.log(`🔍 Verification: Task priority is now ${updatedTask.priority}`);
             if (change.changeType === 'priority_update') {
                 const expectedPriority = mapLocalPriorityToRemote(change.newPriority);
                 if (updatedTask.priority === expectedPriority) {
@@ -1480,11 +1479,17 @@ async function addTaskToLocalFile(task) {
             content = readFileSync(filepath, 'utf8');
         }
 
-        // Add Todoist ID for new task if it's from Remote
-        let taskContentWithCorr = task.content;
-
         // Check both task.id and task.todoistId (the actual field used)
         const todoistId = task.id || task.todoistId;
+        
+        // Check if task already exists in the file (to prevent duplicates)
+        if (todoistId && content.includes(`(${todoistId})`)) {
+            // Task already exists, skip adding it
+            return;
+        }
+
+        // Add Todoist ID for new task if it's from Remote
+        let taskContentWithCorr = task.content;
         if (todoistId) {
             taskContentWithCorr = addCorrelationId(task.content, todoistId);
         }
@@ -1630,7 +1635,24 @@ async function updateTaskInLocalFile(change) {
         const content = readFileSync(filepath, 'utf8');
         let newContent = content;
 
-        if (change.changeType === 'priority_update') {
+        if (change.changeType === 'add_correlation_id') {
+            // Add correlation ID to existing task without changing priority or content
+            const lines = content.split('\n');
+            const taskContent = change.content;
+            
+            // Find the task line
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i].trim();
+                const cleanLine = stripCorrelationId(line);
+                if (cleanLine.toLowerCase().trim() === taskContent.toLowerCase().trim()) {
+                    // Add correlation ID to this line
+                    lines[i] = addCorrelationId(cleanLine, change.corrId);
+                    break;
+                }
+            }
+            
+            newContent = lines.join('\n');
+        } else if (change.changeType === 'priority_update') {
             // Move task to different priority section and add correlation ID
             const lines = content.split('\n');
             const taskContent = change.content;
@@ -2452,11 +2474,11 @@ export function categorizeChanges(localTasks, todoistTasks, legacySyncState = nu
     const uncorrelatedTodoist = [];
 
     for (const localTask of localTasks.current.tasks) {
-        const todoistId = extractCorrelationId(localTask.content);
+        // Use the todoistId field directly instead of extracting from content
+        const todoistId = localTask.todoistId;
 
         if (todoistId) {
-            const todoistTask = todoistTasks.current.tasks.find(t => t.id === parseInt(todoistId));
-
+            const todoistTask = todoistTasks.current.tasks.find(t => t.todoistId === todoistId);
             if (todoistTask) {
                 const cleanLocalContent = stripCorrelationId(localTask.content);
 
@@ -2595,8 +2617,22 @@ export function categorizeChanges(localTasks, todoistTasks, legacySyncState = nu
                     resolutionReason: resolution.reason
                 }
             });
+        } else if (match.type === 'already_synced') {
+            // Tasks match content and priority but local task is missing correlation ID
+            // Add the correlation ID to the local task
+            const corrId = match.todoistTask?.id?.toString() || 'unknown';
+            
+            changes.local.renames.push({
+                content: match.localTask.content,
+                corrId: corrId,
+                todoistId: match.todoistTask.id,
+                changeType: 'add_correlation_id',
+                metadata: {
+                    priority: match.localTask.priority,
+                    source: 'correlation_sync'
+                }
+            });
         }
-        // For 'already_synced', we don't add them to changes (no action needed)
     }
 
     // Process remaining unmatched tasks - no content similarity matching needed

@@ -13,7 +13,8 @@ const commands = {
     remove: () => import('./src/commands/remove.js'),
     dups: () => import('./src/commands/dups.js'),
     init: () => import('./src/commands/init.js'),
-    tran: () => import('./src/commands/tran.js')
+    tran: () => import('./src/commands/tran.js'),
+    usage: () => import('./src/commands/usage.js')
 };
 
 async function main() {
@@ -124,6 +125,15 @@ async function main() {
             await execute(options);
         }));
 
+    // Usage command - show Claude monitor usage
+    program
+        .command('usage')
+        .description('Show Claude monitor usage statistics')
+        .action(withErrorHandler(async(options) => {
+            const { execute } = await commands.usage();
+            await execute(options);
+        }));
+
     // Default to list
     program.action(withErrorHandler(async() => {
         const { execute } = await commands.list();
@@ -145,6 +155,7 @@ Examples:
   tasks sync                    # Execute full sync
   tasks init                    # Initialize clean test environment (TEST mode only)
   tasks tran                    # Display transaction log
+  tasks usage                   # Show Claude monitor usage statistics
     `);
 
     program.parse();

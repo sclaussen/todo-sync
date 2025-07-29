@@ -1,0 +1,206 @@
+ℹ️  updateNameSync -l
+$ node /Users/shane/src/sync/tasks.js create -l -P0 p0
+Created local task: "p0" (P0)
+- name: p0
+  priority: 0
+  due: null
+  id: null
+  location: local
+$ node /Users/shane/src/sync/tasks.js create -l -P1 p1
+Created local task: "p1" (P1)
+- name: p0
+  priority: 0
+  due: null
+  id: null
+  location: local
+- name: p1
+  priority: 1
+  due: null
+  id: null
+  location: local
+$ node /Users/shane/src/sync/tasks.js create -l -P2 p2
+Created local task: "p2" (P2)
+- name: p0
+  priority: 0
+  due: null
+  id: null
+  location: local
+- name: p1
+  priority: 1
+  due: null
+  id: null
+  location: local
+- name: p2
+  priority: 2
+  due: null
+  id: null
+  location: local
+$ node /Users/shane/src/sync/tasks.js create -l -P3 p3
+Created local task: "p3" (P3)
+- name: p0
+  priority: 0
+  due: null
+  id: null
+  location: local
+- name: p1
+  priority: 1
+  due: null
+  id: null
+  location: local
+- name: p2
+  priority: 2
+  due: null
+  id: null
+  location: local
+- name: p3
+  priority: 3
+  due: null
+  id: null
+  location: local
+$ node /Users/shane/src/sync/tasks.js create -l -P4 p4
+Created local task: "p4" (P4)
+- name: p0
+  priority: 0
+  due: null
+  id: null
+  location: local
+- name: p1
+  priority: 1
+  due: null
+  id: null
+  location: local
+- name: p2
+  priority: 2
+  due: null
+  id: null
+  location: local
+- name: p3
+  priority: 3
+  due: null
+  id: null
+  location: local
+- name: p4
+  priority: 4
+  due: null
+  id: null
+  location: local
+$ node /Users/shane/src/sync/tasks.js sync
+🔍 Processing local task: p0 -> todoistId field: null
+🔍 Processing local task: p1 -> todoistId field: null
+🔍 Processing local task: p2 -> todoistId field: null
+🔍 Processing local task: p3 -> todoistId field: null
+🔍 Processing local task: p4 -> todoistId field: null
+Created backup backups/20250728.014706
+🔍 Looking for project: "Test"
+🔍 Available projects: [
+  '2025',                'Inbox',
+  'General',             'Subscriptions',
+  'Health',              'House',
+  'Finance',             'Academics',
+  'Photos and Memories', 'Aquarium',
+  'Budget',              'Sell',
+  'Work',                'Basketball',
+  'Adventure',           'Mathgen',
+  'Sync',                'Test'
+]
+🔍 Found project ID: 2357211370
+🔍 Processing 0 renames
+Updated local task: p0 (P0, 9389159328)
+Updated local task: p1 (P1, 9389159463)
+Updated local task: p2 (P2, 9389159508)
+Updated local task: p3 (P3, 9389159555)
+Updated local task: p4 (P4, 9389159598)
+New remote task: p0 (P0, 7/28/25, 9389159328)
+New remote task: p1 (P1, 9389159463)
+New remote task: p2 (P2, 9389159508)
+New remote task: p3 (P3, 9389159555)
+New remote task: p4 (P4, 9389159598)
+$ node /Users/shane/src/sync/tasks.js update -l "p1" "UPDATED P1 UPDATED P1"
+Updated local task (content: "UPDATED P1 UPDATED P1")
+- name: p0
+  priority: 0
+  due: null
+  id: '9389159328'
+  location: local
+- name: UPDATED P1 UPDATED P1
+  priority: 1
+  due: null
+  id: '9389159463'
+  location: local
+- name: p2
+  priority: 2
+  due: null
+  id: '9389159508'
+  location: local
+- name: p3
+  priority: 3
+  due: null
+  id: '9389159555'
+  location: local
+- name: p4
+  priority: 4
+  due: null
+  id: '9389159598'
+  location: local
+$ node /Users/shane/src/sync/tasks.js sync
+🔍 Processing local task: p0 -> todoistId field: 9389159328
+🔍 Looking for remote task with ID 9389159328: NOT FOUND
+🔍 Processing local task: UPDATED P1 UPDATED P1 -> todoistId field: 9389159463
+🔍 Looking for remote task with ID 9389159463: NOT FOUND
+🔍 Processing local task: p2 -> todoistId field: 9389159508
+🔍 Looking for remote task with ID 9389159508: NOT FOUND
+🔍 Processing local task: p3 -> todoistId field: 9389159555
+🔍 Looking for remote task with ID 9389159555: NOT FOUND
+🔍 Processing local task: p4 -> todoistId field: 9389159598
+🔍 Looking for remote task with ID 9389159598: NOT FOUND
+Created backup backups/20250728.014721
+🔍 Looking for project: "Test"
+🔍 Available projects: [
+  '2025',                'Inbox',
+  'General',             'Subscriptions',
+  'Health',              'House',
+  'Finance',             'Academics',
+  'Photos and Memories', 'Aquarium',
+  'Budget',              'Sell',
+  'Work',                'Basketball',
+  'Adventure',           'Mathgen',
+  'Sync',                'Test'
+]
+🔍 Found project ID: 2357211370
+🔍 Processing 0 renames
+New local task: p1 (P1, 9389159463)
+Updated local task: UPDATED P1 UPDATED P1 (P1, 9389159795)
+New remote task: UPDATED P1 UPDATED P1 (P1, 9389159795)
+$ node /Users/shane/src/sync/tasks.js list -r -y
+- name: p0
+  priority: 0
+  due: '2025-07-28'
+  id: '9389159328'
+  location: remote
+- name: p1
+  priority: 1
+  due: null
+  id: '9389159463'
+  location: remote
+- name: p2
+  priority: 2
+  due: null
+  id: '9389159508'
+  location: remote
+- name: p3
+  priority: 3
+  due: null
+  id: '9389159555'
+  location: remote
+- name: p4
+  priority: 4
+  due: null
+  id: '9389159598'
+  location: remote
+- name: UPDATED P1 UPDATED P1
+  priority: 1
+  due: null
+  id: '9389159795'
+  location: remote
+✅ updateNameSync -l
+
