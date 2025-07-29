@@ -333,17 +333,43 @@ function getTasksCLI() {
 }
 
 /**
- * Normalize YAML output by removing location and due fields
+ * Normalize YAML output by removing location and due fields, then sorting tasks
  */
 function normalize(yamlOutput) {
-    return _(yamlOutput)
-        .split('\n')
-        .reject(line => 
-            _.startsWith(_.trim(line), 'location:') || 
-            _.startsWith(_.trim(line), 'due:')
-        )
-        .filter(line => !_.isEmpty(_.trim(line)))
-        .join('\n');
+    try {
+        // Parse YAML to get task objects
+        const tasks = yaml.load(yamlOutput) || [];
+        
+        // If not an array, return original normalization
+        if (!Array.isArray(tasks)) {
+            return _(yamlOutput)
+                .split('\n')
+                .reject(line => 
+                    _.startsWith(_.trim(line), 'location:') || 
+                    _.startsWith(_.trim(line), 'due:')
+                )
+                .filter(line => !_.isEmpty(_.trim(line)))
+                .join('\n');
+        }
+        
+        // Remove location and due fields, then sort by ID for consistent ordering
+        const normalized = tasks
+            .map(task => _.omit(task, ['location', 'due']))
+            .sort((a, b) => (a.id || '').localeCompare(b.id || ''));
+        
+        // Convert back to YAML
+        return yaml.dump(normalized).trim();
+    } catch (error) {
+        // Fallback to original string-based normalization if YAML parsing fails
+        return _(yamlOutput)
+            .split('\n')
+            .reject(line => 
+                _.startsWith(_.trim(line), 'location:') || 
+                _.startsWith(_.trim(line), 'due:')
+            )
+            .filter(line => !_.isEmpty(_.trim(line)))
+            .join('\n');
+    }
 }
 
 function enter(message) {

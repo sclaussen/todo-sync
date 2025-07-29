@@ -976,10 +976,10 @@ async function testAll() {
         // await createTasksSync('-l');
         // await createTasksSync('-r');
 
-        await createSync('-l');
-        await createSync('-r');
-        // await createPriorityZeroSync('-l');
-        // await createPriorityZeroSync('-r');
+        // await createSync('-l');
+        // await createSync('-r');
+        await createPriorityZeroSync('-l');
+        await createPriorityZeroSync('-r');
         // await updateNameSync('-l'); // adds new vs updates
         // await updateNameSync('-r');
         // await updatePrioritySync('-l');
