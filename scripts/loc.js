@@ -31,7 +31,7 @@ async function countLines(filePath) {
     return { total: lines.length, code: codeLines, blank: blankLines, comment: commentLines };
 }
 
-async function walkDirectory(dir, stats = {}) {
+async function walkDirectory(dir, stats = {}, fileDetails = []) {
     const entries = await readdir(dir, { withFileTypes: true });
     
     for (const entry of entries) {
@@ -39,7 +39,7 @@ async function walkDirectory(dir, stats = {}) {
         
         if (entry.isDirectory()) {
             if (!IGNORE_DIRS.has(entry.name)) {
-                await walkDirectory(fullPath, stats);
+                await walkDirectory(fullPath, stats, fileDetails);
             }
         } else if (entry.isFile()) {
             if (!IGNORE_FILES.has(entry.name) && CODE_EXTENSIONS.has(extname(entry.name))) {
@@ -55,6 +55,15 @@ async function walkDirectory(dir, stats = {}) {
                     stats[ext].code += counts.code;
                     stats[ext].blank += counts.blank;
                     stats[ext].comment += counts.comment;
+                    
+                    // Store file details for .js files
+                    if (ext === '.js') {
+                        fileDetails.push({
+                            path: fullPath,
+                            lines: counts.total,
+                            code: counts.code
+                        });
+                    }
                 } catch (err) {
                     console.error(`Error reading ${fullPath}:`, err.message);
                 }
@@ -62,13 +71,13 @@ async function walkDirectory(dir, stats = {}) {
         }
     }
     
-    return stats;
+    return { stats, fileDetails };
 }
 
 async function main() {
     console.log('Analyzing codebase...\n');
     
-    const stats = await walkDirectory('.');
+    const { stats, fileDetails } = await walkDirectory('.');
     const totals = { files: 0, total: 0, code: 0, blank: 0, comment: 0 };
     
     console.log('Language       Files     Code    Blank  Comment    Total');
@@ -111,6 +120,24 @@ async function main() {
     console.log(`  Code lines: ${totals.code.toLocaleString()} (${((totals.code / totals.total) * 100).toFixed(1)}%)`);
     console.log(`  Blank lines: ${totals.blank.toLocaleString()} (${((totals.blank / totals.total) * 100).toFixed(1)}%)`);
     console.log(`  Comment lines: ${totals.comment.toLocaleString()} (${((totals.comment / totals.total) * 100).toFixed(1)}%)`);
+    
+    // Top 10 largest JavaScript files
+    if (fileDetails.length > 0) {
+        console.log('\nTop 10 Largest JavaScript Files:');
+        console.log('─'.repeat(65));
+        console.log('Lines    Code  File');
+        console.log('─'.repeat(65));
+        
+        fileDetails
+            .sort((a, b) => b.lines - a.lines)
+            .slice(0, 10)
+            .forEach(file => {
+                const relativePath = file.path.startsWith('./') ? file.path : './' + file.path;
+                console.log(
+                    `${String(file.lines).padStart(5)}  ${String(file.code).padStart(6)}  ${relativePath}`
+                );
+            });
+    }
 }
 
 main().catch(console.error);

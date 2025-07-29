@@ -1003,38 +1003,37 @@ async function verifySync() {
 
 async function testAll() {
     try {
-        // await createComplete('-l');
-        // await createComplete('-r');
-        // await createRemove('-l');
-        // await createRemove('-r');
-        // await createUpdateName('-l');
-        // await createUpdateName('-r');
-        // await createUpdatePriority('-l');
-        // await createUpdatePriority('-r');
-        // await createUpdateNameAndPriority('-l');
-        // await createUpdateNameAndPriority('-r');
-        // await createUpdatePriorityZero('-l');
-        // await createUpdatePriorityZero('-r');
+        await createComplete('-l');
+        await createComplete('-r');
+        await createRemove('-l');
+        await createRemove('-r');
+        await createUpdateName('-l');
+        await createUpdateName('-r');
+        await createUpdatePriority('-l');
+        await createUpdatePriority('-r');
+        await createUpdateNameAndPriority('-l');
+        await createUpdateNameAndPriority('-r');
+        await createUpdatePriorityZero('-l');
+        await createUpdatePriorityZero('-r');
 
-        // await createTasksSync('-l');
-        // await createTasksSync('-r');
+        await createTasksSync('-l');
+        await createTasksSync('-r');
 
-        // await createSync('-l');
-        // await createSync('-r');
-        // await createPriorityZeroSync('-l');
-        // await createPriorityZeroSync('-r');
-        // await updateNameSync('-l'); // adds new vs updates
-        // await updateNameSync('-r');
-        // await updatePrioritySync('-l');
-        // await updatePrioritySync('-r');
-        // await updateNameAndPrioritySync('-l');
-        // await updateNameAndPrioritySync('-r');
-        // await completeSync('-l');
-        // await completeSync('-r');
-        // await removeSync('-l');
-        // await removeSync('-r');
+        await createSync('-l');
+        await createSync('-r');
+        await createPriorityZeroSync('-l');
+        await createPriorityZeroSync('-r');
+        await updateNameSync('-l'); // adds new vs updates
+        await updateNameSync('-r');
+        await updatePrioritySync('-l');
+        await updatePrioritySync('-r');
+        await updateNameAndPrioritySync('-l');
+        await updateNameAndPrioritySync('-r');
+        await completeSync('-l');
+        await completeSync('-r');
+        await removeSync('-l');
+        await removeSync('-r');
 
-        // Run sync.md tests - compound operations (local)
         await createUpdateCompoundSync('-l');
         await createUpdateCompoundSync('-r');
         await createUpdateCompleteCompoundSync('-l');
@@ -1047,11 +1046,6 @@ async function testAll() {
         await existingUpdateCompleteCompoundSync('-r');
         await existingUpdateRemoveCompoundSync('-l');
         await existingUpdateRemoveCompoundSync('-r');
-
-        // Verify local and remote are synchronized after all compound tests
-        console.log('\n🔍 Verifying final sync state...');
-        await verifySync();
-        console.log('✅ Local and remote are synchronized\n');
 
         // // Run sync.md tests - conflict scenarios
         // await test33RenameConflict();

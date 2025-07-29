@@ -1,10 +1,14 @@
 # Run Tests
 
-Execute the test suite for the sync project.
+Execute the test suite for the sync project using the qa subagent.
 
-Please execute: `npm run test`
+Use the Task tool with the qa subagent to run the complete test suite. The qa agent will:
+- Execute `npm run test` to run all tests
+- Analyze test results and provide clear feedback
+- Identify any failing tests and suggest fixes
+- Ensure test environment is properly configured
 
-This will run all tests in the test directory, including:
+The tests include:
 - Unit tests for sync functionality
 - Integration tests for local/remote operations
 - Priority mapping tests
