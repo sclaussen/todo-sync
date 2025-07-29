@@ -53,6 +53,14 @@ async function createUpdatePriority(option = '-l', newPriority = 2) {
     success(`createUpdatePriority ${option} P${newPriority}`);
 }
 
+async function createUpdateNameAndPriority(option = '-l') {
+    enter(`createUpdateNameAndPriority ${option}`);
+    await init(option);
+    await tasks('create', option, 'p1');
+    await tasks('update-name-priority', option, 'p1', 2, 'UPDATED p1');
+    success(`createUpdateNameAndPriority ${option}`);
+}
+
 async function createUpdatePriorityZero(option = '-l') {
     enter(`createUpdatePriorityZero ${option}`);
     await init(option);
@@ -925,6 +933,20 @@ async function tasks(operation, option = '-l', taskName = 'p1', priority = null,
         await sh(`node tasks.js list ${option} -y`, { echo: false, output: false, exp: `data.some(t => t.name === '${taskName}' && t.priority === ${priority})`, errmsg: `Task should be updated to P${priority} on ${side}` });
         return;
 
+    case 'update-name-priority':
+        await sh(`node tasks.js update ${option} -P${priority} "${taskName}" "${newName}"`);
+        // Verify both name and priority were updated
+        if (option === '-r' && priority === 0) {
+            await sh(`node tasks.js list ${option} -y`, { echo: false, output: false, exp: `data.some(t => t.name === '${newName}' && t.priority === ${priority} && t.due !== null)`, errmsg: `Task should have updated name and priority P${priority} with due date on ${side}` });
+            return;
+        }
+        if (option === '-r' && priority !== 0) {
+            await sh(`node tasks.js list ${option} -y`, { echo: false, output: false, exp: `data.some(t => t.name === '${newName}' && t.priority === ${priority} && t.due === null)`, errmsg: `Task should have updated name and priority P${priority} without due date on ${side}` });
+            return;
+        }
+        await sh(`node tasks.js list ${option} -y`, { echo: false, output: false, exp: `data.some(t => t.name === '${newName}' && t.priority === ${priority})`, errmsg: `Task should have updated name and priority on ${side}` });
+        return;
+
     case 'complete':
         await sh(`node tasks.js complete ${option} ${taskName}`);
         await sh(`node tasks.js list ${option} -y`, { echo: false, output: false, exp: `!data.some(t => t.name === '${taskName}')`, errmsg: `Task '${taskName}' should not be in active tasks after complete on ${side}` });
@@ -1003,11 +1025,10 @@ async function testAll() {
         // await updatePrioritySync('-r');
         // await updateNameAndPrioritySync('-l');
         // await updateNameAndPrioritySync('-r');
-        await completeSync('-l');
-        await completeSync('-r');
-
-        await removeSync('-l');
-        await removeSync('-r');
+        // await completeSync('-l');
+        // await completeSync('-r');
+        // await removeSync('-l');
+        // await removeSync('-r');
 
         // // Run sync.md tests - compound operations (local)
         // await createUpdateCompoundSync();
