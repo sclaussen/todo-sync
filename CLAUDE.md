@@ -196,6 +196,8 @@ TASKS_DIR=/path/to/custom/tasks/directory
   that dotenv debug output (like "[dotenv@17.2.0] injecting env (0) from
   .env") should NEVER be displayed. Always suppress these messages when
   working with dotenv configuration.
+- On more complicated updates, always use the code-refactoring-specialist to
+  verify the update.
 
 - ALWAYS use `.claude/settings.json` for project settings.
   NEVER use `.claude/settings.local.json`.

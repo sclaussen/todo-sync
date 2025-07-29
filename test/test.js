@@ -87,30 +87,35 @@ async function createPriorityZeroSync(option = '-l') {
 async function updateNameSync(option = '-l') {
     enter(`updateNameSync ${option}`);
     await init2(option);
-    await sync('update-name', option, 'p1', null, 'UPDATED P1 UPDATED P1');
+    await sync('update-name', option, 'p1', null, 'UPDATED p1');
     success(`updateNameSync ${option}`);
 }
 
 async function updatePrioritySync(option = '-l') {
     enter(`updatePrioritySync ${option}`);
     await init2(option);
-    await sync('update-priority', option, 'p1', 2);
+    await sync('update-priority', option, 'p1', 0);
     success(`updatePrioritySync ${option}`);
+}
+
+async function updateNameAndPrioritySync(option = '-l') {
+    enter(`updateNameAndPrioritySync ${option}`);
+    await init2(option);
+    await sync('update-name-priority', option, 'p1', 0, 'UPDATED p1');
+    success(`updateNameAndPrioritySync ${option}`);
 }
 
 async function completeSync(option = '-l') {
     enter(`completeSync ${option}`);
     await init2(option);
-    await tasks('complete', option, 'p1');
-    await tasks('sync');
+    await sync('complete', option, 'p1');
     success(`completeSync ${option}`);
 }
 
 async function removeSync(option = '-l') {
     enter(`removeSync ${option}`);
     await init2(option);
-    await tasks('remove', option, 'p1');
-    await tasks('sync');
+    await sync('remove', option, 'p1');
     success(`removeSync ${option}`);
 }
 
@@ -702,6 +707,15 @@ async function sync(operation, option = '-l', taskName = 'p1', priority = null, 
             const targetPriority = priority !== null ? priority : 2;
             await tasks('update-priority', option, taskName, targetPriority);
             break;
+        case 'update-name-priority':
+            const updatedNameAndPriority = newName || `updated ${taskName}`;
+            const targetPriorityAndName = priority !== null ? priority : 2;
+            // Use single update command with both priority and name
+            await sh(`node tasks.js update ${option} -P${targetPriorityAndName} "${taskName}" "${updatedNameAndPriority}"`);
+            // Verify both name and priority were updated
+            await sh(`node tasks.js list ${option} -y`, { echo: false, output: false, exp: `data.some(t => t.name === '${updatedNameAndPriority}' && t.priority === ${targetPriorityAndName})`, errmsg: `Task should have updated name and priority on ${side}` });
+            finalTaskName = updatedNameAndPriority;
+            break;
         default:
             await tasks(operation, option, taskName, priority, newName);
             break;
@@ -716,6 +730,7 @@ async function sync(operation, option = '-l', taskName = 'p1', priority = null, 
     case 'create':
     case 'update-name':
     case 'update-priority':
+    case 'update-name-priority':
         otherSideTasks = sh(`node tasks.js list ${otherOption} -y`, { echo: false, output: false, exp: `data.some(t => t.name === '${finalTaskName}')`, errmsg: `Task should exist on ${otherSide} after sync` });
         break;
     case 'complete':
@@ -970,6 +985,8 @@ async function testAll() {
         // await createUpdateName('-r');
         // await createUpdatePriority('-l');
         // await createUpdatePriority('-r');
+        await createUpdateNameAndPriority('-l');
+        await createUpdateNameAndPriority('-r');
         // await createUpdatePriorityZero('-l');
         // await createUpdatePriorityZero('-r');
 
@@ -978,27 +995,19 @@ async function testAll() {
 
         // await createSync('-l');
         // await createSync('-r');
-        await createPriorityZeroSync('-l');
-        await createPriorityZeroSync('-r');
+        // await createPriorityZeroSync('-l');
+        // await createPriorityZeroSync('-r');
         // await updateNameSync('-l'); // adds new vs updates
         // await updateNameSync('-r');
         // await updatePrioritySync('-l');
         // await updatePrioritySync('-r');
+        // await updateNameAndPrioritySync('-l');
+        // await updateNameAndPrioritySync('-r');
+        await completeSync('-l');
+        await completeSync('-r');
 
-
-        // // Show which tests are being run
-        // const testSuites = [];
-        // if (context.local) testSuites.push('local');
-        // if (context.remote) testSuites.push('remote');
-        // if (context.sync) testSuites.push('sync');
-        // console.log(`Running test suites: ${testSuites.join(', ')}\n`);
-
-        // // Run sync.md tests - simple operations
-        // await createSync();
-        // await updateNameSync();
-        // await updatePrioritySync();
-        // await completeSync();
-        // await removeSync();
+        await removeSync('-l');
+        await removeSync('-r');
 
         // // Run sync.md tests - compound operations (local)
         // await createUpdateCompoundSync();
