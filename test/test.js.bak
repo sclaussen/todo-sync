@@ -64,8 +64,13 @@ async function createUpdatePriorityZero(option = '-l') {
 
 async function createTasksSync(option = '-l') {
     enter(`createTasksSync ${option}`);
-    await init2(option);
-    await sh('node tasks.js sync');
+    await init();
+    tasks('create', option, 'p0', 0);
+    tasks('create', option, 'p1', 1);
+    tasks('create', option, 'p2', 2);
+    tasks('create', option, 'p3', 3);
+    tasks('create', option, 'p4', 4);
+    tasks('sync');
     await verifySync();
     success(`createTasksSync ${option}`);
 }
@@ -229,7 +234,7 @@ async function test23CompoundCompleteRemote() {
     await sh(`node tasks.js sync`);
 
     // Verify task doesn't exist in local active tasks
-    await sh(`node tasks.js list -l -y`, {
+    sh(`node tasks.js list -l -y`, {
         exp: `!data.some(t => t.name === 'completed task')`,
         errmsg: 'Task should not exist in local active tasks after sync'
     });
@@ -242,15 +247,15 @@ async function test24CompoundRemoveRemote() {
     enter('Test 24: Create remote → update name → update priority → remove → sync');
 
     // Create task remotely
-    await sh(`node tasks.js create -r test task`);
+    sh(`node tasks.js create -r test task`);
 
     // Update name and priority
-    await sh(`node tasks.js update -r "test task" "removed task"`);
-    await sh(`node tasks.js update -r -P4 "removed task"`);
+    sh(`node tasks.js update -r "test task" "removed task"`);
+    sh(`node tasks.js update -r -P4 "removed task"`);
 
     // Remove task
-    await sh(`node tasks.js remove -r "removed task"`);
-    await sh(`node tasks.js list -r -y`, {
+    sh(`node tasks.js remove -r "removed task"`);
+    sh(`node tasks.js list -r -y`, {
         exp: `!data.some(t => t.name === 'removed task')`,
         errmsg: 'Task should be removed remotely'
     });
@@ -259,7 +264,7 @@ async function test24CompoundRemoveRemote() {
     await sh(`node tasks.js sync`);
 
     // Verify task doesn't exist locally
-    await sh(`node tasks.js list -l -y`, {
+    sh(`node tasks.js list -l -y`, {
         exp: `!data.some(t => t.name === 'removed task')`,
         errmsg: 'Task should not exist locally'
     });
@@ -273,11 +278,11 @@ async function test25ExistingSyncedRemote() {
     await init2(option);
 
     // Update priority then name of existing synced task remotely
-    await sh(`node tasks.js update -r -P3 "p1"`);
-    await sh(`node tasks.js update -r "p1" "modified p1"`);
+    sh(`node tasks.js update -r -P3 "p1"`);
+    sh(`node tasks.js update -r "p1" "modified p1"`);
 
     // Verify changes remotely
-    await sh(`node tasks.js list -r -y`, {
+    sh(`node tasks.js list -r -y`, {
         exp: `data.some(t => t.name === 'modified p1' && t.priority === 3)`,
         errmsg: 'Task should have updated name and priority remotely'
     });
@@ -286,7 +291,7 @@ async function test25ExistingSyncedRemote() {
     await sh(`node tasks.js sync`);
 
     // Verify changes propagated to local
-    await sh(`node tasks.js list -l -y`, {
+    sh(`node tasks.js list -l -y`, {
         exp: `data.some(t => t.name === 'modified p1' && t.priority === 3)`,
         errmsg: 'Task should have updated name and priority locally after sync'
     });
@@ -300,12 +305,12 @@ async function test26ExistingSyncedCompleteRemote() {
     await init2(option);
 
     // Update name and priority of existing synced task remotely
-    await sh(`node tasks.js update -r "p2" "completed p2"`);
-    await sh(`node tasks.js update -r -P0 "completed p2"`);
+    sh(`node tasks.js update -r "p2" "completed p2"`);
+    sh(`node tasks.js update -r -P0 "completed p2"`);
 
     // Complete task
-    await sh(`node tasks.js complete -r "completed p2"`);
-    await sh(`node tasks.js list -r -y`, {
+    sh(`node tasks.js complete -r "completed p2"`);
+    sh(`node tasks.js list -r -y`, {
         exp: `!data.some(t => t.name === 'completed p2')`,
         errmsg: 'Task should be removed from active tasks remotely'
     });
@@ -314,7 +319,7 @@ async function test26ExistingSyncedCompleteRemote() {
     await sh(`node tasks.js sync`);
 
     // Verify task completed locally
-    await sh(`node tasks.js list -l -y`, {
+    sh(`node tasks.js list -l -y`, {
         exp: `!data.some(t => t.name === 'completed p2')`,
         errmsg: 'Task should not exist in local active tasks after sync'
     });
@@ -328,12 +333,12 @@ async function test27ExistingSyncedRemoveRemote() {
     await init2(option);
 
     // Update priority and name of existing synced task remotely
-    await sh(`node tasks.js update -r -P4 "p3"`);
-    await sh(`node tasks.js update -r "p3" "removed p3"`);
+    sh(`node tasks.js update -r -P4 "p3"`);
+    sh(`node tasks.js update -r "p3" "removed p3"`);
 
     // Remove task
-    await sh(`node tasks.js remove -r "removed p3"`);
-    await sh(`node tasks.js list -r -y`, {
+    sh(`node tasks.js remove -r "removed p3"`);
+    sh(`node tasks.js list -r -y`, {
         exp: `!data.some(t => t.name === 'removed p3')`,
         errmsg: 'Task should be removed remotely'
     });
@@ -342,7 +347,7 @@ async function test27ExistingSyncedRemoveRemote() {
     await sh(`node tasks.js sync`);
 
     // Verify task removed locally
-    await sh(`node tasks.js list -l -y`, {
+    sh(`node tasks.js list -l -y`, {
         exp: `!data.some(t => t.name === 'removed p3')`,
         errmsg: 'Task should be removed locally after sync'
     });
@@ -358,17 +363,17 @@ async function test33RenameConflict() {
     await init2(option);
 
     // Both sides rename the same task
-    await sh(`node tasks.js update -l "p1" "local name"`);
-    await sh(`node tasks.js update -r "p1" "remote name"`);
+    sh(`node tasks.js update -l "p1" "local name"`);
+    sh(`node tasks.js update -r "p1" "remote name"`);
 
     // Verify local change
-    await sh(`node tasks.js list -l -y`, {
+    sh(`node tasks.js list -l -y`, {
         exp: `data.some(t => t.name === 'local name')`,
         errmsg: 'Task should have local name locally'
     });
 
     // Verify remote change
-    await sh(`node tasks.js list -r -y`, {
+    sh(`node tasks.js list -r -y`, {
         exp: `data.some(t => t.name === 'remote name')`,
         errmsg: 'Task should have remote name remotely'
     });
@@ -377,11 +382,11 @@ async function test33RenameConflict() {
     await sh(`node tasks.js sync`);
 
     // Verify local name wins on both sides
-    await sh(`node tasks.js list -l -y`, {
+    sh(`node tasks.js list -l -y`, {
         exp: `data.some(t => t.name === 'local name')`,
         errmsg: 'Task should have local name locally after sync'
     });
-    await sh(`node tasks.js list -r -y`, {
+    sh(`node tasks.js list -r -y`, {
         exp: `data.some(t => t.name === 'local name')`,
         errmsg: 'Task should have local name remotely after sync'
     });
@@ -395,17 +400,17 @@ async function test34PriorityConflict() {
     await init2(option);
 
     // Both sides change priority of same task
-    await sh(`node tasks.js update -l -P2 "p1"`);
-    await sh(`node tasks.js update -r -P3 "p1"`);
+    sh(`node tasks.js update -l -P2 "p1"`);
+    sh(`node tasks.js update -r -P3 "p1"`);
 
     // Verify local change
-    await sh(`node tasks.js list -l -y`, {
+    sh(`node tasks.js list -l -y`, {
         exp: `data.some(t => t.name === 'p1' && t.priority === 2)`,
         errmsg: 'Task should have priority 2 locally'
     });
 
     // Verify remote change
-    await sh(`node tasks.js list -r -y`, {
+    sh(`node tasks.js list -r -y`, {
         exp: `data.some(t => t.name === 'p1' && t.priority === 3)`,
         errmsg: 'Task should have priority 3 remotely'
     });
@@ -414,11 +419,11 @@ async function test34PriorityConflict() {
     await sh(`node tasks.js sync`);
 
     // Verify local priority wins on both sides
-    await sh(`node tasks.js list -l -y`, {
+    sh(`node tasks.js list -l -y`, {
         exp: `data.some(t => t.name === 'p1' && t.priority === 2)`,
         errmsg: 'Task should have priority 2 locally after sync'
     });
-    await sh(`node tasks.js list -r -y`, {
+    sh(`node tasks.js list -r -y`, {
         exp: `data.some(t => t.name === 'p1' && t.priority === 2)`,
         errmsg: 'Task should have priority 2 remotely after sync'
     });
@@ -432,17 +437,17 @@ async function test35DifferentPropertyMerge() {
     await init2(option);
 
     // Local renames, remote changes priority
-    await sh(`node tasks.js update -l "p1" "renamed locally"`);
-    await sh(`node tasks.js update -r -P4 "p1"`);
+    sh(`node tasks.js update -l "p1" "renamed locally"`);
+    sh(`node tasks.js update -r -P4 "p1"`);
 
     // Verify local change
-    await sh(`node tasks.js list -l -y`, {
+    sh(`node tasks.js list -l -y`, {
         exp: `data.some(t => t.name === 'renamed locally' && t.priority === 1)`,
         errmsg: 'Task should have new name and original priority locally'
     });
 
     // Verify remote change
-    await sh(`node tasks.js list -r -y`, {
+    sh(`node tasks.js list -r -y`, {
         exp: `data.some(t => t.name === 'p1' && t.priority === 4)`,
         errmsg: 'Task should have original name and new priority remotely'
     });
@@ -451,11 +456,11 @@ async function test35DifferentPropertyMerge() {
     await sh(`node tasks.js sync`);
 
     // Verify both changes are merged on both sides
-    await sh(`node tasks.js list -l -y`, {
+    sh(`node tasks.js list -l -y`, {
         exp: `data.some(t => t.name === 'renamed locally' && t.priority === 4)`,
         errmsg: 'Task should have local name and remote priority locally after sync'
     });
-    await sh(`node tasks.js list -r -y`, {
+    sh(`node tasks.js list -r -y`, {
         exp: `data.some(t => t.name === 'renamed locally' && t.priority === 4)`,
         errmsg: 'Task should have local name and remote priority remotely after sync'
     });
@@ -469,17 +474,17 @@ async function test36UpdateCompleteConflict() {
     await init2(option);
 
     // Local updates name, remote completes
-    await sh(`node tasks.js update -l "p1" "updated locally"`);
-    await sh(`node tasks.js complete -r "p1"`);
+    sh(`node tasks.js update -l "p1" "updated locally"`);
+    sh(`node tasks.js complete -r "p1"`);
 
     // Verify local change
-    await sh(`node tasks.js list -l -y`, {
+    sh(`node tasks.js list -l -y`, {
         exp: `data.some(t => t.name === 'updated locally')`,
         errmsg: 'Task should be updated locally'
     });
 
     // Verify remote completion
-    await sh(`node tasks.js list -r -y`, {
+    sh(`node tasks.js list -r -y`, {
         exp: `!data.some(t => t.name === 'p1')`,
         errmsg: 'Task should be completed remotely'
     });
@@ -488,11 +493,11 @@ async function test36UpdateCompleteConflict() {
     await sh(`node tasks.js sync`);
 
     // Verify task is completed on both sides
-    await sh(`node tasks.js list -l -y`, {
+    sh(`node tasks.js list -l -y`, {
         exp: `!data.some(t => t.name === 'updated locally')`,
         errmsg: 'Task should be completed locally after sync'
     });
-    await sh(`node tasks.js list -r -y`, {
+    sh(`node tasks.js list -r -y`, {
         exp: `!data.some(t => t.name === 'updated locally')`,
         errmsg: 'Task should be completed remotely after sync'
     });
@@ -506,17 +511,17 @@ async function test37UpdateDeleteConflict() {
     await init2(option);
 
     // Local updates name, remote deletes
-    await sh(`node tasks.js update -l "p1" "updated locally"`);
-    await sh(`node tasks.js remove -r "p1"`);
+    sh(`node tasks.js update -l "p1" "updated locally"`);
+    sh(`node tasks.js remove -r "p1"`);
 
     // Verify local change
-    await sh(`node tasks.js list -l -y`, {
+    sh(`node tasks.js list -l -y`, {
         exp: `data.some(t => t.name === 'updated locally')`,
         errmsg: 'Task should be updated locally'
     });
 
     // Verify remote deletion
-    await sh(`node tasks.js list -r -y`, {
+    sh(`node tasks.js list -r -y`, {
         exp: `!data.some(t => t.name === 'p1')`,
         errmsg: 'Task should be deleted remotely'
     });
@@ -525,11 +530,11 @@ async function test37UpdateDeleteConflict() {
     await sh(`node tasks.js sync`);
 
     // Verify task is deleted on both sides
-    await sh(`node tasks.js list -l -y`, {
+    sh(`node tasks.js list -l -y`, {
         exp: `!data.some(t => t.name === 'updated locally')`,
         errmsg: 'Task should be deleted locally after sync'
     });
-    await sh(`node tasks.js list -r -y`, {
+    sh(`node tasks.js list -r -y`, {
         exp: `!data.some(t => t.name === 'updated locally')`,
         errmsg: 'Task should be deleted remotely after sync'
     });
@@ -543,18 +548,18 @@ async function test38MultipleUpdatesCompleteConflict() {
     await init2(option);
 
     // Local does multiple updates, remote completes
-    await sh(`node tasks.js update -l "p1" "multi updated"`);
-    await sh(`node tasks.js update -l -P0 "multi updated"`);
-    await sh(`node tasks.js complete -r "p1"`);
+    sh(`node tasks.js update -l "p1" "multi updated"`);
+    sh(`node tasks.js update -l -P0 "multi updated"`);
+    sh(`node tasks.js complete -r "p1"`);
 
     // Verify local changes
-    await sh(`node tasks.js list -l -y`, {
+    sh(`node tasks.js list -l -y`, {
         exp: `data.some(t => t.name === 'multi updated' && t.priority === 0)`,
         errmsg: 'Task should have multiple local updates'
     });
 
     // Verify remote completion
-    await sh(`node tasks.js list -r -y`, {
+    sh(`node tasks.js list -r -y`, {
         exp: `!data.some(t => t.name === 'p1')`,
         errmsg: 'Task should be completed remotely'
     });
@@ -563,11 +568,11 @@ async function test38MultipleUpdatesCompleteConflict() {
     await sh(`node tasks.js sync`);
 
     // Verify task is completed on both sides
-    await sh(`node tasks.js list -l -y`, {
+    sh(`node tasks.js list -l -y`, {
         exp: `!data.some(t => t.name === 'multi updated')`,
         errmsg: 'Task should be completed locally after sync'
     });
-    await sh(`node tasks.js list -r -y`, {
+    sh(`node tasks.js list -r -y`, {
         exp: `!data.some(t => t.name === 'multi updated')`,
         errmsg: 'Task should be completed remotely after sync'
     });
@@ -582,15 +587,15 @@ async function test39DuplicateContent() {
     enter('Test 39: Duplicate content → sync');
 
     // Create same task on both sides
-    await sh(`node tasks.js create -l duplicate task`);
-    await sh(`node tasks.js create -r duplicate task`);
+    sh(`node tasks.js create -l duplicate task`);
+    sh(`node tasks.js create -r duplicate task`);
 
     // Verify both sides have the task
-    await sh(`node tasks.js list -l -y`, {
+    sh(`node tasks.js list -l -y`, {
         exp: `data.some(t => t.name === 'duplicate task')`,
         errmsg: 'Task should exist locally'
     });
-    await sh(`node tasks.js list -r -y`, {
+    sh(`node tasks.js list -r -y`, {
         exp: `data.some(t => t.name === 'duplicate task')`,
         errmsg: 'Task should exist remotely'
     });
@@ -599,17 +604,17 @@ async function test39DuplicateContent() {
     await sh(`node tasks.js sync`);
 
     // Verify single task with correlation ID on both sides
-    await sh(`node tasks.js list -l -y`, {
+    sh(`node tasks.js list -l -y`, {
         exp: `data.filter(t => t.name === 'duplicate task').length === 1`,
         errmsg: 'Should have exactly one task locally after sync'
     });
-    await sh(`node tasks.js list -r -y`, {
+    sh(`node tasks.js list -r -y`, {
         exp: `data.filter(t => t.name === 'duplicate task').length === 1`,
         errmsg: 'Should have exactly one task remotely after sync'
     });
 
     // Verify task has correlation ID locally
-    await sh(`node tasks.js list -l -y`, {
+    sh(`node tasks.js list -l -y`, {
         exp: `data.some(t => t.name === 'duplicate task' && t.id !== null)`,
         errmsg: 'Task should have correlation ID locally after sync'
     });
@@ -622,20 +627,20 @@ async function test42Priority0Special() {
     enter('Test 42: Priority 0 special handling → sync');
 
     // Create P0 task locally
-    await sh(`node tasks.js create -l -P0 priority zero task`);
+    sh(`node tasks.js create -l -P0 priority zero task`);
 
     // Sync to remote
     await sh(`node tasks.js sync`);
 
     // Verify remote task has priority 0 with due date
-    await sh(`node tasks.js list -r -y`, {
+    sh(`node tasks.js list -r -y`, {
         exp: `data.some(t => t.name === 'priority zero task' && t.priority === 0 && t.due !== null)`,
         errmsg: 'Remote P0 task should have due date set'
     });
 
     // Create P0 task remotely and verify it gets due date immediately
-    await sh(`node tasks.js create -r -P0 remote priority zero`);
-    await sh(`node tasks.js list -r -y`, {
+    sh(`node tasks.js create -r -P0 remote priority zero`);
+    sh(`node tasks.js list -r -y`, {
         exp: `data.some(t => t.name === 'remote priority zero' && t.priority === 0 && t.due !== null)`,
         errmsg: 'Remote P0 task should have due date set on creation'
     });
@@ -644,7 +649,7 @@ async function test42Priority0Special() {
     await sh(`node tasks.js sync`);
 
     // Verify local task has P0 priority with correlation ID
-    await sh(`node tasks.js list -l -y`, {
+    sh(`node tasks.js list -l -y`, {
         exp: `data.some(t => t.name === 'remote priority zero' && t.priority === 0 && t.id !== null)`,
         errmsg: 'Local P0 task should have correlation ID after sync'
     });
@@ -658,17 +663,17 @@ async function test40CorruptedCorrelationId() {
     await init2(option);
 
     // Create a task remotely
-    await sh(`node tasks.js create -r test task`);
+    sh(`node tasks.js create -r test task`);
     await sh(`node tasks.js sync`);
 
     // Now manually corrupt the local correlation by updating the task file
     // This simulates a corrupted or invalid correlation ID
     // We'll create a new task locally with same name but no sync
-    await sh(`node tasks.js remove -l "test task"`);  // Remove the synced version
-    await sh(`node tasks.js create -l test task`);   // Create new one without correlation
+    sh(`node tasks.js remove -l "test task"`);  // Remove the synced version
+    sh(`node tasks.js create -l test task`);   // Create new one without correlation
 
     // Verify local task has no correlation ID
-    await sh(`node tasks.js list -l -y`, {
+    sh(`node tasks.js list -l -y`, {
         exp: `data.some(t => t.name === 'test task' && t.id === null)`,
         errmsg: 'Local task should have no correlation ID'
     });
@@ -678,7 +683,7 @@ async function test40CorruptedCorrelationId() {
 
     // After sync, both tasks should exist (the original remote + the new local)
     // This demonstrates the behavior when correlation is lost
-    await sh(`node tasks.js list -l -y`, {
+    sh(`node tasks.js list -l -y`, {
         exp: `data.filter(t => t.name === 'test task').length >= 1`,
         errmsg: 'Should have at least one task locally after sync'
     });
@@ -758,20 +763,20 @@ async function compoundSync(operations, option = '-l', initialTaskName = 'compou
     for (const operation of operations) {
         switch(operation.type) {
         case 'create':
-    await sh(`node tasks.js create ${option} ${currentTaskName}`);
+            sh(`node tasks.js create ${option} ${currentTaskName}`);
             break;
         case 'update-name':
-    await sh(`node tasks.js update ${option} "${currentTaskName}" "${operation.newName}"`);
+            sh(`node tasks.js update ${option} "${currentTaskName}" "${operation.newName}"`);
             currentTaskName = operation.newName;
             break;
         case 'update-priority':
-    await sh(`node tasks.js update ${option} -P${operation.priority} "${currentTaskName}"`);
+            sh(`node tasks.js update ${option} -P${operation.priority} "${currentTaskName}"`);
             break;
         case 'complete':
-    await sh(`node tasks.js complete ${option} "${currentTaskName}"`);
+            sh(`node tasks.js complete ${option} "${currentTaskName}"`);
             break;
         case 'remove':
-    await sh(`node tasks.js remove ${option} "${currentTaskName}"`);
+            sh(`node tasks.js remove ${option} "${currentTaskName}"`);
             break;
         }
     }
@@ -784,12 +789,12 @@ async function compoundSync(operations, option = '-l', initialTaskName = 'compou
     const otherSide = option === '-l' ? 'remote' : 'local';
 
     if (lastOp.type === 'complete' || lastOp.type === 'remove') {
-    await sh(`node tasks.js list ${otherOption} -y`, {
+        sh(`node tasks.js list ${otherOption} -y`, {
             exp: `!data.some(t => t.name === '${currentTaskName}')`,
             errmsg: `Task should not exist on ${otherSide} after sync`
         });
     } else {
-    await sh(`node tasks.js list ${otherOption} -y`, {
+        sh(`node tasks.js list ${otherOption} -y`, {
             exp: `data.some(t => t.name === '${currentTaskName}')`,
             errmsg: `Task should exist on ${otherSide} after sync`
         });
@@ -806,32 +811,32 @@ async function conflictSync(localChange, remoteChange, expectedResolution, taskN
     // Apply local change
     switch(localChange.type) {
     case 'update-name':
-    await sh(`node tasks.js update -l "p1" "${localChange.newName}"`);
+        sh(`node tasks.js update -l "p1" "${localChange.newName}"`);
         break;
     case 'update-priority':
-    await sh(`node tasks.js update -l -P${localChange.priority} "p1"`);
+        sh(`node tasks.js update -l -P${localChange.priority} "p1"`);
         break;
     case 'complete':
-    await sh(`node tasks.js complete -l "p1"`);
+        sh(`node tasks.js complete -l "p1"`);
         break;
     case 'remove':
-    await sh(`node tasks.js remove -l "p1"`);
+        sh(`node tasks.js remove -l "p1"`);
         break;
     }
 
     // Apply remote change
     switch(remoteChange.type) {
     case 'update-name':
-    await sh(`node tasks.js update -r "p1" "${remoteChange.newName}"`);
+        sh(`node tasks.js update -r "p1" "${remoteChange.newName}"`);
         break;
     case 'update-priority':
-    await sh(`node tasks.js update -r -P${remoteChange.priority} "p1"`);
+        sh(`node tasks.js update -r -P${remoteChange.priority} "p1"`);
         break;
     case 'complete':
-    await sh(`node tasks.js complete -r "p1"`);
+        sh(`node tasks.js complete -r "p1"`);
         break;
     case 'remove':
-    await sh(`node tasks.js remove -r "p1"`);
+        sh(`node tasks.js remove -r "p1"`);
         break;
     }
 
@@ -843,11 +848,11 @@ async function conflictSync(localChange, remoteChange, expectedResolution, taskN
     case 'local-wins':
         // Verify local change is preserved on both sides
         if (localChange.type === 'update-name') {
-    await sh(`node tasks.js list -l -y`, {
+            sh(`node tasks.js list -l -y`, {
                 exp: `data.some(t => t.name === '${localChange.newName}')`,
                 errmsg: 'Local name should win'
             });
-    await sh(`node tasks.js list -r -y`, {
+            sh(`node tasks.js list -r -y`, {
                 exp: `data.some(t => t.name === '${localChange.newName}')`,
                 errmsg: 'Local name should win on remote'
             });
@@ -858,11 +863,11 @@ async function conflictSync(localChange, remoteChange, expectedResolution, taskN
         break;
     case 'terminal-state':
         // Verify task is completed/removed on both sides
-    await sh(`node tasks.js list -l -y`, {
+        sh(`node tasks.js list -l -y`, {
             exp: `!data.some(t => t.name.includes('p1'))`,
             errmsg: 'Task should be in terminal state locally'
         });
-    await sh(`node tasks.js list -r -y`, {
+        sh(`node tasks.js list -r -y`, {
             exp: `!data.some(t => t.name.includes('p1'))`,
             errmsg: 'Task should be in terminal state remotely'
         });
@@ -931,19 +936,20 @@ async function tasks(operation, option = '-l', taskName = 'p1', priority = null,
 }
 
 // Helper function to create initial synced state with tasks at different priorities
-async function init2(option, shOptions = { echo: false, output: false }) {
+async function init2(option) {
     await init();
-    await sh(`node tasks.js create ${option} -P0 p0`, shOptions);
-    await sh(`node tasks.js create ${option} -P1 p1`, shOptions);
-    await sh(`node tasks.js create ${option} -P2 p2`, shOptions);
-    await sh(`node tasks.js create ${option} -P3 p3`, shOptions);
-    await sh(`node tasks.js create ${option} -P4 p4`, shOptions);
+    await sh(`node tasks.js create ${option} -P0 p0`, { echo: false, output: false });
+    await sh(`node tasks.js create ${option} -P1 p1`, { echo: false, output: false });
+    await sh(`node tasks.js create ${option} -P2 p2`, { echo: false, output: false });
+    await sh(`node tasks.js create ${option} -P3 p3`, { echo: false, output: false });
+    await sh(`node tasks.js create ${option} -P4 p4`, { echo: false, output: false });
+    await sh('node tasks.js sync', { echo: false, output: false });
 }
 
 // Utility function to verify local and remote tasks are synchronized
 async function verifySync() {
-    const localTasks = await sh(`node tasks.js list -l -y`, { echo: false, output: false });
-    const remoteTasks = await sh(`node tasks.js list -r -y`, { echo: false, output: false });
+    const localTasks = sh(`node tasks.js list -l -y`);
+    const remoteTasks = sh(`node tasks.js list -r -y`);
     const localTasksNormalized = normalize(localTasks);
     const remoteTasksNormalized = normalize(remoteTasks);
     const differences = diff(localTasksNormalized, remoteTasksNormalized);
@@ -973,11 +979,11 @@ async function testAll() {
         // await createUpdatePriorityZero('-l');
         // await createUpdatePriorityZero('-r');
 
-        // await createTasksSync('-l');
-        // await createTasksSync('-r');
+        await createTasksSync('-l');
+        await createTasksSync('-r');
 
-        await createSync('-l');
-        await createSync('-r');
+        // await createSync('-l');
+        // await createSync('-r');
         // await createPriorityZeroSync('-l');
         // await createPriorityZeroSync('-r');
         // await updateNameSync('-l'); // adds new vs updates
