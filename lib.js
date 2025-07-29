@@ -1728,7 +1728,7 @@ export async function createBackup() {
                      now.getHours().toString().padStart(2, '0') +
                      now.getMinutes().toString().padStart(2, '0') +
                      now.getSeconds().toString().padStart(2, '0');
-    const backupDir = join(dirname(FILE_PATHS.TASK), '.tasks', 'backups', timestamp);
+    const backupDir = join(FILE_PATHS.BACKUP_BASE, timestamp);
 
     try {
         // Create backup directory
