@@ -116,6 +116,8 @@ Local priorities (0-4) map to remote Todoist priorities:
 - `tasks.js`: Main CLI interface and entry point
 - `tasks.el`: Emacs major mode providing the primary user interface for local task management
 - `lib.js`: Core functionality for reading/writing tasks, Todoist API integration, and sync logic
+- `src/api/`: External API integrations
+  - `todoist.js`: Todoist API client and integration
 - `src/commands/`: Command implementations for each CLI subcommand
   - `create.js`: Task creation functionality
   - `list.js`: Task listing and display
@@ -124,9 +126,12 @@ Local priorities (0-4) map to remote Todoist priorities:
   - `update.js`: Task modification operations
   - `remove.js`: Task deletion functionality
   - `dups.js`: Duplicate detection and removal
+  - `init.js`: Environment and project initialization
+  - `tran.js`: Transaction log management
+  - `usage.js`: Usage statistics and help information
 - `src/data/`: Data layer for local and remote task management
   - `local.js`: Local file system task operations
-  - `todoist.js`: Todoist API integration
+  - `todoist.js`: Todoist data operations and mapping
   - `index.js`: Unified data access interface
 - `src/display/`: Output formatting and presentation
   - `console.js`: Console output formatting
@@ -136,6 +141,10 @@ Local priorities (0-4) map to remote Todoist priorities:
   - `errorHandler.js`: Error handling utilities
 - `src/models/`: Data models and structures
   - `Task.js`: Task data model and validation
+- `src/sync/`: Synchronization engine
+  - `engine.js`: Core sync logic and conflict resolution
+- `src/utils/`: Utility functions
+  - `correlationId.js`: Task correlation and ID management
 - `test/util.js`: Core testing utilities with functions for setup, cleanup, and command execution
   - `init()`: Sets up clean test environment (creates test project, clears tasks, initializes local files)
   - `sh()`: Executes CLI commands with test environment variables
